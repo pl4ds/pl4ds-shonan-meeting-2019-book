@@ -12,5 +12,6 @@ fi
 latexmk -pdfps
 if [ $? -eq 0 ]; then
 	latexmk -c
-	rm *.bbl
+	# modify if you need one of these files
+	rm bu*.bbl bu*.aux bu*.blg *.glsdefs *.acn *.ist > /dev/null 2>&1
 fi

@@ -5,7 +5,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% you can use compile.sh (> sh compile.sh) to compile it to .dvi, .ps, .pdf.
+%% you can use compile.sh (> bash compile.sh) to compile it to .dvi, .ps, .pdf.
 %% requires Perl installed on machine + latexmk package installed with Latex Package Manager.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -28,23 +28,28 @@ envcountchap,
 \usepackage{newtxtext}       % 
 \usepackage{newtxmath}       % selects Times Roman as basic font
 
+% \usepackage{ natbib}
 \usepackage{footmisc}
-% \usepackage{natbib}
 
 %% Additional packages added. Add necessary packages here.
 %\usepackage[english]{babel}
+\usepackage{siunitx}
+\usepackage{amssymb}
+\usepackage{pifont}
 \usepackage{xcolor}
 \usepackage{tabularx}
 \usepackage{listings}
 \usepackage{booktabs}
-\usepackage{bibunits}
 \usepackage{hyperref}
 \usepackage{url}
 \usepackage{mathtools}
-\usepackage{import}
 \usepackage{lipsum}
-
+\usepackage{import}
+\usepackage{bibunits}
+\usepackage{acronym}
+\usepackage[nottoc]{tocbibind}
 %% define commands here.
+
 \newcommand*{\CHAPTERSROOT}{chapters}	% root path for chapters.
 
 %% consistent book-wide bibliography style.
@@ -67,6 +72,8 @@ envcountchap,
 \include{editorial/contriblist}
 \include{editorial/acronym}
 
+\listoffigures
+\listoftables
 \tableofcontents
 
 \mainmatter%%%%%%%%%%%%%%%
@@ -78,6 +85,7 @@ envcountchap,
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \backmatter%%%%%%%%%%%%%%%
+
 \appendix
 \include{editorial/appendix}
 \include{editorial/glossary}

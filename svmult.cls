@@ -332,6 +332,7 @@ passing it to article class \MessageBreak
 
 \newcommand{\clearemptydoublepage}{%
         \clearpage{\pagestyle{empty}\cleardoublepage}}
+% MODIFY
 \newcommand{\startnewpage}{\if@openright\clearemptydoublepage\else\clearpage\fi}
 
 % MiniTOC
@@ -519,7 +520,7 @@ passing it to article class \MessageBreak
     \vskip 1.5em            % Vertical space after date.
   \fi
  \vfill
- {\Large\bfseries Springer\par}
+ {\Large\bfseries Publisher\par}
 %\vskip 3pt
 %\itshape
 %  Berlin\enspace Heidelberg\enspace New\kern0.1em York\\
