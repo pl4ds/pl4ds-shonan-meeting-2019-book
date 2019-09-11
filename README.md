@@ -24,3 +24,5 @@ Use compile.sh (> bash compile) to compile the document. As things like bibtex r
 
 ### Compile single chapters:
 You can also use this script to compile single chapters (so authors can compile their own chapter independently while writing it). For that, copy the script and the svmult.cs file into the chapters directory. In the chapter's _index.tex_ template, uncomment the preamble and wrap the whole content into a _document_ section (see file for more info) to make it compileable, and rewind these changes in the end to make it compileable as a book contribution again.
+
+If something is unclear, let me know (simon.schoenwaelder@gmx.de).
