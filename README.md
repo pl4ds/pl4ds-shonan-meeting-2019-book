@@ -3,7 +3,7 @@
 ## About
 
 The style used in this book is an adaption of the Springer Contribution Book style.
-The existing .tex files can be used as templates, especially _/chapters/chapter01/index.tex_ as a reference for an author's contribution and _editor.tex_ as a template for the books top level file.
+The existing .tex files are custom created templates that can be used for reference, especially _/chapters/chapter01/index.tex_ as a reference for an author's contribution and _editor.tex_ as a template for the books top level file.
 
 ## Structure
 
