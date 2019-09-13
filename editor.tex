@@ -16,6 +16,7 @@ envcountchap,
 %natbib
 ]{svmult}
 
+\usepackage[utf8]{inputenc}
 %\usepackage{type1cm}        % activate if the above 3 fonts are 
                              % not available on your system
 
@@ -50,6 +51,24 @@ envcountchap,
 \usepackage[nottoc]{tocbibind}
 %% define commands here.
 
+\usepackage{numberpt}
+
+%% redefine labels to add a unique chapter prefix, so labels dont clash between chapters.
+%% add \locallabels[prefix] at beginning of chapter
+\AtBeginDocument{%
+	%\let\origlabel@in@display\label@in@display
+	\let\globalref\ref
+	\let\globalpageref\pageref
+	\let\globallabel\label
+	\newcommand\chapterprefix{}
+	\newcommand\chapterlabels[1]{
+		\renewcommand\chapterprefix{#1}
+		\renewcommand\label[1]{\globallabel{#1:##1}}
+		\renewcommand\ref[1]{\globalref{#1:##1}}
+		\renewcommand\pageref[1]{\globalpageref{#1:##1}}
+		%\renewcommand{\label@in@display}[1]{\origlabel@in@display{#1##1}}
+	}
+}
 \newcommand*{\CHAPTERSROOT}{chapters}	% root path for chapters.
 
 %% consistent book-wide bibliography style.
@@ -57,8 +76,12 @@ envcountchap,
 
 \makeindex             % used for the subject index
 
+% todo hyperref links go to wrong page.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
+\chapterlabels{00} %% global 00 prefix for labels in global section of the book, only within chapters.
+
 \frontmatter%%%%%%%%%%%%%%
 
 %%%%%%
@@ -81,10 +104,24 @@ envcountchap,
 
 %%%% List of contributions %%%%%
 %%%% Use subimport to include chapter indexes, so that paths within that are relative to the chapter dir.
-\import{chapters/chapter01/}{index}
+%%%% set local label prefixes for each chapter, so that labels and refs don't clash.
+
+\chapterlabels{01}\import{chapters/chapter01/}{index}
+\chapterlabels{02}\import{chapters/chapter02/}{index}
+\chapterlabels{03}\import{chapters/chapter03/}{index}
+\chapterlabels{04}\import{chapters/chapter04/}{index}
+\chapterlabels{05}\import{chapters/chapter05/}{index}
+\chapterlabels{06}\import{chapters/chapter06/}{index}
+\chapterlabels{07}\import{chapters/chapter07/}{index}
+\chapterlabels{08}\import{chapters/chapter08/}{index}
+
+%% template chapter
+\chapterlabels{99}\import{chapters/chapter99/}{index}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \backmatter%%%%%%%%%%%%%%%
+
+\chapterlabels{00} %% unset chapter label prefix.
 
 \appendix
 \include{editorial/appendix}

@@ -12,6 +12,9 @@ fi
 latexmk -pdfps
 if [ $? -eq 0 ]; then
 	latexmk -c
-	# modify if you need one of these files
+	# if you want to keep one of these files, remove the respective one.
 	rm bu*.bbl bu*.aux bu*.blg *.glsdefs *.acn *.ist > /dev/null 2>&1
+	echo "Compilation done successfully."
+	else
+		echo "Error during compilation."
 fi
