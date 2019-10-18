@@ -91,17 +91,79 @@
 	\maketitle
 	
 	\abstract{Please place your abstract here.}
+
+        \section{Introduction}
+
+        The following is the result of a focus group on consistency models. From the title the reader could expect a comprehensive survey of the subject. Instead, our goal is less ambitious and only to provide a vision of some of the dimensions that characterize this area and then offer the reader some open research directions. For a deeper coverage of the field we direct the reader to surveys on \emph{non-transactional consistency models} \cite{Viotti:2016:CND:2911992.2926965}, ...  %TODO: to complete with other reference surveys by sub-area: database consistency, memory consistency models, distributed consensus and total order
+
+        (a couple more paragraphs on the focus of our discussion)
+
+
+	\section{Consistency at different scales}\label{sec:1}
+
+        %Relevant notes from meeting:
+        % - Issue in both multi-core and distributed settings
+        % -- Relation between two areas
+        % - In distributed systems, strong consistency has problem with latency:
+        % -- What are good timeouts?
+        % -- Not much control over rate of commits
+        % - Eventual consistency:
+        % -- Asynchronicity an issue
+        % - Shared-memory systems: sync operation to establish consistent view
+        % - Essential differences between multi-core and distributed setting
+        % -- Partial failure
+        % -- Unbounded asynchronicity
+
+        \section{The two sides of the CAP frontier}\label{sec:2}
+
+        %Relevant notes from meeting:
+        % - Escrow is an intermediate point between weak consistency and strong consistency
+        % -- Escrow: replicas can coordinate in pairs to re-fill their credits
+        % -- Consensus round only needed for strong consistency
+        % - Best you can do under partition tolerance: causal consistency
+
+        \section{Walks around the frontier}\label{sec:2}
+
+        %Relevant notes from meeting:
+        % - Semantic causal consistency
+        % -- Relax consistency for independent data
+        % - Atomicity
+        % -- Transactions/bundles of operations
+        % -- Simple to do under partition tolerance
+
+        \section{Research Directions}\label{sec:2}
+
+        %Relevant notes from meeting:
+        % - How to provide causal consistency in a scalable way
+        % - How to program with different consistency levels?
+        % -- Suresh Jagannathan et al. define consistency in terms of operation order
+        % --- can be hard to reason about
+        % - Providing both weak and strong operations. How to describe in the language
+        % - Debugging of distributed applications built on replicated data types
+        % -- Consistency bugs
+        % - Bounded staleness (probabilistic bounds)
+        % - Composition of replicated data types
+        % -- How to ensure consistency?
+        % - Fragility at the edge to the clients
+        % -- Raft leader receives request, but connection to client breaks
+        % -- Client cannot be part of replicas
+        % - Security and privacy
+        % -- Encryption, (semi-)homomorphic encryption
+        % --- Certain operations performed on encrypted data
+        % - Dynamic Membership
+        % - Partial replication
 	
 	%% content
-	\section{Content}\label{sec:1}
+	%\section{Content}\label{sec:1}
 	
-	Please place your content here. See the sample template chapter for further reference on how you could style your content here.
+	%Please place your content here. See the sample template chapter for further reference on how you could style your content here.
 	
 	%% content
 	
-	\section*{Appendix}\label{appendix}
+	%\section*{Appendix}\label{appendix}
 	
-	Please place your appendix content here, if applicable.
+	%Please place your appendix content here, if applicable.
+
 	
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% For your bibliography, you should use a bibtex .bib file and include it here.
