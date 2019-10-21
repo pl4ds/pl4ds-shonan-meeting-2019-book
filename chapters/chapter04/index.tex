@@ -114,6 +114,8 @@
         % -- Partial failure
         % -- Unbounded asynchronicity
 
+        (say something about scale in terms of number of nodes and physical distance, the impacts of asynchrony and address the topics in comment. Contrast asynchronous geo-distributed systems with shared memory multi-core settings)
+
         \section{The two sides of the CAP frontier}\label{sec:2}
 
         %Relevant notes from meeting:
@@ -121,6 +123,8 @@
         % -- Escrow: replicas can coordinate in pairs to re-fill their credits
         % -- Consensus round only needed for strong consistency
         % - Best you can do under partition tolerance: causal consistency
+
+        (refer the several papers that establish the most that can be done under partition tolerance. One side has causal consistency, the other runs coordination protocols. Note that escrow is a type of a-priory coordination, pair to pair, that helps with global invariants but is only live to some extent under partitions)
 
         \section{Walks around the frontier}\label{sec:2}
 
@@ -131,7 +135,17 @@
         % -- Transactions/bundles of operations
         % -- Simple to do under partition tolerance
 
+        (talk about techniques that go around the CAP division. Using properties of data, like sharding into independent sets of objects for extra concurrency. Talk about grouping operations together for all or nothing execution.)
+
         \section{Research Directions}\label{sec:2}
+
+        (create subsections that pick and expand some of the open topics in the notes)
+
+        \subsection{Causal consistency at scale}
+
+        \subsection{\ldots}
+
+        \subsection{\ldots}
 
         %Relevant notes from meeting:
         % - How to provide causal consistency in a scalable way
@@ -152,6 +166,7 @@
         % --- Certain operations performed on encrypted data
         % - Dynamic Membership
         % - Partial replication
+
 	
 	%% content
 	%\section{Content}\label{sec:1}
