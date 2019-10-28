@@ -26,3 +26,34 @@
   - point-to-point vs broadcast communication
   - large number of processes (swarm / sensor networks)
   - line-of-sight / limite range (gossip protocol)
+
+## Open Research Questions
+
+Discrete vs continuous systems
+- Process algebra, actors, and others model discrete systems.
+- Differential equations, calculus, and others model the physical world.
+- How to incorporate continuous time and space into concurrency models?
+- How to go beyond bi-simulation and observational equivalence to reason about continuous systems?
+
+Cyber-physical systems have a hardware (physical) and a software (cyber) component.
+- How to model SW/HW interface?
+- Are real-time properties properly modeled?
+- How to tackle complexity via abstraction without losing key properties?  (Translucency vs black box approaches)
+- How to verify infinite-space systems?
+
+Dealing with uncertainty
+- Stochastic nature of cyber-physical systems, e.g., weather, requires probabilistic approach.
+- Are heterogeneous latencies, failure modes properly accounted for?
+- How to accurately model, quantify, propagate uncertainty?
+- Need for statistical reasoning libraries suitable for interactive/automated proof assistants.
+
+Modal logics and reasoning
+- Is first-order logic sufficient to reason about cyber-physical systems?
+- Are spatial logics, temporal logics, and combinations thereof better suited for specifying and reasoning about CPS?
+- What are their expressive power?   Are there efficient decision procedures?  (SAT modulo theory approaches?)
+
+Robust control
+- Can we reason about properties of feedback loop control systems incorporating the above (hybrid, SW/HW/Network, uncertainty/failures, modal logics/reasoning)?
+
+AI and data-driven systems
+- As more CPS are model-driven and more models are data-driven, how can we trust these systems?  Are there inherent theoretical limits to dynamic data-driven applications and systems? (e.g., Cramer-Rao lower bounds, etc.)
