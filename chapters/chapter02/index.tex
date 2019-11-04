@@ -32,7 +32,7 @@
 %]{svmult}
 %
 %\usepackage[utf8]{inputenc}
-%%\usepackage{type1cm}        % activate if the above 3 fonts are 
+%%\usepackage{type1cm}        % activate if the above 3 fonts are
 %% not available on your system
 %
 %\usepackage{makeidx}         % allows index generation
@@ -41,7 +41,7 @@
 %\usepackage{multicol}        % used for the two-column index
 %\usepackage[bottom]{footmisc}% places footnotes at page bottom
 %
-%\usepackage{newtxtext}       % 
+%\usepackage{newtxtext}       %
 %\usepackage{newtxmath}       % selects Times Roman as basic font
 %
 %% \usepackage{natbib}
@@ -76,10 +76,10 @@
 %\begin{document}
 
 \begin{bibunit}
-	
-	\title*{Behavioral Types}
+
+	\title*{Behavioural Types for Distribution}
 	\author{Simon Fowler and Keigo Imai}
-	
+
 	\institute{
 		Simon Fowler \at University of Edinburgh, United Kingdom, \email{simon.fowler@ed.ac.uk}
 		\and Keigo Imai \at Gifu University, Japan, \email{keigoi@gifu-u.ac.jp}
@@ -88,36 +88,60 @@
 		\and Nobuko Yoshida \at Imperial College London, United Kingdom, \email{n.yoshida@imperial.ac.uk}
 	}
 	\maketitle
-	
+
 	\abstract{Please place your abstract here.}
-	
+
 	%% content
+  \section{Introduction}
+  \section{Background}
+  \subsection{Behavioural Types}
+  \subsection{Session Types}
+  \subsection{Desirable Properties}
+
+  \section{Behavioural Types and Distribution}
+  \subsection{Session Channels}
+  \subsubsection{Difficulties}
+  \subsubsection{Na\"ive approaches}
+  \subsubsection{Distributed Delegation Algorithms}
+  \subsubsection{Continuation-passing Approaches}
+
+  \subsection{Behavioural types for Actor Systems}
+  \subsubsection{Featherweight Erlang}
+  \subsubsection{Runtime Monitoring}
+  \subsubsection{Mailbox Types}
+
+  \section{Future Directions}
+  \subsection{Finagle}
+  \subsection{Failure handling and fault tolerance}
+
+  \section{Conclusion}
+
 	\section{Content}\label{sec:1}
-	
+
 	Please place your content here. See the sample template chapter for further reference on how you could style your content here.
-	
+
 	%% content
-	
+
 	\section*{Appendix}\label{appendix}
-	
+
 	Please place your appendix content here, if applicable.
-	
+
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% For your bibliography, you should use a bibtex .bib file and include it here.
 	%% Note that the final reference lists styling might differ because it'll be styled in unified book layout.
-	
+
 	% \biblstarthook{
 	%	text inserted here will be printed before the actual list of references, but only if there is at least one reference to %display. Delete this section if you don't need it.
 	%}
-	
+
 	% \nocite{*}		%% uncomment if uncited references should be listed in the bibliography.
-	
+
 	%% uncomment and state path to your .bib to use a bibtex file as your bibliography.
 	%% NOTE: relative paths don't work in \putbib => During development, you might delete the "\CHAPTERSROOT/chapter\chapterprefix/" part to refer to your bib file. When you're done, please make this path absolute by adding the prefix again.
 	%%
 	% \putbib[\CHAPTERSROOT/chapter\chapterprefix/bibliography] %
-	
+
 \end{bibunit}
-	
+
 %% uncomment the \end{document} statement to make this file stand-alone compileable.
 %\end{document}
