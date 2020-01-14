@@ -25,55 +25,60 @@
 %% When you hand in your contribution, please uncomment or remove the preamble again.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% start of preamble
-%\documentclass[
-%graybox,
-%envcountchap,
-%%natbib
-%]{svmult}
-%
-%\usepackage[utf8]{inputenc}
-%%\usepackage{type1cm}        % activate if the above 3 fonts are
-%% not available on your system
-%
-%\usepackage{makeidx}         % allows index generation
-%\usepackage{graphicx}        % standard LaTeX graphics tool
-%% when including figure files
-%\usepackage{multicol}        % used for the two-column index
-%\usepackage[bottom]{footmisc}% places footnotes at page bottom
-%
-%\usepackage{newtxtext}       %
-%\usepackage{newtxmath}       % selects Times Roman as basic font
-%
-%% \usepackage{natbib}
-%\usepackage{footmisc}
-%
-%%% Additional packages added. Add necessary packages here.
-%%\usepackage[english]{babel}
-%\usepackage{siunitx}
-%\usepackage{amssymb}
-%\usepackage{pifont}
-%\usepackage{xcolor}
-%\usepackage{tabularx}
-%\usepackage{listings}
-%\usepackage{booktabs}
-%\usepackage{hyperref}
-%\usepackage{url}
-%\usepackage{mathtools}
-%\usepackage{lipsum}
-%\usepackage{import}
-%\usepackage{bibunits}
-%\usepackage{acronym}
-%\usepackage[nottoc]{tocbibind}
-%\usepackage{numberpt}
-%
-%\newcommand*{\CHAPTERSROOT}{../.}	% root path for chapters.
-%\newcommand*{\chapterprefix}{02}	% your chapter number.
-%
-%\makeindex % used for the subject index
+\documentclass[
+graybox,
+envcountchap,
+%natbib
+]{svmult}
+
+\usepackage[utf8]{inputenc}
+%\usepackage{type1cm}        % activate if the above 3 fonts are
+% not available on your system
+
+\usepackage{makeidx}         % allows index generation
+\usepackage{graphicx}        % standard LaTeX graphics tool
+% when including figure files
+\usepackage{multicol}        % used for the two-column index
+\usepackage[bottom]{footmisc}% places footnotes at page bottom
+
+\usepackage{newtxtext}       %
+\usepackage{newtxmath}       % selects Times Roman as basic font
+
+% \usepackage{natbib}
+\usepackage{footmisc}
+
+%% Additional packages added. Add necessary packages here.
+%\usepackage[english]{babel}
+\usepackage{siunitx}
+\usepackage{amssymb}
+\usepackage{pifont}
+\usepackage{xcolor}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{mathtools}
+\usepackage{lipsum}
+\usepackage{import}
+\usepackage{bibunits}
+\usepackage{acronym}
+\usepackage[nottoc]{tocbibind}
+\usepackage{numberpt}
+
+\newcommand{\todo}[1]{{\noindent\small\color{red} \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{\textbf{TODO:} #1}}}}
+
+\newcommand*{\CHAPTERSROOT}{../.}	% root path for chapters.
+\newcommand*{\chapterprefix}{02}	% your chapter number.
+
+\newcommand{\mkwd}[1]{\ensuremath{\mathsf{#1}}}
+\newcommand{\defeq}{\triangleq}
+
+\makeindex % used for the subject index
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% end of preamble
 
 %% uncomment the \begin{document} statement to make this file stand-alone compileable.
-%\begin{document}
+\begin{document}
 
 \begin{bibunit}
 
@@ -93,19 +98,107 @@
 
 	%% content
   \section{Introduction}
+
+
+  \todo{yadayada}
+
+  Following our discussions at the meeting which were centred around
+  communication amongst distributed systems, and in particular noting that
+  communication is a central concern in distributed systems, we concentrate
+  particularly on behavioural type systems for communication protocols.
+
+  Furthermore, while there has been extensive work on the behavioural typing
+  disciplines described in this chapter, we restrict our attention purely to
+  work which pertains explicitly to the interaction between behavioural types
+  and distribution.
+
   \section{Background}
   \subsection{Behavioural Types}
+
+  Much like data types encode the shape of data, behavioural types encode the
+  behaviour of an application. Type systems allow an application developer to
+  catch errors earlier in the development cycle: as an example, using a type
+  system we can ensure undefined operations such as adding an integer to a
+  Boolean value, or storing a string in an integer array, are ruled out before a
+  program is executed.
+
+  While data types can rule out errors such as adding $5$ and \mkwd{true},
+  behavioural types can rule out more semantic errors, such as forgetting to
+  close an open file handle, or failure to follow a communication protocol.
+
+  \todo{Non-session type example (file system?)}
+
   \subsection{Session Types}
-  \subsection{Desirable Properties}
+  Session types are a particularly well-known subclass of behavioural type
+  system, which type an endpoint of a communication channel. A communication
+  channel is an entity which allows communication between processes which hold
+  an \emph{endpoint} to the channel.
+
+  Perhaps the most basic type system for a communication channel endpoint is a
+  channel which can send or receive a single type of value. Such type systems
+  are inspired by the typed $\pi$-calculus, and have been used first in research
+  languages such as Pict~\cite{XXX}, and more recently in widely-adopted
+  languages such as Go~\cite{XXX}.
+
+  For example, we could create a channel with type:
+  \[
+    \mkwd{Chan}(\mkwd{Int})
+  \]
+  which could send or receive integers; an attempt to send a string would result
+  in a compile-time error.
+
+  To illustrate the use of channels, in the following program, the
+  main thread creates a channel and then spawns off a child thread. The main
+  then then sends two integers along the channel, which are received by the
+  child thread. The child thread subsequently sends the sum of the two integers,
+  which is received by the parent thread:
+
+  \todo{Write out example}
+
+  However, even this tiny example is prone to multiple semantic errors: if the
+  main thread only sends one integer and receives, there is a deadlock, and the
+  program hangs forever. The same result happens if the main thread tries to
+  receive; or if the main thread tries to send three integers; or if the child
+  thread attempts to send before receiving; to name but a few. All of these
+  semantic errors boil down to the program not satisfying an
+  informally-specified protocol, which cannot be checked for correctness.
+
+  \emph{Session types} allow us to generalise this type to be more descriptive.
+  We can assign the channel endpoint for the main thread the following session
+  type:
+
+  \[
+    \mkwd{AdditionServer} \defeq
+    \mkwd{Chan}{{!}\mkwd{Int}.{!}\mkwd{Int}.{?}\mkwd{Int}}.\mkwd{End}
+  \]
+
+  \todo{Description}
+
+  The session endpoint given to the child process is as follows:
+  \[
+    \mkwd{Chan}{{?}\mkwd{Int}.{?}\mkwd{Int}.{!}\mkwd{Int}}.\mkwd{End}
+  \]
+
+  (In the remainder of the chapter, we omit the $\mkwd{Chan}$ annotation for
+  brevity.)
+
+  \todo{GV example of the process, discussion of linearity}
+
+  \subsubsection{Multiparty Session Types}
+
+  \todo{Probably the two-buyer example}
 
   \section{Behavioural Types and Distribution}
+
   \subsection{Session Channels}
+  \subsubsection{Synchrony and Asynchrony}
   \subsubsection{Difficulties}
   \subsubsection{Na\"ive approaches}
   \subsubsection{Distributed Delegation Algorithms}
   \subsubsection{Continuation-passing Approaches}
 
   \subsection{Behavioural types for Actor Systems}
+  \subsubsection{The Challenges of Typed Mailboxes}
   \subsubsection{Featherweight Erlang}
   \subsubsection{Runtime Monitoring}
   \subsubsection{Mailbox Types}
@@ -115,8 +208,6 @@
   \subsection{Failure handling and fault tolerance}
 
   \section{Conclusion}
-
-	\section{Content}\label{sec:1}
 
 	Please place your content here. See the sample template chapter for further reference on how you could style your content here.
 
@@ -144,4 +235,4 @@
 \end{bibunit}
 
 %% uncomment the \end{document} statement to make this file stand-alone compileable.
-%\end{document}
+\end{document}
