@@ -171,18 +171,26 @@ envcountchap,
     \mkwd{AdditionServer} \defeq
     \mkwd{Chan}{{!}\mkwd{Int}.{!}\mkwd{Int}.{?}\mkwd{Int}}.\mkwd{End}
   \]
+  (In the remainder of the chapter, we omit the $\mkwd{Chan}$ annotation when it
+  is clear that we are discussing session-typed channels.)
 
   \todo{Description}
 
   The session endpoint given to the child process is as follows:
   \[
+    \mkwd{AdditionClient} \defeq
     \mkwd{Chan}{{?}\mkwd{Int}.{?}\mkwd{Int}.{!}\mkwd{Int}}.\mkwd{End}
   \]
 
-  (In the remainder of the chapter, we omit the $\mkwd{Chan}$ annotation for
-  brevity.)
+  Where the server sends, the client receives, and where the server receives,
+  the client sends. This \emph{duality} between client and server ensures that
+  the two ends of the channel implement the protocol and communicate safely.
 
   \todo{GV example of the process, discussion of linearity}
+
+  To safely implement session types, we require some form of \emph{linearity},
+  generally in the form of a linear type system. This proves to be the main
+  hurdle to overcome when implementing session types in programming languages.
 
   \subsubsection{Multiparty Session Types}
 
@@ -191,14 +199,62 @@ envcountchap,
   \section{Behavioural Types and Distribution}
 
   \subsection{Session Channels}
-  \subsubsection{Synchrony and Asynchrony}
-  \subsubsection{Difficulties}
+  Session types are designed as type system for channel endpoints.
+  In addition to sending values, we can also send channel endpoints themselves;
+  a technique known as \emph{delegation}. Unfortunately, this mobility of
+  endpoints leads to difficulties in the distributed setting.
+
+  \paragraph{Synchrony and asynchrony.}
+  The $\pi$-calculus involves \emph{synchronous} communication: two peers
+  \emph{rendezvous} over a channel in order to communicate. Communication cannot
+  occur until one peer is sending, and one peer is receiving, and execution
+  cannot progres until the communication is complete. \emph{Asynchronous}
+  communication allows send actions to communicate immediately, whereas receive
+  actions complete immediately if a value is available but block otherwise.
+  Asynchronous communication is usually implemented using a buffer.
+
+
+  \subsubsection{Difficulties}\label{sec:distrib-deleg:difficulties}
+  \todo{Describe distributed delegation algorithms}
   \subsubsection{Na\"ive approaches}
+  \todo{Indefinite redirection, etc.}
   \subsubsection{Distributed Delegation Algorithms}
+  \todo{Summarise Hu et al., 2008}
+
   \subsubsection{Continuation-passing Approaches}
+  \todo{Summarise Scalas and Yoshida, 2016, Scalas et al., 2017}
 
   \subsection{Behavioural types for Actor Systems}
+  The \emph{actor model} was introduced as a formalism for artificial
+  intelligence by~\citet{HewittBS73:actors}. An actor is an entity with a
+  unique identifier which upon receiving a message can perform
+  three actions: it can send a finite set of messages to other actors; spawn a
+  finite set of new actors; and change how it reacts to a new message being
+  received.
+
+  \citet{Agha90:actors} was first to investigate the actor model as a formalism
+  for disributed systems. The actor model is particularly appealing since
+  process IDs can be used to \emph{send} messages, but the capability to
+  \emph{receive} messages is associated uniquely with an actor. In turn, this
+  restriction sidesteps the issues described in
+  Section~\ref{sec:distrib-deleg:difficulties}.
+  This asymmetry is captured by Figure~\ref{fig:channels-vs-mailboxes} (Figure
+  as shown by~\citet{FowlerLW17:mm}). Figure~\ref{fig:channels-vs-mailboxes:a}
+  shows the communication patterns allowed by three process $P_1$, $P_2$, and
+  $P_3$, over a channel: given that each process has access to the channel,
+  each process can use the channel to send a message to any of the other
+  processes. Figure~\ref{fig:channels-vs-maiboxes:b} shows the communication
+  patterns associated with process $P_2$ as an actor process: given the process
+  ID of $P_2$, all processes can send $P_2$ a message, but only $P_2$ can
+  receive messages.
+
   \subsubsection{The Challenges of Typed Mailboxes}
+  Actor communication is asynchronous. When implementing actors, an
+  implementation technique is to associate each process with an incoming message
+  queue, or \emph{mailbox}. While adding types to channels is entirely
+  straightforward, adding types to mailboxes is substantially more challenging.
+
+
   \subsubsection{Featherweight Erlang}
   \subsubsection{Runtime Monitoring}
   \subsubsection{Mailbox Types}
