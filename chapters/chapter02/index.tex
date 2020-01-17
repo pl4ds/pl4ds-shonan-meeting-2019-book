@@ -94,8 +94,8 @@ envcountchap
   Perhaps the most basic type system for a communication channel endpoint is a
   channel which can send or receive a single type of value. Such type systems
   are inspired by the typed $\pi$-calculus, and have been used first in research
-  languages such as Pict~\cite{XXX}, and more recently in widely-adopted
-  languages such as Go~\cite{XXX}.
+  languages such as Pict~\cite{PierceT00:pict}, and more recently in
+  widely-adopted languages such as Go~\cite{DonovanK15:go}.
 
   For example, we could create a channel with type:
   \[
@@ -164,13 +164,14 @@ envcountchap
   endpoints leads to difficulties in the distributed setting.
 
   \mypar{Synchrony and asynchrony.}
-  The $\pi$-calculus involves \emph{synchronous} communication: two peers
-  \emph{rendezvous} over a channel in order to communicate. Communication cannot
-  occur until one peer is sending, and one peer is receiving, and execution
-  cannot progres until the communication is complete. \emph{Asynchronous}
-  communication allows send actions to communicate immediately, whereas receive
-  actions complete immediately if a value is available but block otherwise.
-  Asynchronous communication is usually implemented using a buffer.
+  The $\pi$-calculus~\cite{Milner99:pi-calc} involves \emph{synchronous}
+  communication: two peers \emph{rendezvous} over a channel in order to
+  communicate. Communication cannot occur until one peer is sending, and one
+  peer is receiving, and execution cannot progres until the communication is
+  complete. \emph{Asynchronous} communication allows send actions to communicate
+  immediately, whereas receive actions complete immediately if a value is
+  available but block otherwise.  Asynchronous communication is usually
+  implemented using a buffer.
 
 
   \subsubsection{Difficulties}\label{sec:distrib-deleg:difficulties}
@@ -312,9 +313,75 @@ envcountchap
   behavioural types to actor-like systems.
 
   \subsubsection{Featherweight Erlang}
-  Erlang~\cite{Armstrong10:erlang} is 
+  Erlang~\cite{Armstrong10:erlang} is a dynamically-typed concurrent functional
+  programming language, originally designed for telecommunications applications.
+  Erlang was designed to allow developers to write applications with strong
+  reliability guarantees, fostering a development style with share-nothing
+  semantics and explicit message passing.
+  %
+  Although the developers did not
+  explicitly base their design on the actor model~\cite{erlang-not-actor}, the
+  language provides addressable processes with an incoming message queue, so
+  follows similar principles; indeed,~Agha et
+  al.~\cite{AghaMST97:foundation-actor} describe Erlang as ``essentially
+  an actor language''.
+
+  Erlang supports a \emph{selective receive} construct, which supports pattern
+  matching syntax to await messages of a particular structure.
+  %
+  Mostrous \& Vasconcelos~\cite{MostrousV11:session-erlang} describe a
+  behaviourally-typed process calculus which allows a form of binary session
+  typing. The key idea is to emulate session channels using two key ingredients:
+  selective receive, and a mechanism to generate unique references. Unique
+  references can then be used as a proxy for a session channel endpoint; a
+  technique known as \emph{correlation sets}~\cite{Viroli04a:correlation}. By
+  combining selective receive and unique references with a behavioural typing
+  discipline, it becomes possible to specify and check binary session protocols.
+
+  Their approach has not been implemented. A key drawback is that the approach
+  forbids delegation, so the communication topology remains static. It would be
+  interesting to implement the system and see whether it scales to larger
+  examples, and whether the correlation sets approach could be used to implement
+  multiparty session types. Due to the issues identified in
+  Section~\ref{sec:distrib-deleg:difficulties}, it is likely that supporting
+  delegation would be challenging.
 
   \subsubsection{Runtime Monitoring}
+
+  \todo{It might be an idea to move this earlier, so we can then put in the
+  session actor stuff here, rather than hopping back to MPST theory before
+  describing session actors?}
+
+  Multiparty session types have a close correspondence with communicating
+  automata~\cite{DenielouY12:mpst-automata}. Communicating finite-state
+  machines (CFSMs)~\cite{BrandZ83:cfsms} are a version of finite-state automata
+  where a transition between two states can be predicated on a communication
+  action with another CFSM. A drawback of CFSMs is that properties such as
+  deadlock-freedom are undecidable. Denielou \&
+  Yoshida~\cite{DenielouY12:mpst-automata} show that multiparty session types
+  can be translated into \emph{multiparty session automata}, a class of CFSM
+  which satisfy deadlock-freedom by construction.
+
+  Chen et al.~\cite{ChenBDHY11:monitoring} and Bocchi et
+  al.~\cite{BocchiCDHY13:monitoring} investigate \emph{monitored} process
+  calculi where local projections of multiparty session types are used to
+  monitor the types of messages sent by processes, as opposed to statically
+  ruling out erroneous messages. Crucially for distributed systems,
+  the authors prove that if a network of monitored and unmonitored processes
+  behave well according to their speicfications, then the communication in the
+  network precisely follows the specification. A corollary is that if some
+  components in a system are statically checked against their session types, and
+  other components are monitored, then the entire network will behave according
+  to the session type.
+
+  Together, these results have given rise to a body of work on \emph{runtime
+  monitoring} of conformance to multiparty session types. Neykova et
+  al.~\cite{NeykovaYH13:spy} introduce the first distributed implementation of
+  session types in a dynamically-typed programming language, namely Python.
+
+  \todo{Go from here}
+
+
 
   \subsubsection{Mailbox Types}
 
