@@ -151,9 +151,39 @@ envcountchap
   generally in the form of a linear type system. This proves to be the main
   hurdle to overcome when implementing session types in programming languages.
 
-  \subsubsection{Multiparty Session Types}
+  \subsubsection{Multiparty Session Types}\label{sec:bt:mpst}
 
-  \todo{Probably the two-buyer example}
+  \todo{Introduction to MPSTs: probably the two-buyer example}
+
+  \mypar{Runtime monitoring.}
+  Multiparty session types have a close correspondence with communicating
+  automata~\cite{DenielouY12:mpst-automata}. Communicating finite-state
+  machines (CFSMs)~\cite{BrandZ83:cfsms} are a version of finite-state automata
+  where a transition between two states can be predicated on a communication
+  action with another CFSM. A drawback of CFSMs is that properties such as
+  deadlock-freedom are undecidable. Denielou \&
+  Yoshida~\cite{DenielouY12:mpst-automata} show that multiparty session types
+  can be translated into \emph{multiparty session automata}, a class of CFSM
+  which satisfy deadlock-freedom by construction.
+
+  Chen et al.~\cite{ChenBDHY11:monitoring} and Bocchi et
+  al.~\cite{BocchiCDHY13:monitoring} investigate \emph{monitored} process
+  calculi where local projections of multiparty session types are used to
+  monitor the types of messages sent by processes, as opposed to statically
+  ruling out erroneous messages. Crucially for distributed systems,
+  the authors prove that if a network of monitored and unmonitored processes
+  behave well according to their speicfications, then the communication in the
+  network precisely follows the specification. A corollary is that if some
+  components in a system are statically checked against their session types, and
+  other components are monitored, then the entire network will behave according
+  to the session type.
+
+  Together, these results have given rise to a body of work on \emph{runtime
+  monitoring} of conformance to multiparty session types. Neykova et
+  al.~\cite{NeykovaYH13:spy} introduce the first distributed implementation of
+  session types in a dynamically-typed programming language, namely Python.
+
+
 
   \section{Behavioural Types and Distribution}
 
@@ -347,43 +377,47 @@ envcountchap
   delegation would be challenging.
 
   \subsubsection{Runtime Monitoring}
+  In Section~\ref{sec:bt:mpst}, we described how the correspondence between
+  multiparty session types and communicating finite state automata has given
+  rise to implementations which allow conformance to multiparty session types to
+  be checked at runtime.
 
-  \todo{It might be an idea to move this earlier, so we can then put in the
-  session actor stuff here, rather than hopping back to MPST theory before
-  describing session actors?}
+  \begin{figure}
 
-  Multiparty session types have a close correspondence with communicating
-  automata~\cite{DenielouY12:mpst-automata}. Communicating finite-state
-  machines (CFSMs)~\cite{BrandZ83:cfsms} are a version of finite-state automata
-  where a transition between two states can be predicated on a communication
-  action with another CFSM. A drawback of CFSMs is that properties such as
-  deadlock-freedom are undecidable. Denielou \&
-  Yoshida~\cite{DenielouY12:mpst-automata} show that multiparty session types
-  can be translated into \emph{multiparty session automata}, a class of CFSM
-  which satisfy deadlock-freedom by construction.
+    \todo{Two images comparing standard MPST workflow against multiparty session
+    actors}
+    \caption{Monitored processes vs. multiparty session actors}
+    \label{fig:bt:mpst-actor}
+  \end{figure}
 
-  Chen et al.~\cite{ChenBDHY11:monitoring} and Bocchi et
-  al.~\cite{BocchiCDHY13:monitoring} investigate \emph{monitored} process
-  calculi where local projections of multiparty session types are used to
-  monitor the types of messages sent by processes, as opposed to statically
-  ruling out erroneous messages. Crucially for distributed systems,
-  the authors prove that if a network of monitored and unmonitored processes
-  behave well according to their speicfications, then the communication in the
-  network precisely follows the specification. A corollary is that if some
-  components in a system are statically checked against their session types, and
-  other components are monitored, then the entire network will behave according
-  to the session type.
 
-  Together, these results have given rise to a body of work on \emph{runtime
-  monitoring} of conformance to multiparty session types. Neykova et
-  al.~\cite{NeykovaYH13:spy} introduce the first distributed implementation of
-  session types in a dynamically-typed programming language, namely Python.
+  Neykova \& Yoshida~\cite{NeykovaY17:sactor} implemented a Python framework for
+  actor-style communication. The key differences over the `classic' approach to
+  monitoring processes against multiparty session types is that each actor may
+  be involved in \emph{multiple} sessions at a time; computation is driven by
+  incoming messages; and that a message received in one session may trigger
+  communication in another. In contrast, in the classic approach, each process
+  is assigned a single monitor. These differences are shown in
+  Figure~\ref{fig:bt:mpst}.
 
-  \todo{Go from here}
+  Neykova \& Yoshida use the Celery~\cite{celery} framework to build their
+  library. Python is an imperative language which does not support native
+  concurrency, nor enforce actor-style fault isolation.
+  Fowler~\cite{Fowler16:actors} implements Neykova \& Yoshida's conceptual
+  framework in Erlang, and introduces dynamism in the communication topologies,
+  along with some rudimentary failure handling
+  mechanisms, using subsessions, as introduced by Demangeon \&
+  Honda~\cite{DemangeonH12:subsessions}. Failure handling is crucial in the
+  distributed setting, and we discuss it further in
+  Section~\ref{sec:bt:failure-handling}.
+
+    \todo{Go from here}
 
 
 
   \subsubsection{Mailbox Types}
+
+  \section{Failure handling}\label{sec:bt:failure-handling}
 
   \section{Future Directions}
   \subsection{Finagle}
