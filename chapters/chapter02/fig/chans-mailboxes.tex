@@ -1,0 +1,64 @@
+\begin{figure}
+\centering
+\subfloat[Channel\label{fig:bt:channels-vs-mailboxes:a}]{
+  \centering
+  \begin{tikzpicture}
+
+    \matrix (m) [matrix of math nodes,row sep=2em,column sep=7em,minimum
+    width=1em,ampersand replacement=\&]
+    {
+       P_1 \& P_1 \\
+       P_2 \& P_2 \\
+       P_3 \& P_3 \\
+    };
+    \path
+      (m-1-1) edge (m-1-2)
+              edge (m-2-2)
+              edge (m-3-2)
+      (m-2-1) edge (m-1-2)
+              edge (m-2-2)
+              edge (m-3-2)
+      (m-3-1) edge (m-1-2)
+              edge (m-2-2)
+              edge (m-3-2);
+
+    %% \tikzset{dotted/.style={draw=black!50!white, line width=0.5pt,
+    %%                         dash pattern=on 2pt off 2pt,
+    %%                         inner sep=0mm, rectangle, rounded corners}};
+
+    \node (sender) [fit = (m-1-1) (m-3-1)] {};
+    \node at (sender.north) [above] {\textsf{sender}};
+
+    \node (receiver) [fit = (m-1-2) (m-3-2)] {};
+    \node at (receiver.north) [above] {\textsf{receiver}};
+
+  \end{tikzpicture}
+}
+~
+\subfloat[Mailbox\label{fig:bt:channels-vs-mailboxes:b}]{
+  \centering
+  \begin{tikzpicture}
+    \matrix (m) [matrix of math nodes,row sep=2em,column sep=7em,minimum
+    width=1em,ampersand replacement=\&]
+    {
+       P_1 \& P_1 \\
+       P_2 \& P_2 \\
+       P_3 \& P_3 \\
+    };
+    \path
+      (m-1-1) edge (m-2-2)
+      (m-2-1) edge (m-2-2)
+      (m-3-1) edge (m-2-2);
+
+    \node (sender) [fit = (m-1-1) (m-3-1)] {};
+    \node at (sender.north) [above] {\textsf{sender}};
+
+    \node (receiver) [fit = (m-1-2) (m-3-2)] {};
+    \node at (receiver.north) [above] {\textsf{receiver}};
+
+  \end{tikzpicture}
+}
+
+\caption{Mailboxes as pinned channels}
+\label{fig:bt:channels-vs-mailboxes}
+\end{figure}

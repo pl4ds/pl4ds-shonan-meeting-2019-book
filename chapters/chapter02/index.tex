@@ -27,53 +27,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% start of preamble
 \documentclass[
 graybox,
-envcountchap,
-%natbib
+envcountchap
 ]{svmult}
 
-\usepackage[utf8]{inputenc}
-%\usepackage{type1cm}        % activate if the above 3 fonts are
-% not available on your system
-
-\usepackage{makeidx}         % allows index generation
-\usepackage{graphicx}        % standard LaTeX graphics tool
-% when including figure files
-\usepackage{multicol}        % used for the two-column index
-\usepackage[bottom]{footmisc}% places footnotes at page bottom
-
-\usepackage{newtxtext}       %
-\usepackage{newtxmath}       % selects Times Roman as basic font
-
-% \usepackage{natbib}
-\usepackage{footmisc}
-
-%% Additional packages added. Add necessary packages here.
-%\usepackage[english]{babel}
-\usepackage{siunitx}
-\usepackage{amssymb}
-\usepackage{pifont}
-\usepackage{xcolor}
-\usepackage{tabularx}
-\usepackage{listings}
-\usepackage{booktabs}
-\usepackage{hyperref}
-\usepackage{url}
-\usepackage{mathtools}
-\usepackage{lipsum}
-\usepackage{import}
-\usepackage{bibunits}
-\usepackage{acronym}
-\usepackage[nottoc]{tocbibind}
-\usepackage{numberpt}
-
-\newcommand{\todo}[1]{{\noindent\small\color{red} \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{\textbf{TODO:} #1}}}}
-
-\newcommand*{\CHAPTERSROOT}{../.}	% root path for chapters.
-\newcommand*{\chapterprefix}{02}	% your chapter number.
-
-\newcommand{\mkwd}[1]{\ensuremath{\mathsf{#1}}}
-\newcommand{\defeq}{\triangleq}
-
+\input{preamble}
 \makeindex % used for the subject index
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% end of preamble
 
@@ -144,6 +101,8 @@ envcountchap,
   \[
     \mkwd{Chan}(\mkwd{Int})
   \]
+
+
   which could send or receive integers; an attempt to send a string would result
   in a compile-time error.
 
@@ -204,7 +163,7 @@ envcountchap,
   a technique known as \emph{delegation}. Unfortunately, this mobility of
   endpoints leads to difficulties in the distributed setting.
 
-  \paragraph{Synchrony and asynchrony.}
+  \mypar{Synchrony and asynchrony.}
   The $\pi$-calculus involves \emph{synchronous} communication: two peers
   \emph{rendezvous} over a channel in order to communicate. Communication cannot
   occur until one peer is sending, and one peer is receiving, and execution
@@ -226,37 +185,137 @@ envcountchap,
 
   \subsection{Behavioural types for Actor Systems}
   The \emph{actor model} was introduced as a formalism for artificial
-  intelligence by~\citet{HewittBS73:actors}. An actor is an entity with a
+  intelligence by Hewitt et al.~\cite{HewittBS73:actors}. An actor is an entity with a
   unique identifier which upon receiving a message can perform
   three actions: it can send a finite set of messages to other actors; spawn a
   finite set of new actors; and change how it reacts to a new message being
   received.
 
-  \citet{Agha90:actors} was first to investigate the actor model as a formalism
+  \input{fig/chans-mailboxes}
+
+  Agha~\cite{Agha90:actors} was first to investigate the actor model as a formalism
   for disributed systems. The actor model is particularly appealing since
   process IDs can be used to \emph{send} messages, but the capability to
   \emph{receive} messages is associated uniquely with an actor. In turn, this
   restriction sidesteps the issues described in
   Section~\ref{sec:distrib-deleg:difficulties}.
-  This asymmetry is captured by Figure~\ref{fig:channels-vs-mailboxes} (Figure
-  as shown by~\citet{FowlerLW17:mm}). Figure~\ref{fig:channels-vs-mailboxes:a}
+  This asymmetry is captured by Figure~\ref{fig:bt:channels-vs-mailboxes} (Figure
+  as shown by Fowler et al.~\cite{FowlerLW17:mm}). Figure~\ref{fig:bt:channels-vs-mailboxes:a}
   shows the communication patterns allowed by three process $P_1$, $P_2$, and
   $P_3$, over a channel: given that each process has access to the channel,
   each process can use the channel to send a message to any of the other
-  processes. Figure~\ref{fig:channels-vs-maiboxes:b} shows the communication
+  processes. Figure~\ref{fig:bt:channels-vs-mailboxes:b} shows the communication
   patterns associated with process $P_2$ as an actor process: given the process
   ID of $P_2$, all processes can send $P_2$ a message, but only $P_2$ can
   receive messages.
 
-  \subsubsection{The Challenges of Typed Mailboxes}
+  \mypar{The Challenges of Typed Mailboxes}
   Actor communication is asynchronous. When implementing actors, an
   implementation technique is to associate each process with an incoming message
   queue, or \emph{mailbox}. While adding types to channels is entirely
   straightforward, adding types to mailboxes is substantially more challenging.
 
+  Most implementations of actor-like communication, such as processes in
+  Erlang~\cite{Armstrong10:erlang} or the native actor libraries for
+  Scala~\cite{HallerO09:actors}, provide untyped mailboxes.
+  %
+  Typed mailboxes were first investigated by~He et al.~\cite{HeWT14:actors}, who
+  introduced a typed extension of Akka, called TAkka. The authors highlighted
+  the \emph{type pollution} problem, aparticular challenge with typed mailboxes
+  arising due to the coarser granularity of typing.
+
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.75\textwidth]{img/type-pollution-example.pdf}
+    \caption{Type Pollution}
+    \label{fig:bt:type-pollution}
+  \end{figure}
+
+  To demonstrate this,
+  consider the scenario shown in Figure~\ref{fig:bt:type-pollution}. A client
+  wishes to connect to a chat room, modelled by a \lstinline+ChatRoom+ actor. It
+  firstly sends a \lstinline+joinRequest+ message to the \lstinline+ChatServer+
+  actor, which forwards the request to the appropriate \lstinline+ChatRoom+
+  actor. The \lstinline+ChatRoom+ actor responds with a \lstinline+joinResponse+
+  message, which is then forwarded to the client. We can assign the following
+  mailbox types:
+
+
+  \begin{itemize}
+    \item \lstinline|Client : ActorRef(joinResponse)|
+    \item \lstinline|ChatServer : ActorRef(joinRequest + joinResponse)|
+    \item \lstinline|ChatRoom : ActorRef(joinRequest)|
+  \end{itemize}
+
+  Note in particular that the \lstinline+ChatServer+ must be able to handle both
+  the \lstinline+joinRequest+ \emph{and} the \lstinline+joinResponse+ messages.
+  Na\"ively implemented, this would result in a complete loss of modularity:
+  each actor would be aware of \emph{every} message which could be received by
+  every other actor, and worse, would need to use the exact same sum injection.
+  Any small changes would make the program ill-typed.
+
+  He et al.~\cite{HeWT14:actors} address type pollution by making use of subtyping, making
+  actor references contravariant in their message type. Using a similar
+  approach, the widely-adopted Akka framework~\cite{akka} has recently
+  transitioned to typed actor references; the first major actor framework to do so.
+
+  Fowler et al.~\cite{FowlerLW17:mm} study typed actors formally, and formally investigate
+  type- and semantics-preserving translations between the two communication
+  models. In particular, the type pollution problem means that in order to
+  translate from typed channels into typed actors, one must either assign the
+  same type to every channel in the system, or use a synchronisation mechanism
+  such as futures.
+
+  \mypar{A na\"ive behavioural type system for mailboxes.}
+  As---unlike channels---mailboxes are unidirectional, the na\"ive extension is
+  to generalise an actor's mailbox type to receiving a \emph{sequence} of types.
+  Letting $A, B$ range over types, $V$ range over values, and $M$ range over
+  terms, we might envisage actor references of type $\pid{\seq{A}}$ and the
+  following two communication constructs:
+
+  \begin{mathpar}
+    \inferrule
+      [TA-Receive]
+      { }
+      { \cdot \mid A \cdot \seq{A} \triangleright \calcwd{receive} : A \triangleleft \seq{A} }
+
+    \inferrule
+      [TA-Send]
+      { \Gamma_1 \vdash V : A \\ \Gamma_2 \vdash W : \pid{A \cdot \seq{A}} }
+      { \Gamma_1, \Gamma_2 \mid \seq{B} \triangleright \calcwd{send} \: M : \pid{A} \triangleleft \seq{B} }
+  \end{mathpar}
+
+  The $\Gamma \mid \seq{A} \triangleright M : B \triangleleft \seq{A}'$
+  judgement can be read ``Under typing environment $\Gamma$, with the ability to
+  receive a sequence of values with types $\seq{A}$, term $M$ has type $B$, and the
+  remainder of the program has the ability to receive a sequence of values with
+  type $\seq{A}'$. As values are pure, the value typing judgement $\Gamma \vdash
+  V : A$ states that under type environment $\Gamma$, value $V$ has type $A$.
+
+  Given the ability to receive values of types $A \cdot \seq{A}$, rule \textsc{TA-Receive}
+  assigns $\calcwd{receive}$ type $A$, and allows $\seq{A}$ to be received in
+  the remainder of the program. Correspondingly, rule \textsc{TA-Send} assigns
+  term $\calcwd{send} \: V \: W$ type $\pid{A}$ if value $V$ has type $A$ and
+  value $W$ is a process ID with type $\pid{A \cdot \seq{A}}$. Sending a message
+  does not affect the types of value that the sender can receive.
+  This formulation of a calculus with effectful operations with pre- and
+  post-conditions is reminiscent of a parameterised
+  monad~\cite{Atkey09:parameterised}.
+
+  In order to make such a system sound, since $\calcwd{send}$ changes the type
+  of a process ID, we need a linear type system. Unfortunately, such a system is
+  far too restrictive to use in practice: as a gauge, there is no obvious
+  translation from a standard channel-based session calculus into the above
+  behavioural type system.
+
+  In the remainder of this section, we survey various approaches to assigning
+  behavioural types to actor-like systems.
 
   \subsubsection{Featherweight Erlang}
+  Erlang~\cite{Armstrong10:erlang} is 
+
   \subsubsection{Runtime Monitoring}
+
   \subsubsection{Mailbox Types}
 
   \section{Future Directions}
@@ -286,7 +345,8 @@ envcountchap,
 	%% uncomment and state path to your .bib to use a bibtex file as your bibliography.
 	%% NOTE: relative paths don't work in \putbib => During development, you might delete the "\CHAPTERSROOT/chapter\chapterprefix/" part to refer to your bib file. When you're done, please make this path absolute by adding the prefix again.
 	%%
-	% \putbib[\CHAPTERSROOT/chapter\chapterprefix/bibliography] %
+	%\putbib[\CHAPTERSROOT/chapter\chapterprefix/bibliography] %
+	\putbib[bibliography] %
 
 \end{bibunit}
 
