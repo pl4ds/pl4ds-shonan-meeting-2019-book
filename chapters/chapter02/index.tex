@@ -155,6 +155,25 @@ envcountchap
 
   \todo{Introduction to MPSTs: probably the two-buyer example}
 
+  \section{Behavioural Types and Distribution}
+
+  \subsection{Session Channels}
+  Session types are designed as type system for channel endpoints.
+  In addition to sending values, we can also send channel endpoints themselves;
+  a technique known as \emph{delegation}. Unfortunately, this mobility of
+  endpoints leads to difficulties in the distributed setting.
+
+  \mypar{Synchrony and asynchrony.}
+  The $\pi$-calculus~\cite{Milner99:pi-calc} involves \emph{synchronous}
+  communication: two peers \emph{rendezvous} over a channel in order to
+  communicate. Communication cannot occur until one peer is sending, and one
+  peer is receiving, and execution cannot progres until the communication is
+  complete. \emph{Asynchronous} communication allows send actions to communicate
+  immediately, whereas receive actions complete immediately if a value is
+  available but block otherwise.  Asynchronous communication is usually
+  implemented using a buffer.
+
+  \subsection{Multiparty session types}
   \mypar{Runtime monitoring.}
   Multiparty session types have a close correspondence with communicating
   automata~\cite{DenielouY12:mpst-automata}. Communicating finite-state
@@ -183,28 +202,13 @@ envcountchap
   al.~\cite{NeykovaYH13:spy} introduce the first distributed implementation of
   session types in a dynamically-typed programming language, namely Python.
 
+  Runtime monitoring approaches have the disadvantage that errors are detected
+  later---at runtime, rather than at compile time---but have increased
+  flexibility such as being able to check more complex properties on messages.
+  As an example, runtime monitoring has been used to check timing
+  constraints within protocols~\cite{NeykovaBY17:timed-monitoring}.
 
-
-  \section{Behavioural Types and Distribution}
-
-  \subsection{Session Channels}
-  Session types are designed as type system for channel endpoints.
-  In addition to sending values, we can also send channel endpoints themselves;
-  a technique known as \emph{delegation}. Unfortunately, this mobility of
-  endpoints leads to difficulties in the distributed setting.
-
-  \mypar{Synchrony and asynchrony.}
-  The $\pi$-calculus~\cite{Milner99:pi-calc} involves \emph{synchronous}
-  communication: two peers \emph{rendezvous} over a channel in order to
-  communicate. Communication cannot occur until one peer is sending, and one
-  peer is receiving, and execution cannot progres until the communication is
-  complete. \emph{Asynchronous} communication allows send actions to communicate
-  immediately, whereas receive actions complete immediately if a value is
-  available but block otherwise.  Asynchronous communication is usually
-  implemented using a buffer.
-
-
-  \subsubsection{Difficulties}\label{sec:distrib-deleg:difficulties}
+  \subsection{Distributed Delegation}\label{sec:distrib-deleg:difficulties}
   \todo{Describe distributed delegation algorithms}
   \subsubsection{Na\"ive approaches}
   \todo{Indefinite redirection, etc.}
@@ -391,14 +395,14 @@ envcountchap
   \end{figure}
 
 
-  Neykova \& Yoshida~\cite{NeykovaY17:sactor} implemented a Python framework for
+  Neykova \& Yoshida~\cite{NeykovaY16:sactor} implemented a Python framework for
   actor-style communication. The key differences over the `classic' approach to
   monitoring processes against multiparty session types is that each actor may
   be involved in \emph{multiple} sessions at a time; computation is driven by
   incoming messages; and that a message received in one session may trigger
   communication in another. In contrast, in the classic approach, each process
   is assigned a single monitor. These differences are shown in
-  Figure~\ref{fig:bt:mpst}.
+  Figure~\ref{fig:bt:mpst-actor}.
 
   Neykova \& Yoshida use the Celery~\cite{celery} framework to build their
   library. Python is an imperative language which does not support native
@@ -411,13 +415,14 @@ envcountchap
   distributed setting, and we discuss it further in
   Section~\ref{sec:bt:failure-handling}.
 
-    \todo{Go from here}
-
-
-
   \subsubsection{Mailbox Types}
 
-  \section{Failure handling}\label{sec:bt:failure-handling}
+  \subsection{Failure handling}\label{sec:bt:failure-handling}
+
+  \mypar{Erlang.}
+  \mypar{Crash handling.}
+  \mypar{Interactional exceptions and global escape.}
+  \mypar{Affine sessions.}
 
   \section{Future Directions}
   \subsection{Finagle}
