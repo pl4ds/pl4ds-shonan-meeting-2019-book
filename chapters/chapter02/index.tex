@@ -419,6 +419,7 @@ envcountchap
 
   \subsection{Failure handling}\label{sec:bt:failure-handling}
 
+
   \begin{figure}
     \centering
     \includegraphics[width=0.3\textwidth]{img/SupervisionTree.pdf}
@@ -426,7 +427,7 @@ envcountchap
     \label{fig:bt:supervision}
   \end{figure}
 
-  \mypar{Erlang.}
+  \subsection{Erlang}
   In distributed systems, failure is inevitable. Key to Erlang's success is that
   it was  designed with failure handling as a key concern. In Erlang, processes
   are arranged in supervision hierarchies~\cite{Armstrong03:thesis} (see
@@ -457,12 +458,40 @@ envcountchap
   performance of the approach is evaluated empirically to show that protocol
   recovery outperforms the na\"ive recovery strategies.
 
-  \mypar{Crash handling.}
+  \subsection{Availability and crash handling.}
 
-  \mypar{Interactional exceptions and global escape.}
+  \todo{Lopez, Nielson, Nielson paper: Enforcing Availability in Failure-Aware Communicating Systems}
 
-  \mypar{Affine sessions.}
+  \todo{Viering et al. crash handling paper}
 
+  \subsection{Interactional exceptions and global escape.}
+
+  \todo{Write me}
+
+
+  \subsection{Affine sessions.}
+
+  Linear type systems forbid the properties of weakening (computationally,
+  allowing a resource to be discarded) and contraction (computationally,
+  allowing a resource to be duplicated).
+  Taken together, these two restrictions on structural rules ensure that a
+  linear resource must be used precisely once.
+
+  An \emph{affine} type system forbids contraction, but allows weakening,
+  meaning that session endpoints can be discarded. This is unsound, since to do
+  so would allow us to write a program where one party does not complete their
+  role in the communication protocol, and the other party is blocked
+  indefinitely.
+
+  Nevertheless, in the presence of failure, a linear type system is too strong
+  as one party may crash.
+  %
+  Mostrous \& Vasconcelos~\cite{MostrousV18:affine} introduce the notion of
+  \emph{explicit cancellation} to denote an endpoint which can no longer be used
+  for communication. An explicit cancellation
+
+  \todo{FowlerLMD19}
+  \todo{Pruiksma and Pfenning}
 
   \section{Future Directions}
   \subsection{Finagle}
