@@ -218,7 +218,7 @@ envcountchap
   \subsubsection{Continuation-passing Approaches}
   \todo{Summarise Scalas and Yoshida, 2016, Scalas et al., 2017}
 
-  \subsection{Behavioural types for Actor Systems}
+  \subsection{Behavioural types for Actor Systems}\label{sec:bt:actor-types}
   The \emph{actor model} was introduced as a formalism for artificial
   intelligence by Hewitt et al.~\cite{HewittBS73:actors}. An actor is an entity with a
   unique identifier which upon receiving a message can perform
@@ -259,7 +259,7 @@ envcountchap
   the \emph{type pollution} problem, aparticular challenge with typed mailboxes
   arising due to the coarser granularity of typing.
 
-  \begin{figure}
+  \begin{figure}[t]
     \centering
     \includegraphics[width=0.75\textwidth]{img/type-pollution-example.pdf}
     \caption{Type Pollution}
@@ -386,7 +386,7 @@ envcountchap
   rise to implementations which allow conformance to multiparty session types to
   be checked at runtime.
 
-  \begin{figure}
+  \begin{figure}[t]
 
     \todo{Two images comparing standard MPST workflow against multiparty session
     actors}
@@ -416,12 +416,12 @@ envcountchap
   Section~\ref{sec:bt:failure-handling}.
 
   \subsubsection{Mailbox Types}
-  Our na\"ive behavioural type system from Section~\ref{sec:XXX} was too
+  Our na\"ive behavioural type system from Section~\ref{sec:bt:actor-types} was too
   restrictive as it required that messages were received in a particular order,
   which in turn necessitated that a reference used to send messages to an actor
   was linear.
 
-  de'Liguoro \& Padovani~\cite{XXX} instead propose the \emph{mailbox calculus}
+  de'Liguoro \& Padovani~\cite{deLiguoroP18:mailbox} instead propose the \emph{mailbox calculus}
   and a mailbox typing system for \emph{unordered} interactions.
 
   The mailbox calculus is similar to the asynchronous $\pi$-calculus in that
@@ -437,18 +437,17 @@ envcountchap
   The behavioural type system for the mailbox typing system is appealing in
   several respects. First, as shown by de'Liguoro \& Padovani, it is expressive
   enough to encode real communication patterns, as shown by the encodings of
-  several applications from the Savina benchmark suite~\cite{XXX}. Second, due
+  several applications from the Savina benchmark suite~\cite{ImamS14:savina}. Second, due
   to the receive-only nature of mailboxes, it does not suffer from the
-  distributed delegation issues described in Section~\ref{XXX}. Third, even
-  without considering message ordering, the type system ensures useful
-  properties.
-
-  The authors have presented 
+  distributed delegation issues described in Section~\ref{sec:distrib-deleg:difficulties}.
+  Third, even without considering message ordering, the type system ensures
+  useful
+  safety properties.
 
   \subsection{Failure handling}\label{sec:bt:failure-handling}
 
 
-  \begin{figure}
+  \begin{figure}[t]
     \centering
     \includegraphics[width=0.3\textwidth]{img/SupervisionTree.pdf}
     \caption{Supervision hierarchy}
@@ -560,6 +559,23 @@ envcountchap
   is a set containing multiple names, then $x$ is used for multicast.
 
   \section{Future Directions}
+
+  \subsection{A language based on the mailbox calculus}
+  de'Liguoro \& Padovani~\cite{deLiguoroP18:mailbox} have presented the mailbox
+  calculus as a process calculus. The mailbox calculus is a particularly
+  appealing proposal for a distribution-friendly behavioural type system.
+  However, process calculi are useful for modelling the \emph{state} of a system, but
+  it is difficult to immediately see the \emph{program} one would write in order to
+  arrive at such a state.  It would be interesting to consider a concrete
+  language design for the mailbox calculus. Furthermore,
+  Padovani~\cite{Padovani18:mc2} has implemented a typechecker for the
+  mailbox calculus, but not a runtime system.
+
+  It would be interesting, after a concrete language design, to implement a
+  concurrent language runtime, perhaps by compilation to the BEAM virtual
+  machine used by Erlang.
+
+
   \subsection{Finagle}
   \subsection{Failure handling and fault tolerance}
 
