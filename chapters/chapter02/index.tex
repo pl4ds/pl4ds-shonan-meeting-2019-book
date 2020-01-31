@@ -416,6 +416,34 @@ envcountchap
   Section~\ref{sec:bt:failure-handling}.
 
   \subsubsection{Mailbox Types}
+  Our na\"ive behavioural type system from Section~\ref{sec:XXX} was too
+  restrictive as it required that messages were received in a particular order,
+  which in turn necessitated that a reference used to send messages to an actor
+  was linear.
+
+  de'Liguoro \& Padovani~\cite{XXX} instead propose the \emph{mailbox calculus}
+  and a mailbox typing system for \emph{unordered} interactions.
+
+  The mailbox calculus is similar to the asynchronous $\pi$-calculus in that
+  message sends do not have a continuation. Whereas actor-style calculi tend to
+  associate a process with a \emph{single} mailbox, the mailbox calculus allows
+  each process to be associated with \emph{multiple} mailboxes, and supports
+  nondeterministically selective receiving messages between them.
+  The authors then propose a behavioural typing system which, via a
+  dependency graph, ensures that processes do not fail due to unexpected
+  messages; do not deadlock; and (for certain processes) do not allow
+  unprocessed messages.
+
+  The behavioural type system for the mailbox typing system is appealing in
+  several respects. First, as shown by de'Liguoro \& Padovani, it is expressive
+  enough to encode real communication patterns, as shown by the encodings of
+  several applications from the Savina benchmark suite~\cite{XXX}. Second, due
+  to the receive-only nature of mailboxes, it does not suffer from the
+  distributed delegation issues described in Section~\ref{XXX}. Third, even
+  without considering message ordering, the type system ensures useful
+  properties.
+
+  The authors have presented 
 
   \subsection{Failure handling}\label{sec:bt:failure-handling}
 
@@ -460,7 +488,20 @@ envcountchap
 
   \subsection{Availability and crash handling.}
 
-  \todo{Lopez, Nielson, Nielson paper: Enforcing Availability in Failure-Aware Communicating Systems}
+  Choreographic programming~\cite{CarboneM13:df-design} allows a developer to
+  specify deadlock-free protocols at a global level, and allows code generation
+  for each participant. L\'opez et al.~\cite{LopezNN16:availability} describe an
+  approach to choreographic programming for cyber-physical systems such as
+  sensor networks. They introduce the \emph{Global Quality Calculus}, an
+  extension of the Global Calculus~\cite{CarboneM13:df-design} to include
+  broadcast and gathering constructs. Each communication action is annotated
+  with \emph{quality predicates}, which record the number of nodes which must be
+  available for a communication to occur. Each thread is annotated with
+  \emph{progress capabilities}, which define the preconditions required for a
+  thread to evaluate, and the capabilities after a communication has occurred.
+  The calculus supports graceful degradation of the system, and the authors
+  provide a behavioural typing discipline to ensure that the calculus enjoys
+  progress.
 
   \todo{Viering et al. crash handling paper}
 
@@ -476,22 +517,47 @@ envcountchap
   allowing a resource to be duplicated).
   Taken together, these two restrictions on structural rules ensure that a
   linear resource must be used precisely once.
+  Unfortunately, in the presence of failure, a linear type system is too strong as one party may crash.
 
-  An \emph{affine} type system forbids contraction, but allows weakening,
-  meaning that session endpoints can be discarded. This is unsound, since to do
-  so would allow us to write a program where one party does not complete their
-  role in the communication protocol, and the other party is blocked
-  indefinitely.
+  \mypar{Affine type systems.}
+  One possible solution is to use an \emph{affine} type system. An affine type
+  system forbids contraction, but allows weakening,
+  meaning that session endpoints can be discarded.
+%
+  The main problem with using an affine type system is that it is possible to
+  write a program where one party does not complete their role in the
+  communication protocol, and the other party is blocked indefinitely.
+  Furthermore, a developer does not get any feedback if they \emph{accidentally}
+  forget to implement part of a protocol.
 
-  Nevertheless, in the presence of failure, a linear type system is too strong
-  as one party may crash.
-  %
-  Mostrous \& Vasconcelos~\cite{MostrousV18:affine} introduce the notion of
-  \emph{explicit cancellation} to denote an endpoint which can no longer be used
-  for communication. An explicit cancellation
+  \mypar{Explicit cancellation.}
+  Mostrous \& Vasconcelos~\cite{MostrousV18:affine} introduce a session-typed
+  process calculus with \emph{explicit cancellation} to denote an endpoint which
+  can no longer be used for communication. Attempting to send or receive along
+  an endpoint whose peer is cancelled results in an exception being thrown; the
+  exception can be caught using an exception handler process.
 
-  \todo{FowlerLMD19}
-  \todo{Pruiksma and Pfenning}
+  Fowler et al.~\cite{FowlerLMD19:stwt} build upon the work of Mostrous \&
+  Vasconcelos by introducing Exceptional GV: an extension of the GV
+  session-typed $\lambda$-calculus with explicit cancellations, exception
+  handlers, and asynchrony. The exception handling construct in EGV is
+  compositional and allows arbitrary nesting of exception handlers, whereas the
+  exception handler process in the work of Mostrous \& Vasconcelos scopes only
+  over a single communication action. Furthermore, Fowler et al.\ provide an
+  implementation of the technique in the Links programming
+  language~\cite{CooperLWY06:links}, in turn providing the first application of
+  session types to web programming.
+
+  \mypar{Adjoint logic.}
+  Pruiksma \& Pfenning~\cite{PruiksmaP19:mp-adjoint} provide a logical grounding
+  for cancellation (as well as multicast and replication) by providing a
+  message-passing interpretation of adjoint logic~\cite{PruiksmaCPR18:adjoint}.
+  The key computational idea is to interpret the logical cut rule as the process
+  $S \leftarrow (\nu x) P; Q$, where $S$ is a possibly-empty set of channels
+  provided by process $P$, $x$ is the internal name of a channel used by $P$;
+  and $Q$ is a continuation process. If $S$ is a singleton set, then the normal
+  semantics are used; if $S$ is the empty set, then $x$ is cancelled; and if $S$
+  is a set containing multiple names, then $x$ is used for multicast.
 
   \section{Future Directions}
   \subsection{Finagle}
