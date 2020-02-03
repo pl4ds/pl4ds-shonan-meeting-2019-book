@@ -446,6 +446,15 @@ envcountchap
 
   \subsection{Failure handling}\label{sec:bt:failure-handling}
 
+  A key difference between the concurrent and distributed settings is the
+  ability to handle failures. Whereas in the concurrent setting it is reasonable
+  to expect that all participants will be online for the duration of a session,
+  and that all messages will be reliably delivered, this is not the case in the
+  distributed setting.
+
+  In this section, we describe various proposals towards extending session types
+  and communication-centric behavioural typing disciplines with support for
+  failure handling.
 
   \begin{figure}[t]
     \centering
@@ -454,7 +463,7 @@ envcountchap
     \label{fig:bt:supervision}
   \end{figure}
 
-  \subsection{Erlang}
+  \subsubsection{Erlang}
   In distributed systems, failure is inevitable. Key to Erlang's success is that
   it was  designed with failure handling as a key concern. In Erlang, processes
   are arranged in supervision hierarchies~\cite{Armstrong03:thesis} (see
@@ -485,7 +494,7 @@ envcountchap
   performance of the approach is evaluated empirically to show that protocol
   recovery outperforms the na\"ive recovery strategies.
 
-  \subsection{Availability and crash handling.}
+  \subsubsection{Availability and crash handling.}
 
   Choreographic programming~\cite{CarboneM13:df-design} allows a developer to
   specify deadlock-free protocols at a global level, and allows code generation
@@ -502,14 +511,20 @@ envcountchap
   provide a behavioural typing discipline to ensure that the calculus enjoys
   progress.
 
+  \todo{Chen et al. protocol types paper}
+
   \todo{Viering et al. crash handling paper}
 
-  \subsection{Interactional exceptions and global escape.}
+  \todo{Link failures paper}
+
+  \todo{Broadcast (Kouzapas et al.)}
+
+  \subsubsection{Interactional exceptions and global escape.}
 
   \todo{Write me}
 
 
-  \subsection{Affine sessions.}
+  \subsubsection{Affine sessions.}
 
   Linear type systems forbid the properties of weakening (computationally,
   allowing a resource to be discarded) and contraction (computationally,
@@ -561,15 +576,15 @@ envcountchap
   \section{Future Directions}
 
   \subsection{A language based on the mailbox calculus}
-  de'Liguoro \& Padovani~\cite{deLiguoroP18:mailbox} have presented the mailbox
-  calculus as a process calculus. The mailbox calculus is a particularly
+  The Mailbox Calculus, proposed by de'Liguoro \&
+  Padovani~\cite{deLiguoroP18:mailbox}, is a particularly
   appealing proposal for a distribution-friendly behavioural type system.
-  However, process calculi are useful for modelling the \emph{state} of a system, but
-  it is difficult to immediately see the \emph{program} one would write in order to
-  arrive at such a state.  It would be interesting to consider a concrete
-  language design for the mailbox calculus. Furthermore,
-  Padovani~\cite{Padovani18:mc2} has implemented a typechecker for the
-  mailbox calculus, but not a runtime system.
+  However, process calculi are useful for modelling the \emph{state} of a
+  system, but it is difficult to immediately see the \emph{program} one would
+  write in order to arrive at such a state. Consequently, it would be
+  interesting to consider a concrete language design for the mailbox calculus.
+  Furthermore, Padovani~\cite{Padovani18:mc2} has implemented a typechecker for
+  the mailbox calculus, but not a runtime system.
 
   It would be interesting, after a concrete language design, to implement a
   concurrent language runtime, perhaps by compilation to the BEAM virtual
