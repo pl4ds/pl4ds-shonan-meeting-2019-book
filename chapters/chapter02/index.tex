@@ -496,6 +496,7 @@ envcountchap
 
   \subsubsection{Availability and crash handling.}
 
+  \mypar{Typing availability.}
   Choreographic programming~\cite{CarboneM13:df-design} allows a developer to
   specify deadlock-free protocols at a global level, and allows code generation
   for each participant. L\'opez et al.~\cite{LopezNN16:availability} describe an
@@ -511,11 +512,20 @@ envcountchap
   provide a behavioural typing discipline to ensure that the calculus enjoys
   progress.
 
+
   \todo{Chen et al. protocol types paper}
 
   \todo{Viering et al. crash handling paper}
 
-  \todo{Link failures paper}
+
+  \mypar{Link failures.}
+  Adameit et al.~\cite{AdameitPN17:link-failures} describe a multiparty session
+  calculus extended with \emph{optional blocks}. An optional block describes a
+  portion of the protocol to be run as a possibly-failing
+  subsession~\cite{DemangeonH12:subsessions}, along with a default value to be
+  used should the subsession fail. The authors illustrate the technique on the
+  rotating coordinators algorithm~\cite{Tel00:dist-algorithms}.
+
 
   \todo{Broadcast (Kouzapas et al.)}
 
@@ -528,10 +538,11 @@ envcountchap
 
   Linear type systems forbid the properties of weakening (computationally,
   allowing a resource to be discarded) and contraction (computationally,
-  allowing a resource to be duplicated).
-  Taken together, these two restrictions on structural rules ensure that a
-  linear resource must be used precisely once.
-  Unfortunately, in the presence of failure, a linear type system is too strong as one party may crash.
+  allowing a resource to be duplicated).  Taken together, these two restrictions
+  on structural rules ensure that a linear resource must be used precisely once.
+  Unfortunately, in the presence of failure, a linear type system is too strong
+  as one party may crash and therefore not be able to complete their part of the
+  protocol.
 
   \mypar{Affine type systems.}
   One possible solution is to use an \emph{affine} type system. An affine type
