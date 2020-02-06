@@ -512,8 +512,15 @@ envcountchap
   provide a behavioural typing discipline to ensure that the calculus enjoys
   progress.
 
-
-  \todo{Chen et al. protocol types paper}
+  \mypar{Protocol types.}
+  Chen et al.~\cite{ChenVBZE16:failure-handling} introduce \emph{protocol
+  types}, a type disipline inspired by multiparty session types. Communication
+  actions are annotated by failure conditions that might be raised as a result
+  of a message, and failures can be handled by performing a set of interactions
+  described in an associated failure handling block. Analogously to projecting a
+  global type into a local type, a protocol type is \emph{transformed} into
+  local types which include explicit synchronisation points in order to ensure
+  that all affected participants are notified when a failure takes place.
 
   \todo{Viering et al. crash handling paper}
 
@@ -527,7 +534,15 @@ envcountchap
   rotating coordinators algorithm~\cite{Tel00:dist-algorithms}.
 
 
-  \todo{Broadcast (Kouzapas et al.)}
+  \mypar{Broadcast.}
+  Kouzapas et al.~\cite{KouzapasGVG19:async-broadcast} describe a session
+  process calculus designed for broadcast communication, where a single sender
+  can send messages to multiple
+  receivers. A key distinguishing feature is that their calculus allows for
+  \emph{unreliable} interactions, where messages can be lost during
+  transmissions. The authors show that their approach is expressive enough to
+  encode the failure-aware Paxos~\cite{Lamport98:paxos} protocol for distributed
+  consensus.
 
   \subsubsection{Interactional exceptions and global escape.}
 
