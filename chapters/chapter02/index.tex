@@ -522,9 +522,6 @@ envcountchap
   local types which include explicit synchronisation points in order to ensure
   that all affected participants are notified when a failure takes place.
 
-  \todo{Viering et al. crash handling paper}
-
-
   \mypar{Link failures.}
   Adameit et al.~\cite{AdameitPN17:link-failures} describe a multiparty session
   calculus extended with \emph{optional blocks}. An optional block describes a
@@ -543,6 +540,27 @@ envcountchap
   transmissions. The authors show that their approach is expressive enough to
   encode the failure-aware Paxos~\cite{Lamport98:paxos} protocol for distributed
   consensus.
+
+  \mypar{Crash handling via a coordinator process.}
+  Viering et al.~\cite{VieringCEHZ18:crash-handling} describe a process calculus
+  and multiparty session typing discipline to handle \emph{crash failures} in
+  distributed systems. They assume reliable communication and a robust
+  coordinator process, as well as reliable failure detection, but due to
+  asynchrony there is no total ordering on the messages transmitted in the
+  system.
+%
+  Although the assumptions of a robust co-ordinator process and reliable failure
+  detection sound strong, robust processes are implemented in practice using
+  techniques such as redundant services and consensus prototcols; an example is
+  the popular Apache ZooKeeper project~\cite{JunqueiraR13:zookeeper}. Reliable
+  failure detection can be approximated by timeouts, and signalling that a
+  process should crash if it is suspected of having failed.
+
+  The authors extend multiparty session types with a
+  \mkwd{try}-\mkwd{handler} block which can be arbitrarily nested; each failure
+  handler specifies a set of failed roles (i.e., roles provided by processes
+  which have crashed), and the system is guaranteed by the type system to be in
+  a consistent state at the end of a \mkwd{try}-\mkwd{handle} block.
 
   \subsubsection{Interactional exceptions and global escape.}
 
