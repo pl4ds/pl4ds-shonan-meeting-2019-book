@@ -51,13 +51,27 @@ envcountchap
 	}
 	\maketitle
 
-	\abstract{Please place your abstract here.}
-
+  \abstract{
+  Behavioural types go beyond the power of regular type systems by
+    classifying the \emph{behaviour} of an application at
+  runtime.
+%
+  Since distributed systems are notoriously difficult to design,
+implement, and check for correctness, behavioural types provide an appealing
+promise for lightweight verification.
+%
+Unfortunately, several behavioural typing
+disciplines pose challenges in the distributed setting. In this chapter, we
+survey the literature on behavioural types for distribution; we describe the
+difficulties with distributed delegation; we investigate behavioural typing
+disciplines for concurrency models suited to distribution; and describe open
+problems for future work.
+}
 	%% content
   \section{Introduction}
 
 
-  \todo{yadayada}
+  \todo{fill me out}
 
   Following our discussions at the meeting which were centred around
   communication amongst distributed systems, and in particular noting that
@@ -69,7 +83,21 @@ envcountchap
   work which pertains explicitly to the interaction between behavioural types
   and distribution.
 
-  \section{Background}
+
+  \mypar{Structure.}
+  The remainder of the document is structured as follows.
+
+  In Section~\ref{sec:bt:background}, we provide the relevant background on
+  behavioural types, including both binary and multiparty session types. In
+  Section~\ref{sec:bt:distrib}, we survey the literature on behavioural types
+  used in the setting of distributed programming, in particular detailing the
+  problems of distributed delegation (Section~\ref{sec:bt:distrib-deleg}) and the
+  difficulties of adding types to distribution-friendly paradigms such as the
+  actor model. Finally, in Section~\ref{XXX}
+
+  \todo{Go from here}
+
+  \section{Background}\label{sec:bt:background}
   \subsection{Behavioural Types}
 
   Much like data types encode the shape of data, behavioural types encode the
@@ -153,27 +181,80 @@ envcountchap
 
   \subsubsection{Multiparty Session Types}\label{sec:bt:mpst}
 
-  \todo{Introduction to MPSTs: probably the two-buyer example}
+  \begin{figure}
+%\begin{multicols}{2}
+~\totheleft{Global protocol}
+\begin{lstlisting}[basicstyle=\scriptsize, language = scribble]
+global protocol TwoBuyer(role Seller, role Buyer1, role Buyer2) {
+  title(string) from Buyer1 to Seller;
+  price(int) from Seller to Buyer1;
+  quote(int) from Buyer1 to Buyer2;
+  choice at Buyer2 {
+    agree(string) from Buyer2 to Buyer1, Seller;
+    transfer(int) from Buyer1 to Seller;
+    transfer(int) from Buyer2 to Seller;
+  } or {
+    quit(string) from Buyer2 to Buyer1, Seller;
+  } }
+\end{lstlisting}%
+%
+~\totheleft{Local protocols \lstinline+Seller+ (left) and \lstinline+Buyer1+ (right)}
+\begin{lstlisting}[language = scribble, label={lst:scribble-buy1},multicols=2]
+local protocol TwoBuyer_Seller
+(self Seller,role Buyer1,role Buyer2)
+{ title(string) from Buyer1;
+  price(int) to Buyer1;
+  choice at Buyer2 {
+    agree(string) from Buyer2;
+    transfer(int) from Buyer1;
+    transfer(int) from Buyer2;
+  } or {
+    quit(string) from Buyer2;
+} }
+local protocol TwoBuyer_Buyer1
+(role Seller,self Buyer1,role Buyer2)
+{ title(string) to Seller;
+  price(int) from Seller;
+  quote(int) to Buyer2;
+  choice at Buyer2 {
+    agree(string) from Buyer2;
+    transfer(int) to Seller;
+  } or {
+    quit(string) from Buyer2;
+} }
+\end{lstlisting}
+%\end{multicols}
+\caption{Global and Local Protocols for Two-Buyer Protocol}
+\label{fig:bt:multiparty}
+\end{figure}
 
-  \section{Behavioural Types and Distribution}
+\emph{Binary} session types encode interactions between two participants.
+Although binary session types rule out deadlocks within a single protocol,
+without using techniques such as channel priorities~\cite{XXX} or imposing a
+tree-like topology on processes~\cite{XXX}, it is not possible to rule out
+deadlock when considering multiple sessions.
 
-  \subsection{Session Channels}
-  Session types are designed as type system for channel endpoints.
-  In addition to sending values, we can also send channel endpoints themselves;
-  a technique known as \emph{delegation}. Unfortunately, this mobility of
-  endpoints leads to difficulties in the distributed setting.
+\emph{Multiparty} session types~\cite{XXX} generalise binary session types to
+capture the interactions between multiple communicating process. The key idea is
+to define a \emph{global type}, which define the messages sent between each
+participant; well-formedness conditions on the global type ensure that the
+protocol is safe and does not cause deadlocks, unreceived messages, or other
+safety errors.
 
-  \mypar{Synchrony and asynchrony.}
-  The $\pi$-calculus~\cite{Milner99:pi-calc} involves \emph{synchronous}
-  communication: two peers \emph{rendezvous} over a channel in order to
-  communicate. Communication cannot occur until one peer is sending, and one
-  peer is receiving, and execution cannot progres until the communication is
-  complete. \emph{Asynchronous} communication allows send actions to communicate
-  immediately, whereas receive actions complete immediately if a value is
-  available but block otherwise.  Asynchronous communication is usually
-  implemented using a buffer.
+Scribble~\cite{XXX} is a language-agnostic protocol description language, based
+on the theory of multiparty session types. Figure~\ref{fig:bt:multiparty} shows
+the \emph{Two-Buyer protocol}, a widely-used example of a multiparty protocol,
+written in Scribble. The Two-Buyer protocol is intended as a simplification of
+financial protocols, and centres around two customers wishing to purchase a
+book. Buyer 1 begins by sending the title of the book to the seller, who
+responds with the price. Buyer 1 then sends a quote to buyer 2, who can then
+either accept the quote and then both parties transfer money to the seller, or
+and decline and quit the protocol.
 
-  \subsection{Multiparty session types}
+The global protocol can then be \emph{projected} into \emph{local protocols} for
+each role, which strip out unnecessary information and can therefore be used in
+typechecking.
+
   \mypar{Runtime monitoring.}
   Multiparty session types have a close correspondence with communicating
   automata~\cite{DenielouY12:mpst-automata}. Communicating finite-state
@@ -208,7 +289,26 @@ envcountchap
   As an example, runtime monitoring has been used to check timing
   constraints within protocols~\cite{NeykovaBY17:timed-monitoring}.
 
+
+  \section{Behavioural Types and Distribution}
+
   \subsection{Distributed Delegation}\label{sec:distrib-deleg:difficulties}
+  Session types are designed as type system for channel endpoints.
+  In addition to sending values, we can also send channel endpoints themselves;
+  a technique known as \emph{delegation}. Unfortunately, this mobility of
+  endpoints leads to difficulties in the distributed setting.
+
+  \mypar{Synchrony and asynchrony.}
+  The $\pi$-calculus~\cite{Milner99:pi-calc} involves \emph{synchronous}
+  communication: two peers \emph{rendezvous} over a channel in order to
+  communicate. Communication cannot occur until one peer is sending, and one
+  peer is receiving, and execution cannot progres until the communication is
+  complete. \emph{Asynchronous} communication allows send actions to communicate
+  immediately, whereas receive actions complete immediately if a value is
+  available but block otherwise.  Asynchronous communication is usually
+  implemented using a buffer.
+
+
   \todo{Describe distributed delegation algorithms}
   \subsubsection{Na\"ive approaches}
   \todo{Indefinite redirection, etc.}

@@ -34,6 +34,8 @@
 \usepackage[nottoc]{tocbibind}
 \usepackage{numberpt}
 
+\input{scribble-listings}
+
 \newcommand{\todo}[1]{{\noindent\small\color{red} \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{\textbf{TODO:} #1}}}}
 
 \newcommand*{\CHAPTERSROOT}{../.}	% root path for chapters.
@@ -57,3 +59,5 @@
 \newcommand{\actsend}[2]{\calcwd{send} :\ #1 \: #2}
 \newcommand{\pid}[1]{\mkwd{ActorRef}(#1)}
 \newcommand{\seq}[1]{\overrightarrow{#1}}
+\newcommand{\totheleft}[1]{\begin{flushleft}#1\end{flushleft}}
+
