@@ -1,0 +1,64 @@
+\usepackage[utf8]{inputenc}
+\usepackage{mathpartir}
+%\usepackage{type1cm}        % activate if the above 3 fonts are
+% not available on your system
+
+\usepackage{makeidx}         % allows index generation
+\usepackage{graphicx}        % standard LaTeX graphics tool
+% when including figure files
+\usepackage{multicol}        % used for the two-column index
+\usepackage[bottom]{footmisc}% places footnotes at page bottom
+\usepackage{url}
+\usepackage{newtxtext}       %
+\usepackage{newtxmath}       % selects Times Roman as basic font
+
+% \usepackage{natbib}
+\usepackage{footmisc}
+
+%% Additional packages added. Add necessary packages here.
+%\usepackage[english]{babel}
+\usepackage{siunitx}
+\usepackage{amssymb}
+\usepackage{pifont}
+\usepackage{xcolor}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{mathtools}
+\usepackage{lipsum}
+\usepackage{import}
+\usepackage{bibunits}
+\usepackage{acronym}
+\usepackage[nottoc]{tocbibind}
+\usepackage{numberpt}
+
+\input{scribble-listings}
+
+\newcommand{\todo}[1]{{\noindent\small\color{red} \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{\textbf{TODO:} #1}}}}
+
+\newcommand*{\CHAPTERSROOT}{../.}	% root path for chapters.
+\newcommand*{\chapterprefix}{02}	% your chapter number.
+
+\newcommand{\mkwd}[1]{\ensuremath{\mathsf{#1}}}
+\newcommand{\defeq}{\triangleq}
+\usepackage{subfig}
+\usepackage{tikz}
+\usetikzlibrary{matrix,fit}
+\usepackage[scaled]{beramono}
+\usepackage[T1]{fontenc}
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily
+}
+
+\newcommand{\mypar}[1]{\vspace{1em}\textbf{#1}\quad}
+
+\newcommand{\calcwd}[1]{\textbf{\textsf{#1}}}
+\newcommand{\actsend}[2]{\calcwd{send} :\ #1 \: #2}
+\newcommand{\pid}[1]{\mkwd{ActorRef}(#1)}
+\newcommand{\seq}[1]{\overrightarrow{#1}}
+\newcommand{\totheleft}[1]{\begin{flushleft}#1\end{flushleft}}
+
+\newcommand{\chan}[1]{\mkwd{Chan}(#1)}

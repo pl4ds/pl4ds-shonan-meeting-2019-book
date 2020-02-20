@@ -25,55 +25,17 @@
 %% When you hand in your contribution, please uncomment or remove the preamble again.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% start of preamble
-%\documentclass[
-%graybox,
-%envcountchap,
-%%natbib
-%]{svmult}
-%
-%\usepackage[utf8]{inputenc}
-%%\usepackage{type1cm}        % activate if the above 3 fonts are
-%% not available on your system
-%
-%\usepackage{makeidx}         % allows index generation
-%\usepackage{graphicx}        % standard LaTeX graphics tool
-%% when including figure files
-%\usepackage{multicol}        % used for the two-column index
-%\usepackage[bottom]{footmisc}% places footnotes at page bottom
-%
-%\usepackage{newtxtext}       %
-%\usepackage{newtxmath}       % selects Times Roman as basic font
-%
-%% \usepackage{natbib}
-%\usepackage{footmisc}
-%
-%%% Additional packages added. Add necessary packages here.
-%%\usepackage[english]{babel}
-%\usepackage{siunitx}
-%\usepackage{amssymb}
-%\usepackage{pifont}
-%\usepackage{xcolor}
-%\usepackage{tabularx}
-%\usepackage{listings}
-%\usepackage{booktabs}
-%\usepackage{hyperref}
-%\usepackage{url}
-%\usepackage{mathtools}
-%\usepackage{lipsum}
-%\usepackage{import}
-%\usepackage{bibunits}
-%\usepackage{acronym}
-%\usepackage[nottoc]{tocbibind}
-%\usepackage{numberpt}
-%
-%\newcommand*{\CHAPTERSROOT}{../.}	% root path for chapters.
-%\newcommand*{\chapterprefix}{02}	% your chapter number.
-%
-%\makeindex % used for the subject index
+\documentclass[
+graybox,
+envcountchap
+]{svmult}
+
+\input{preamble}
+\makeindex % used for the subject index
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% end of preamble
 
 %% uncomment the \begin{document} statement to make this file stand-alone compileable.
-%\begin{document}
+\begin{document}
 
 \begin{bibunit}
 
@@ -89,34 +51,698 @@
 	}
 	\maketitle
 
-	\abstract{Please place your abstract here.}
-
+  \abstract{
+  Behavioural types go beyond the power of regular type systems by
+    classifying the \emph{behaviour} of an application at
+  runtime.
+%
+  Since distributed systems are notoriously difficult to design,
+implement, and check for correctness, behavioural types provide an appealing
+promise for lightweight verification.
+%
+Unfortunately, several behavioural typing
+disciplines pose challenges in the distributed setting. In this chapter, we
+survey the literature on behavioural types for distribution; we describe the
+difficulties with distributed delegation; we investigate behavioural typing
+disciplines for concurrency models suited to distribution; and describe open
+problems for future work.
+}
 	%% content
   \section{Introduction}
-  \section{Background}
+
+
+  \todo{fill me out}
+
+  Following our discussions at the meeting which were centred around
+  communication amongst distributed systems, and in particular noting that
+  communication is a central concern in distributed systems, we concentrate
+  particularly on behavioural type systems for communication protocols.
+
+  Furthermore, while there has been extensive work on the behavioural typing
+  disciplines described in this chapter, we restrict our attention purely to
+  work which pertains explicitly to the interaction between behavioural types
+  and distribution.
+
+
+  \mypar{Structure.}
+  The remainder of the document is structured as follows.
+
+  In Section~\ref{sec:bt:background}, we provide the relevant background on
+  behavioural types, including both binary and multiparty session types. In
+  Section~\ref{sec:bt:distrib}, we survey the literature on behavioural types
+  used in the setting of distributed programming, in particular detailing the
+  problems of distributed delegation (Section~\ref{sec:bt:distrib-deleg}); the
+  difficulties of adding behavioural types to distribution-friendly paradigms
+  such as the actor model (Section~\ref{sec:bt:actor-types}).
+  Finally, in Section~\ref{sec:bt:future}, we describe some open problems
+  and potential directions for future work.
+
+  \section{Background}\label{sec:bt:background}
   \subsection{Behavioural Types}
+
+  Much like data types encode the shape of data, behavioural types encode the
+  behaviour of an application. Type systems allow an application developer to
+  catch errors earlier in the development cycle: as an example, using a type
+  system we can ensure undefined operations such as adding an integer to a
+  Boolean value, or storing a string in an integer array, are ruled out before a
+  program is executed.
+
+  While data types can rule out errors such as adding $5$ and \mkwd{true},
+  behavioural types can rule out more semantic errors, such as forgetting to
+  close an open file handle, or failure to follow a communication protocol.
+
+  \todo{Non-session type example (file system?)}
+
   \subsection{Session Types}
-  \subsection{Desirable Properties}
+  Session types are a particularly well-known subclass of behavioural type
+  system, which type an endpoint of a communication channel. A communication
+  channel is an entity which allows communication between processes which hold
+  an \emph{endpoint} to the channel.
 
-  \section{Behavioural Types and Distribution}
-  \subsection{Session Channels}
-  \subsubsection{Difficulties}
+  Perhaps the most basic type system for a communication channel endpoint is a
+  channel which can send or receive a single type of value. Such type systems
+  are inspired by the typed $\pi$-calculus, and have been used first in research
+  languages such as Pict~\cite{PierceT00:pict}, and more recently in
+  widely-adopted languages such as Go~\cite{DonovanK15:go}.
+
+  For example, we could create a channel with type:
+  \[
+    \chan{\mkwd{Int}}
+  \]
+
+
+  which could send or receive integers; an attempt to send a string would result
+  in a compile-time error.
+
+  To illustrate the use of channels, in the following program, the
+  main thread creates a channel and then spawns off a child thread. The main
+  then then sends two integers along the channel, which are received by the
+  child thread. The child thread subsequently sends the sum of the two integers,
+  which is received by the parent thread:
+
+  \todo{Write out example}
+
+  However, even this tiny example is prone to multiple semantic errors: if the
+  main thread only sends one integer and receives, there is a deadlock, and the
+  program hangs forever. The same result happens if the main thread tries to
+  receive; or if the main thread tries to send three integers; or if the child
+  thread attempts to send before receiving; to name but a few. All of these
+  semantic errors boil down to the program not satisfying an
+  informally-specified protocol, which cannot be checked for correctness.
+
+  \emph{Session types} allow us to generalise this type to be more descriptive.
+  We can assign the channel endpoint for the main thread the following session
+  type:
+
+  \[
+    \mkwd{AdditionServer} \defeq
+    \chan{{?}\mkwd{Int}.{?}\mkwd{Int}.{!}\mkwd{Int}.\mkwd{End}}
+  \]
+  (In the remainder of the chapter, we omit the $\mkwd{Chan}$ annotation when it
+  is clear that we are discussing session-typed channels.)
+
+  The \mkwd{AdditionServer} type denotes the type of a channel endpoint which
+  receives two integers (?), sends an integer (!), and then finishes.
+
+  The session endpoint given to the child process is as follows:
+
+  \[
+    \mkwd{AdditionClient} \defeq
+    \chan{{!}\mkwd{Int}.{!}\mkwd{Int}.{?}\mkwd{Int}.\mkwd{End}}
+  \]
+
+  Where the server sends, the client receives, and where the server receives,
+  the client sends. This \emph{duality} between client and server ensures that
+  the two ends of the channel implement the protocol and communicate safely.
+
+  \todo{GV example of the process, discussion of linearity}
+
+  To safely implement session types, we require some form of \emph{linearity},
+  generally in the form of a linear type system. This proves to be the main
+  hurdle to overcome when implementing session types in programming languages.
+
+  \subsubsection{Multiparty Session Types}\label{sec:bt:mpst}
+
+  \begin{figure}
+%\begin{multicols}{2}
+~\totheleft{Global protocol}
+\begin{lstlisting}[basicstyle=\scriptsize, language = scribble]
+global protocol TwoBuyer(role Seller, role Buyer1, role Buyer2) {
+  title(string) from Buyer1 to Seller;
+  price(int) from Seller to Buyer1;
+  quote(int) from Buyer1 to Buyer2;
+  choice at Buyer2 {
+    agree(string) from Buyer2 to Buyer1, Seller;
+    transfer(int) from Buyer1 to Seller;
+    transfer(int) from Buyer2 to Seller;
+  } or {
+    quit(string) from Buyer2 to Buyer1, Seller;
+  } }
+\end{lstlisting}%
+%
+~\totheleft{Local protocols \lstinline+Seller+ (left) and \lstinline+Buyer1+ (right)}
+\begin{lstlisting}[language = scribble, label={lst:scribble-buy1},multicols=2]
+local protocol TwoBuyer_Seller
+(self Seller,role Buyer1,role Buyer2)
+{ title(string) from Buyer1;
+  price(int) to Buyer1;
+  choice at Buyer2 {
+    agree(string) from Buyer2;
+    transfer(int) from Buyer1;
+    transfer(int) from Buyer2;
+  } or {
+    quit(string) from Buyer2;
+} }
+local protocol TwoBuyer_Buyer1
+(role Seller,self Buyer1,role Buyer2)
+{ title(string) to Seller;
+  price(int) from Seller;
+  quote(int) to Buyer2;
+  choice at Buyer2 {
+    agree(string) from Buyer2;
+    transfer(int) to Seller;
+  } or {
+    quit(string) from Buyer2;
+} }
+\end{lstlisting}
+%\end{multicols}
+\caption{Global and Local Protocols for Two-Buyer Protocol}
+\label{fig:bt:multiparty}
+\end{figure}
+
+\emph{Binary} session types encode interactions between two participants.
+Although binary session types rule out deadlocks within a single protocol,
+without using techniques such as channel
+priorities~\cite{Kobayashi06:df-processes,Padovani14:df-pi,DardhaG18:df-processes}
+or imposing a tree-like topology on
+processes~\cite{CairesP10:logic,Wadler14:prop-sessions,LindleyM15:semantics}, it
+is not possible to rule out deadlock when considering multiple sessions.
+
+\emph{Multiparty} session types~\cite{HondaYC16:mpst} generalise binary session types to
+capture the interactions between multiple communicating process. The key idea is
+to define a \emph{global type}, which define the messages sent between each
+participant; well-formedness conditions on the global type ensure that the
+protocol is safe and does not cause deadlocks, unreceived messages, or other
+safety errors.
+
+Scribble~\cite{YoshidaHNN13:scribble} is a language-agnostic protocol description language, based
+on the theory of multiparty session types. Figure~\ref{fig:bt:multiparty} shows
+the \emph{Two-Buyer protocol}, a widely-used example of a multiparty protocol,
+written in Scribble. The Two-Buyer protocol is intended as a simplification of
+financial protocols, and centres around two customers wishing to purchase a
+book. Buyer 1 begins by sending the title of the book to the seller, who
+responds with the price. Buyer 1 then sends a quote to buyer 2, who can then
+either accept the quote and then both parties transfer money to the seller, or
+and decline and quit the protocol.
+
+The global protocol can then be \emph{projected} into \emph{local protocols} for
+each role, which strip out unnecessary information and can therefore be used in
+typechecking.
+
+  \mypar{Runtime monitoring.}
+  Multiparty session types have a close correspondence with communicating
+  automata~\cite{DenielouY12:mpst-automata}. Communicating finite-state
+  machines (CFSMs)~\cite{BrandZ83:cfsms} are a version of finite-state automata
+  where a transition between two states can be predicated on a communication
+  action with another CFSM. A drawback of CFSMs is that properties such as
+  deadlock-freedom are undecidable. Denielou \&
+  Yoshida~\cite{DenielouY12:mpst-automata} show that multiparty session types
+  can be translated into \emph{multiparty session automata}, a class of CFSM
+  which satisfy deadlock-freedom by construction.
+
+  Chen et al.~\cite{ChenBDHY11:monitoring} and Bocchi et
+  al.~\cite{BocchiCDHY13:monitoring} investigate \emph{monitored} process
+  calculi where local projections of multiparty session types are used to
+  monitor the types of messages sent by processes, as opposed to statically
+  ruling out erroneous messages. Crucially for distributed systems,
+  the authors prove that if a network of monitored and unmonitored processes
+  behave well according to their speicfications, then the communication in the
+  network precisely follows the specification. A corollary is that if some
+  components in a system are statically checked against their session types, and
+  other components are monitored, then the entire network will behave according
+  to the session type.
+
+  Together, these results have given rise to a body of work on \emph{runtime
+  monitoring} of conformance to multiparty session types. Neykova et
+  al.~\cite{NeykovaYH13:spy} introduce the first distributed implementation of
+  session types in a dynamically-typed programming language, namely Python.
+
+  Runtime monitoring approaches have the disadvantage that errors are detected
+  later---at runtime, rather than at compile time---but have increased
+  flexibility such as being able to check more complex properties on messages.
+  As an example, runtime monitoring has been used to check timing
+  constraints within protocols~\cite{NeykovaBY17:timed-monitoring}.
+
+
+  \section{Behavioural Types and Distribution}\label{sec:bt:distrib}
+
+  \subsection{Distributed Delegation}\label{sec:bt:distrib-deleg}
+  Session types are designed as type system for channel endpoints.
+  In addition to sending values, we can also send channel endpoints themselves;
+  a technique known as \emph{delegation}. Unfortunately, this mobility of
+  endpoints leads to difficulties in the distributed setting.
+
+  \mypar{Synchrony and asynchrony.}
+  The $\pi$-calculus~\cite{Milner99:pi-calc} involves \emph{synchronous}
+  communication: two peers \emph{rendezvous} over a channel in order to
+  communicate. Communication cannot occur until one peer is sending, and one
+  peer is receiving, and execution cannot progres until the communication is
+  complete. \emph{Asynchronous} communication allows send actions to communicate
+  immediately, whereas receive actions complete immediately if a value is
+  available but block otherwise.  Asynchronous communication is usually
+  implemented using a buffer.
+
+
+  \todo{Describe distributed delegation algorithms}
   \subsubsection{Na\"ive approaches}
+  \todo{Indefinite redirection, etc.}
   \subsubsection{Distributed Delegation Algorithms}
+  \todo{Summarise Hu et al., 2008}
+
   \subsubsection{Continuation-passing Approaches}
+  \todo{Summarise Scalas and Yoshida, 2016, Scalas et al., 2017}
 
-  \subsection{Behavioural types for Actor Systems}
+  \subsection{Behavioural types for Actor Systems}\label{sec:bt:actor-types}
+  The \emph{actor model} was introduced as a formalism for artificial
+  intelligence by Hewitt et al.~\cite{HewittBS73:actors}. An actor is an entity with a
+  unique identifier which upon receiving a message can perform
+  three actions: it can send a finite set of messages to other actors; spawn a
+  finite set of new actors; and change how it reacts to a new message being
+  received.
+
+  \input{fig/chans-mailboxes}
+
+  Agha~\cite{Agha90:actors} was first to investigate the actor model as a formalism
+  for disributed systems. The actor model is particularly appealing since
+  process IDs can be used to \emph{send} messages, but the capability to
+  \emph{receive} messages is associated uniquely with an actor. In turn, this
+  restriction sidesteps the issues described in
+  Section~\ref{sec:bt:distrib-deleg}.
+  This asymmetry is captured by Figure~\ref{fig:bt:channels-vs-mailboxes} (Figure
+  as shown by Fowler et al.~\cite{FowlerLW17:mm}). Figure~\ref{fig:bt:channels-vs-mailboxes:a}
+  shows the communication patterns allowed by three process $P_1$, $P_2$, and
+  $P_3$, over a channel: given that each process has access to the channel,
+  each process can use the channel to send a message to any of the other
+  processes. Figure~\ref{fig:bt:channels-vs-mailboxes:b} shows the communication
+  patterns associated with process $P_2$ as an actor process: given the process
+  ID of $P_2$, all processes can send $P_2$ a message, but only $P_2$ can
+  receive messages.
+
+  \mypar{The Challenges of Typed Mailboxes}
+  Actor communication is asynchronous. When implementing actors, an
+  implementation technique is to associate each process with an incoming message
+  queue, or \emph{mailbox}. While adding types to channels is entirely
+  straightforward, adding types to mailboxes is substantially more challenging.
+
+  Most implementations of actor-like communication, such as processes in
+  Erlang~\cite{Armstrong10:erlang} or the native actor libraries for
+  Scala~\cite{HallerO09:actors}, provide untyped mailboxes.
+  %
+  Typed mailboxes were first investigated by~He et al.~\cite{HeWT14:actors}, who
+  introduced a typed extension of Akka, called TAkka. The authors highlighted
+  the \emph{type pollution} problem, aparticular challenge with typed mailboxes
+  arising due to the coarser granularity of typing.
+
+  \begin{figure}[t]
+    \centering
+    \includegraphics[width=0.75\textwidth]{img/type-pollution-example.pdf}
+    \caption{Type Pollution}
+    \label{fig:bt:type-pollution}
+  \end{figure}
+
+  To demonstrate this,
+  consider the scenario shown in Figure~\ref{fig:bt:type-pollution}. A client
+  wishes to connect to a chat room, modelled by a \lstinline+ChatRoom+ actor. It
+  firstly sends a \lstinline+joinRequest+ message to the \lstinline+ChatServer+
+  actor, which forwards the request to the appropriate \lstinline+ChatRoom+
+  actor. The \lstinline+ChatRoom+ actor responds with a \lstinline+joinResponse+
+  message, which is then forwarded to the client. We can assign the following
+  mailbox types:
+
+
+  \begin{itemize}
+    \item \lstinline|Client : ActorRef(joinResponse)|
+    \item \lstinline|ChatServer : ActorRef(joinRequest + joinResponse)|
+    \item \lstinline|ChatRoom : ActorRef(joinRequest)|
+  \end{itemize}
+
+  Note in particular that the \lstinline+ChatServer+ must be able to handle both
+  the \lstinline+joinRequest+ \emph{and} the \lstinline+joinResponse+ messages.
+  Na\"ively implemented, this would result in a complete loss of modularity:
+  each actor would be aware of \emph{every} message which could be received by
+  every other actor, and worse, would need to use the exact same sum injection.
+  Any small changes would make the program ill-typed.
+
+  He et al.~\cite{HeWT14:actors} address type pollution by making use of subtyping, making
+  actor references contravariant in their message type. Using a similar
+  approach, the widely-adopted Akka framework~\cite{akka} has recently
+  transitioned to typed actor references; the first major actor framework to do so.
+
+  Fowler et al.~\cite{FowlerLW17:mm} study typed actors formally, and formally investigate
+  type- and semantics-preserving translations between the two communication
+  models. In particular, the type pollution problem means that in order to
+  translate from typed channels into typed actors, one must either assign the
+  same type to every channel in the system, or use a synchronisation mechanism
+  such as futures.
+
+  \mypar{A na\"ive behavioural type system for mailboxes.}
+  As---unlike channels---mailboxes are unidirectional, the na\"ive extension is
+  to generalise an actor's mailbox type to receiving a \emph{sequence} of types.
+  Letting $A, B$ range over types, $V$ range over values, and $M$ range over
+  terms, we might envisage actor references of type $\pid{\seq{A}}$ and the
+  following two communication constructs:
+
+  \begin{mathpar}
+    \inferrule
+      [TA-Receive]
+      { }
+      { \cdot \mid A \cdot \seq{A} \triangleright \calcwd{receive} : A \triangleleft \seq{A} }
+
+    \inferrule
+      [TA-Send]
+      { \Gamma_1 \vdash V : A \\ \Gamma_2 \vdash W : \pid{A \cdot \seq{A}} }
+      { \Gamma_1, \Gamma_2 \mid \seq{B} \triangleright \calcwd{send} \: M : \pid{A} \triangleleft \seq{B} }
+  \end{mathpar}
+
+  The $\Gamma \mid \seq{A} \triangleright M : B \triangleleft \seq{A}'$
+  judgement can be read ``Under typing environment $\Gamma$, with the ability to
+  receive a sequence of values with types $\seq{A}$, term $M$ has type $B$, and the
+  remainder of the program has the ability to receive a sequence of values with
+  type $\seq{A}'$. As values are pure, the value typing judgement $\Gamma \vdash
+  V : A$ states that under type environment $\Gamma$, value $V$ has type $A$.
+
+  Given the ability to receive values of types $A \cdot \seq{A}$, rule \textsc{TA-Receive}
+  assigns $\calcwd{receive}$ type $A$, and allows $\seq{A}$ to be received in
+  the remainder of the program. Correspondingly, rule \textsc{TA-Send} assigns
+  term $\calcwd{send} \: V \: W$ type $\pid{A}$ if value $V$ has type $A$ and
+  value $W$ is a process ID with type $\pid{A \cdot \seq{A}}$. Sending a message
+  does not affect the types of value that the sender can receive.
+  This formulation of a calculus with effectful operations with pre- and
+  post-conditions is reminiscent of a parameterised
+  monad~\cite{Atkey09:parameterised}.
+
+  In order to make such a system sound, since $\calcwd{send}$ changes the type
+  of a process ID, we need a linear type system. Unfortunately, such a system is
+  far too restrictive to use in practice: as a gauge, there is no obvious
+  translation from a standard channel-based session calculus into the above
+  behavioural type system.
+
+  In the remainder of this section, we survey various approaches to assigning
+  behavioural types to actor-like systems.
+
   \subsubsection{Featherweight Erlang}
-  \subsubsection{Runtime Monitoring}
-  \subsubsection{Mailbox Types}
+  Erlang~\cite{Armstrong10:erlang} is a dynamically-typed concurrent functional
+  programming language, originally designed for telecommunications applications.
+  Erlang was designed to allow developers to write applications with strong
+  reliability guarantees, fostering a development style with share-nothing
+  semantics and explicit message passing.
+  %
+  Although the developers did not
+  explicitly base their design on the actor model~\cite{erlang-not-actor}, the
+  language provides addressable processes with an incoming message queue, so
+  follows similar principles; indeed,~Agha et
+  al.~\cite{AghaMST97:foundation-actor} describe Erlang as ``essentially
+  an actor language''.
 
-  \section{Future Directions}
+  Erlang supports a \emph{selective receive} construct, which supports pattern
+  matching syntax to await messages of a particular structure.
+  %
+  Mostrous \& Vasconcelos~\cite{MostrousV11:session-erlang} describe a
+  behaviourally-typed process calculus which allows a form of binary session
+  typing. The key idea is to emulate session channels using two key ingredients:
+  selective receive, and a mechanism to generate unique references. Unique
+  references can then be used as a proxy for a session channel endpoint; a
+  technique known as \emph{correlation sets}~\cite{Viroli04a:correlation}. By
+  combining selective receive and unique references with a behavioural typing
+  discipline, it becomes possible to specify and check binary session protocols.
+
+  Their approach has not been implemented. A key drawback is that the approach
+  forbids delegation, so the communication topology remains static. It would be
+  interesting to implement the system and see whether it scales to larger
+  examples, and whether the correlation sets approach could be used to implement
+  multiparty session types. Due to the issues identified in
+  Section~\ref{sec:bt:distrib-deleg}, it is likely that supporting
+  delegation would be challenging.
+
+  \subsubsection{Runtime Monitoring}
+  In Section~\ref{sec:bt:mpst}, we described how the correspondence between
+  multiparty session types and communicating finite state automata has given
+  rise to implementations which allow conformance to multiparty session types to
+  be checked at runtime.
+
+  \begin{figure}[t]
+
+    \todo{Two images comparing standard MPST workflow against multiparty session
+    actors}
+    \caption{Monitored processes vs. multiparty session actors}
+    \label{fig:bt:mpst-actor}
+  \end{figure}
+
+
+  Neykova \& Yoshida~\cite{NeykovaY16:sactor} implemented a Python framework for
+  actor-style communication. The key differences over the `classic' approach to
+  monitoring processes against multiparty session types is that each actor may
+  be involved in \emph{multiple} sessions at a time; computation is driven by
+  incoming messages; and that a message received in one session may trigger
+  communication in another. In contrast, in the classic approach, each process
+  is assigned a single monitor. These differences are shown in
+  Figure~\ref{fig:bt:mpst-actor}.
+
+  Neykova \& Yoshida use the Celery~\cite{celery} framework to build their
+  library. Python is an imperative language which does not support native
+  concurrency, nor enforce actor-style fault isolation.
+  Fowler~\cite{Fowler16:actors} implements Neykova \& Yoshida's conceptual
+  framework in Erlang, and introduces dynamism in the communication topologies,
+  along with some rudimentary failure handling
+  mechanisms, using subsessions, as introduced by Demangeon \&
+  Honda~\cite{DemangeonH12:subsessions}. Failure handling is crucial in the
+  distributed setting, and we discuss it further in
+  Section~\ref{sec:bt:failure-handling}.
+
+  \subsubsection{Mailbox Types}
+  Our na\"ive behavioural type system from Section~\ref{sec:bt:actor-types} was too
+  restrictive as it required that messages were received in a particular order,
+  which in turn necessitated that a reference used to send messages to an actor
+  was linear.
+
+  de'Liguoro \& Padovani~\cite{deLiguoroP18:mailbox} instead propose the \emph{mailbox calculus}
+  and a mailbox typing system for \emph{unordered} interactions.
+
+  The mailbox calculus is similar to the asynchronous $\pi$-calculus in that
+  message sends do not have a continuation. Whereas actor-style calculi tend to
+  associate a process with a \emph{single} mailbox, the mailbox calculus allows
+  each process to be associated with \emph{multiple} mailboxes, and supports
+  nondeterministically selective receiving messages between them.
+  The authors then propose a behavioural typing system which, via a
+  dependency graph, ensures that processes do not fail due to unexpected
+  messages; do not deadlock; and (for certain processes) do not allow
+  unprocessed messages.
+
+  The behavioural type system for the mailbox typing system is appealing in
+  several respects. First, as shown by de'Liguoro \& Padovani, it is expressive
+  enough to encode real communication patterns, as shown by the encodings of
+  several applications from the Savina benchmark suite~\cite{ImamS14:savina}. Second, due
+  to the receive-only nature of mailboxes, it does not suffer from the
+  distributed delegation issues described in Section~\ref{sec:bt:distrib-deleg}.
+  Third, even without considering message ordering, the type system ensures
+  useful
+  safety properties.
+
+  \subsection{Failure handling}\label{sec:bt:failure-handling}
+
+  A key difference between the concurrent and distributed settings is the
+  ability to handle failures. Whereas in the concurrent setting it is reasonable
+  to expect that all participants will be online for the duration of a session,
+  and that all messages will be reliably delivered, this is not the case in the
+  distributed setting.
+
+  In this section, we describe various proposals towards extending session types
+  and communication-centric behavioural typing disciplines with support for
+  failure handling.
+
+  \begin{figure}[t]
+    \centering
+    \includegraphics[width=0.3\textwidth]{img/SupervisionTree.pdf}
+    \caption{Supervision hierarchy}
+    \label{fig:bt:supervision}
+  \end{figure}
+
+  \subsubsection{Erlang}
+  In distributed systems, failure is inevitable. Key to Erlang's success is that
+  it was  designed with failure handling as a key concern. In Erlang, processes
+  are arranged in supervision hierarchies~\cite{Armstrong03:thesis} (see
+  Figure~\ref{fig:bt:supervision}). In this example, if process \texttt{B}
+  encounters an unrecoverable error, it should be designed to crash; its
+  supervisor process \texttt{D} will then be notified of the failure, and can
+  restart the process.
+
+  Fowler~\cite{Fowler16:actors} implements Neykova \& Yoshida's session actor
+  framework~\cite{NeykovaY16:sactor} in Erlang. If a monitor rejects a message,
+  this is treated as an unrecoverable failure, and the process is terminated.
+  If a process crashes, a reachability analysis is used to detect whether the
+  process is needed in the remainder of each session in which it is involved; if
+  the process is not involved, then the sessions can continue. The author also
+  advocates splitting a session into multiple possibly-failing subsessions in
+  order to localise failures, and presents a simple exception handling
+  construct. The approach is not formalised.
+
+  Neykova \& Yoshida~\cite{NeykovaY17:let-it-recover} propose a more
+  sophisticated mechanism which allows safe recovery for various supervision
+  strategies, rather than treating a crash where a participant is required in
+  the remainder of the session as unrecoverable. The authors define an algorithm
+  to statically determine the dependencies induced by a protocol, which are
+  stored in a global recovery table. The global recovery table can be used to
+  recover from partial failures in the system by triggering the re-sending of
+  required messages upon detection of a failure. The approach is formalised, and
+  the authors show safety and transparency properties. Furthermore, the
+  performance of the approach is evaluated empirically to show that protocol
+  recovery outperforms the na\"ive recovery strategies.
+
+  \subsubsection{Availability and crash handling.}
+
+  \mypar{Typing availability.}
+  Choreographic programming~\cite{CarboneM13:df-design} allows a developer to
+  specify deadlock-free protocols at a global level, and allows code generation
+  for each participant. L\'opez et al.~\cite{LopezNN16:availability} describe an
+  approach to choreographic programming for cyber-physical systems such as
+  sensor networks. They introduce the \emph{Global Quality Calculus}, an
+  extension of the Global Calculus~\cite{CarboneM13:df-design} to include
+  broadcast and gathering constructs. Each communication action is annotated
+  with \emph{quality predicates}, which record the number of nodes which must be
+  available for a communication to occur. Each thread is annotated with
+  \emph{progress capabilities}, which define the preconditions required for a
+  thread to evaluate, and the capabilities after a communication has occurred.
+  The calculus supports graceful degradation of the system, and the authors
+  provide a behavioural typing discipline to ensure that the calculus enjoys
+  progress.
+
+  \mypar{Protocol types.}
+  Chen et al.~\cite{ChenVBZE16:failure-handling} introduce \emph{protocol
+  types}, a type disipline inspired by multiparty session types. Communication
+  actions are annotated by failure conditions that might be raised as a result
+  of a message, and failures can be handled by performing a set of interactions
+  described in an associated failure handling block. Analogously to projecting a
+  global type into a local type, a protocol type is \emph{transformed} into
+  local types which include explicit synchronisation points in order to ensure
+  that all affected participants are notified when a failure takes place.
+
+  \mypar{Link failures.}
+  Adameit et al.~\cite{AdameitPN17:link-failures} describe a multiparty session
+  calculus extended with \emph{optional blocks}. An optional block describes a
+  portion of the protocol to be run as a possibly-failing
+  subsession~\cite{DemangeonH12:subsessions}, along with a default value to be
+  used should the subsession fail. The authors illustrate the technique on the
+  rotating coordinators algorithm~\cite{Tel00:dist-algorithms}.
+
+
+  \mypar{Broadcast.}
+  Kouzapas et al.~\cite{KouzapasGVG19:async-broadcast} describe a session
+  process calculus designed for broadcast communication, where a single sender
+  can send messages to multiple
+  receivers. A key distinguishing feature is that their calculus allows for
+  \emph{unreliable} interactions, where messages can be lost during
+  transmissions. The authors show that their approach is expressive enough to
+  encode the failure-aware Paxos~\cite{Lamport98:paxos} protocol for distributed
+  consensus.
+
+  \mypar{Crash handling via a coordinator process.}
+  Viering et al.~\cite{VieringCEHZ18:crash-handling} describe a process calculus
+  and multiparty session typing discipline to handle \emph{crash failures} in
+  distributed systems. They assume reliable communication and a robust
+  coordinator process, as well as reliable failure detection, but due to
+  asynchrony there is no total ordering on the messages transmitted in the
+  system.
+%
+  Although the assumptions of a robust co-ordinator process and reliable failure
+  detection sound strong, robust processes are implemented in practice using
+  techniques such as redundant services and consensus prototcols; an example is
+  the popular Apache ZooKeeper project~\cite{JunqueiraR13:zookeeper}. Reliable
+  failure detection can be approximated by timeouts, and signalling that a
+  process should crash if it is suspected of having failed.
+
+  The authors extend multiparty session types with a
+  \mkwd{try}-\mkwd{handler} block which can be arbitrarily nested; each failure
+  handler specifies a set of failed roles (i.e., roles provided by processes
+  which have crashed), and the system is guaranteed by the type system to be in
+  a consistent state at the end of a \mkwd{try}-\mkwd{handle} block.
+
+  \subsubsection{Interactional exceptions and global escape.}
+
+  \todo{Write me}
+
+
+  \subsubsection{Affine sessions.}
+
+  Linear type systems forbid the properties of weakening (computationally,
+  allowing a resource to be discarded) and contraction (computationally,
+  allowing a resource to be duplicated).  Taken together, these two restrictions
+  on structural rules ensure that a linear resource must be used precisely once.
+  Unfortunately, in the presence of failure, a linear type system is too strong
+  as one party may crash and therefore not be able to complete their part of the
+  protocol.
+
+  \mypar{Affine type systems.}
+  One possible solution is to use an \emph{affine} type system. An affine type
+  system forbids contraction, but allows weakening,
+  meaning that session endpoints can be discarded.
+%
+  The main problem with using an affine type system is that it is possible to
+  write a program where one party does not complete their role in the
+  communication protocol, and the other party is blocked indefinitely.
+  Furthermore, a developer does not get any feedback if they \emph{accidentally}
+  forget to implement part of a protocol.
+
+  \mypar{Explicit cancellation.}
+  Mostrous \& Vasconcelos~\cite{MostrousV18:affine} introduce a session-typed
+  process calculus with \emph{explicit cancellation} to denote an endpoint which
+  can no longer be used for communication. Attempting to send or receive along
+  an endpoint whose peer is cancelled results in an exception being thrown; the
+  exception can be caught using an exception handler process.
+
+  Fowler et al.~\cite{FowlerLMD19:stwt} build upon the work of Mostrous \&
+  Vasconcelos by introducing Exceptional GV: an extension of the GV
+  session-typed $\lambda$-calculus with explicit cancellations, exception
+  handlers, and asynchrony. The exception handling construct in EGV is
+  compositional and allows arbitrary nesting of exception handlers, whereas the
+  exception handler process in the work of Mostrous \& Vasconcelos scopes only
+  over a single communication action. Furthermore, Fowler et al.\ provide an
+  implementation of the technique in the Links programming
+  language~\cite{CooperLWY06:links}, in turn providing the first application of
+  session types to web programming.
+
+  \mypar{Adjoint logic.}
+  Pruiksma \& Pfenning~\cite{PruiksmaP19:mp-adjoint} provide a logical grounding
+  for cancellation (as well as multicast and replication) by providing a
+  message-passing interpretation of adjoint logic~\cite{PruiksmaCPR18:adjoint}.
+  The key computational idea is to interpret the logical cut rule as the process
+  $S \leftarrow (\nu x) P; Q$, where $S$ is a possibly-empty set of channels
+  provided by process $P$, $x$ is the internal name of a channel used by $P$;
+  and $Q$ is a continuation process. If $S$ is a singleton set, then the normal
+  semantics are used; if $S$ is the empty set, then $x$ is cancelled; and if $S$
+  is a set containing multiple names, then $x$ is used for multicast.
+
+  \section{Future Directions}\label{sec:bt:future}
+
+  \subsection{A language based on the mailbox calculus}
+  The Mailbox Calculus, proposed by de'Liguoro \&
+  Padovani~\cite{deLiguoroP18:mailbox}, is a particularly
+  appealing proposal for a distribution-friendly behavioural type system.
+  However, process calculi are useful for modelling the \emph{state} of a
+  system, but it is difficult to immediately see the \emph{program} one would
+  write in order to arrive at such a state. Consequently, it would be
+  interesting to consider a concrete language design for the mailbox calculus.
+  Furthermore, Padovani~\cite{Padovani18:mc2} has implemented a typechecker for
+  the mailbox calculus, but not a runtime system.
+
+  It would be interesting, after a concrete language design, to implement a
+  concurrent language runtime, perhaps by compilation to the BEAM virtual
+  machine used by Erlang.
+
+
   \subsection{Finagle}
   \subsection{Failure handling and fault tolerance}
 
   \section{Conclusion}
-
-	\section{Content}\label{sec:1}
 
 	Please place your content here. See the sample template chapter for further reference on how you could style your content here.
 
@@ -139,9 +765,10 @@
 	%% uncomment and state path to your .bib to use a bibtex file as your bibliography.
 	%% NOTE: relative paths don't work in \putbib => During development, you might delete the "\CHAPTERSROOT/chapter\chapterprefix/" part to refer to your bib file. When you're done, please make this path absolute by adding the prefix again.
 	%%
-	% \putbib[\CHAPTERSROOT/chapter\chapterprefix/bibliography] %
+	%\putbib[\CHAPTERSROOT/chapter\chapterprefix/bibliography] %
+	\putbib[bibliography] %
 
 \end{bibunit}
 
 %% uncomment the \end{document} statement to make this file stand-alone compileable.
-%\end{document}
+\end{document}
