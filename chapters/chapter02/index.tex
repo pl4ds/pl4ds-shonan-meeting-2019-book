@@ -492,21 +492,35 @@ typechecking.
 
   \begin{figure}[t]
 
-    \todo{Two images comparing standard MPST workflow against multiparty session
-    actors}
+    \subfloat[fig:bt:mpsa1][Standard MPST Monitoring]{
+      \label{fig:bt:mpsa1}
+      \centering
+      \includegraphics[width=0.45\textwidth]{img/mpst-diag.pdf}
+    }
+    %
+    \hfill
+    %
+    \subfloat[fig:bt:mpsa2][Multiparty Session Actors]{
+      \label{fig:bt:mpsa2}
+      \centering
+      \includegraphics[width=0.4\textwidth]{img/mpsa-diag.pdf}
+    }
     \caption{Monitored processes vs. multiparty session actors}
     \label{fig:bt:mpst-actor}
   \end{figure}
 
 
   Neykova \& Yoshida~\cite{NeykovaY16:sactor} implemented a Python framework for
-  actor-style communication. The key differences over the `classic' approach to
-  monitoring processes against multiparty session types is that each actor may
-  be involved in \emph{multiple} sessions at a time; computation is driven by
-  incoming messages; and that a message received in one session may trigger
-  communication in another. In contrast, in the classic approach, each process
-  is assigned a single monitor. These differences are shown in
-  Figure~\ref{fig:bt:mpst-actor}.
+  actor-style communication.
+  In the `classic' approach to monitoring processes using multiparty session
+  types (Figure~\ref{fig:bt:mpsa1}), each process implements a single role in a
+  protocol, with communication mediated by a monitor generated from a local
+  type.
+  In the multiparty session actors approach,
+  The key differences over the `classic' approach (Figure~\ref{fig:bt:mpsa2}),
+  each actor may play \emph{multiple} roles in \emph{multiple} sessions at a
+  time; is driven by incoming messages; and that a message received in one
+  session may trigger communication in another.
 
   Neykova \& Yoshida use the Celery~\cite{celery} framework to build their
   library. Python is an imperative language which does not support native
