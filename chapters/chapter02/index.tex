@@ -91,11 +91,11 @@ problems for future work.
   behavioural types, including both binary and multiparty session types. In
   Section~\ref{sec:bt:distrib}, we survey the literature on behavioural types
   used in the setting of distributed programming, in particular detailing the
-  problems of distributed delegation (Section~\ref{sec:bt:distrib-deleg}) and the
-  difficulties of adding types to distribution-friendly paradigms such as the
-  actor model. Finally, in Section~\ref{XXX}
-
-  \todo{Go from here}
+  problems of distributed delegation (Section~\ref{sec:bt:distrib-deleg}); the
+  difficulties of adding behavioural types to distribution-friendly paradigms
+  such as the actor model (Section~\ref{sec:bt:actor-types}).
+  Finally, in Section~\ref{sec:bt:future}, we describe some open problems
+  and potential directions for future work.
 
   \section{Background}\label{sec:bt:background}
   \subsection{Behavioural Types}
@@ -127,7 +127,7 @@ problems for future work.
 
   For example, we could create a channel with type:
   \[
-    \mkwd{Chan}(\mkwd{Int})
+    \chan{\mkwd{Int}}
   \]
 
 
@@ -156,17 +156,19 @@ problems for future work.
 
   \[
     \mkwd{AdditionServer} \defeq
-    \mkwd{Chan}{{!}\mkwd{Int}.{!}\mkwd{Int}.{?}\mkwd{Int}}.\mkwd{End}
+    \chan{{?}\mkwd{Int}.{?}\mkwd{Int}.{!}\mkwd{Int}.\mkwd{End}}
   \]
   (In the remainder of the chapter, we omit the $\mkwd{Chan}$ annotation when it
   is clear that we are discussing session-typed channels.)
 
-  \todo{Description}
+  The \mkwd{AdditionServer} type denotes the type of a channel endpoint which
+  receives two integers (?), sends an integer (!), and then finishes.
 
   The session endpoint given to the child process is as follows:
+
   \[
     \mkwd{AdditionClient} \defeq
-    \mkwd{Chan}{{?}\mkwd{Int}.{?}\mkwd{Int}.{!}\mkwd{Int}}.\mkwd{End}
+    \chan{{!}\mkwd{Int}.{!}\mkwd{Int}.{?}\mkwd{Int}.\mkwd{End}}
   \]
 
   Where the server sends, the client receives, and where the server receives,
@@ -230,18 +232,20 @@ local protocol TwoBuyer_Buyer1
 
 \emph{Binary} session types encode interactions between two participants.
 Although binary session types rule out deadlocks within a single protocol,
-without using techniques such as channel priorities~\cite{XXX} or imposing a
-tree-like topology on processes~\cite{XXX}, it is not possible to rule out
-deadlock when considering multiple sessions.
+without using techniques such as channel
+priorities~\cite{Kobayashi06:df-processes,Padovani14:df-pi,DardhaG18:df-processes}
+or imposing a tree-like topology on
+processes~\cite{CairesP10:logic,Wadler14:prop-sessions,LindleyM15:semantics}, it
+is not possible to rule out deadlock when considering multiple sessions.
 
-\emph{Multiparty} session types~\cite{XXX} generalise binary session types to
+\emph{Multiparty} session types~\cite{HondaYC16:mpst} generalise binary session types to
 capture the interactions between multiple communicating process. The key idea is
 to define a \emph{global type}, which define the messages sent between each
 participant; well-formedness conditions on the global type ensure that the
 protocol is safe and does not cause deadlocks, unreceived messages, or other
 safety errors.
 
-Scribble~\cite{XXX} is a language-agnostic protocol description language, based
+Scribble~\cite{YoshidaHNN13:scribble} is a language-agnostic protocol description language, based
 on the theory of multiparty session types. Figure~\ref{fig:bt:multiparty} shows
 the \emph{Two-Buyer protocol}, a widely-used example of a multiparty protocol,
 written in Scribble. The Two-Buyer protocol is intended as a simplification of
@@ -290,9 +294,9 @@ typechecking.
   constraints within protocols~\cite{NeykovaBY17:timed-monitoring}.
 
 
-  \section{Behavioural Types and Distribution}
+  \section{Behavioural Types and Distribution}\label{sec:bt:distrib}
 
-  \subsection{Distributed Delegation}\label{sec:distrib-deleg:difficulties}
+  \subsection{Distributed Delegation}\label{sec:bt:distrib-deleg}
   Session types are designed as type system for channel endpoints.
   In addition to sending values, we can also send channel endpoints themselves;
   a technique known as \emph{delegation}. Unfortunately, this mobility of
@@ -333,7 +337,7 @@ typechecking.
   process IDs can be used to \emph{send} messages, but the capability to
   \emph{receive} messages is associated uniquely with an actor. In turn, this
   restriction sidesteps the issues described in
-  Section~\ref{sec:distrib-deleg:difficulties}.
+  Section~\ref{sec:bt:distrib-deleg}.
   This asymmetry is captured by Figure~\ref{fig:bt:channels-vs-mailboxes} (Figure
   as shown by Fowler et al.~\cite{FowlerLW17:mm}). Figure~\ref{fig:bt:channels-vs-mailboxes:a}
   shows the communication patterns allowed by three process $P_1$, $P_2$, and
@@ -477,7 +481,7 @@ typechecking.
   interesting to implement the system and see whether it scales to larger
   examples, and whether the correlation sets approach could be used to implement
   multiparty session types. Due to the issues identified in
-  Section~\ref{sec:distrib-deleg:difficulties}, it is likely that supporting
+  Section~\ref{sec:bt:distrib-deleg}, it is likely that supporting
   delegation would be challenging.
 
   \subsubsection{Runtime Monitoring}
@@ -539,7 +543,7 @@ typechecking.
   enough to encode real communication patterns, as shown by the encodings of
   several applications from the Savina benchmark suite~\cite{ImamS14:savina}. Second, due
   to the receive-only nature of mailboxes, it does not suffer from the
-  distributed delegation issues described in Section~\ref{sec:distrib-deleg:difficulties}.
+  distributed delegation issues described in Section~\ref{sec:bt:distrib-deleg}.
   Third, even without considering message ordering, the type system ensures
   useful
   safety properties.
@@ -717,7 +721,7 @@ typechecking.
   semantics are used; if $S$ is the empty set, then $x$ is cancelled; and if $S$
   is a set containing multiple names, then $x$ is used for multicast.
 
-  \section{Future Directions}
+  \section{Future Directions}\label{sec:bt:future}
 
   \subsection{A language based on the mailbox calculus}
   The Mailbox Calculus, proposed by de'Liguoro \&
