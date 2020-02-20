@@ -88,10 +88,9 @@ problems for future work.
   Section~\ref{sec:bt:background}, we provide the relevant background on
   behavioural types, including both binary and multiparty session types.
 
-  In the remainde of the chapter, we focus on three issues:
+  In the remainder of the chapter, we focus on three issues:
 
-  \begin{description}
-    \item[\textbf{Distributed Delegation}]
+  \mypar{Distributed Delegation}
       Session types are a type system for communication channel endpoints.
       Unfortunately, channels are difficult to implement in the distributed
       setting in the presence of \emph{asynchrony} (buffered communication) and
@@ -103,7 +102,7 @@ problems for future work.
       problem, and describe previous proposals to implementing distributed
       delegation algorithms.
 
-    \item[\textbf{Behavioural Types for Actors}]
+    \mypar{Behavioural Types for Actors}
       Distributed delegation is difficult to implement because of the permissive
       communication patterns allowed by channels. In contrast, the reactive
       nature of the actor model is more restrictive but particularly amenable
@@ -121,13 +120,13 @@ problems for future work.
       typing disciplines for the actor model and similar distribution-friendly
       paradigms.
 
-    \item[\textbf{Failure Handling}]
+    \mypar{Failure Handling}
       In the concurrent setting, we can assume that messages are reliably
       delivered, and that participants are available for the entirety of a
       session. In the distributed setting, this is no longer the case. In
       Section~\ref{sec:bt:failure-handling}, we review proposals which allow
-      behavioural typing in the presence of failure.
-  \end{description}
+      behavioural typing in the presence of failure. \\
+
 
   In Section~\ref{sec:bt:future}, we describe future directions and open
   problems, and Section~\ref{sec:bt:conclusion} concludes.
