@@ -83,19 +83,54 @@ problems for future work.
   work which pertains explicitly to the interaction between behavioural types
   and distribution.
 
+  \subsection{Overview}
 
-  \mypar{Structure.}
-  The remainder of the document is structured as follows.
+  Section~\ref{sec:bt:background}, we provide the relevant background on
+  behavioural types, including both binary and multiparty session types.
 
-  In Section~\ref{sec:bt:background}, we provide the relevant background on
-  behavioural types, including both binary and multiparty session types. In
-  Section~\ref{sec:bt:distrib}, we survey the literature on behavioural types
-  used in the setting of distributed programming, in particular detailing the
-  problems of distributed delegation (Section~\ref{sec:bt:distrib-deleg}); the
-  difficulties of adding behavioural types to distribution-friendly paradigms
-  such as the actor model (Section~\ref{sec:bt:actor-types}).
-  Finally, in Section~\ref{sec:bt:future}, we describe some open problems
-  and potential directions for future work.
+  In the remainde of the chapter, we focus on three issues:
+
+  \begin{description}
+    \item[\textbf{Distributed Delegation}]
+      Session types are a type system for communication channel endpoints.
+      Unfortunately, channels are difficult to implement in the distributed
+      setting in the presence of \emph{asynchrony} (buffered communication) and
+      \emph{delegation} (mobility of endpoints).
+
+      Various proposals have studied how to safely implement distributed
+      delegation, but it remains a challenging problem.
+      In Section~\ref{sec:bt:distrib-deleg}, we introduce the distributed delegation
+      problem, and describe previous proposals to implementing distributed
+      delegation algorithms.
+
+    \item[\textbf{Behavioural Types for Actors}]
+      Distributed delegation is difficult to implement because of the permissive
+      communication patterns allowed by channels. In contrast, the reactive
+      nature of the actor model is more restrictive but particularly amenable
+      to distribution.
+
+      However, adding even simple types to actors presents challenges.
+      To be effective for the actor model, behavioural types must move beyond
+      the ordered message delivery enforced by session types.
+
+      In Section~\ref{sec:bt:actor-types}, we detail type systems for actor
+      systems from first principles. We describe the difficulties with adding
+      simple types to actors, and describe how this can be mitigated. We then
+      show a na\"ive behavioural type system for the actor model, and describe
+      why it is insufficient. Finally, we review several proposals for behavioural
+      typing disciplines for the actor model and similar distribution-friendly
+      paradigms.
+
+    \item[\textbf{Failure Handling}]
+      In the concurrent setting, we can assume that messages are reliably
+      delivered, and that participants are available for the entirety of a
+      session. In the distributed setting, this is no longer the case. In
+      Section~\ref{sec:bt:failure-handling}, we review proposals which allow
+      behavioural typing in the presence of failure.
+  \end{description}
+
+  In Section~\ref{sec:bt:future}, we describe future directions and open
+  problems, and Section~\ref{sec:bt:conclusion} concludes.
 
   \section{Background}\label{sec:bt:background}
   \subsection{Behavioural Types}
@@ -110,8 +145,6 @@ problems for future work.
   While data types can rule out errors such as adding $5$ and \mkwd{true},
   behavioural types can rule out more semantic errors, such as forgetting to
   close an open file handle, or failure to follow a communication protocol.
-
-  \todo{Non-session type example (file system?)}
 
   \subsection{Session Types}
   Session types are a particularly well-known subclass of behavioural type
@@ -135,14 +168,43 @@ problems for future work.
   in a compile-time error.
 
   To illustrate the use of channels, in the following program, the
-  main thread creates a channel and then spawns off a child thread. The main
+  main thread creates a channel and then spawns a child thread. The main
   then then sends two integers along the channel, which are received by the
   child thread. The child thread subsequently sends the sum of the two integers,
   which is received by the parent thread:
 
-  \todo{Write out example}
+  \begin{minipage}{0.45\textwidth}
+  \[
+    \bl
+    \metadef{main} \defeq \\
+    \quad
+      \bl
+        \letintwo{\var{ch}}{\newch} \\
+        \calcwd{spawn} \: \metadef{child}(\var{ch}); \\
+        \gvsend{10}{\var{ch}}; \\
+        \gvsend{5}{\var{ch}}; \\
+        \gvrecv{\var{ch}}
+      \el
+    \el
+  \]
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+  \[
+    \bl
+    \metadef{child}(\var{ch}) \defeq \\
+    \quad
+      \bl
+      \letintwo{x}{\gvrecv{\var{ch}}} \\
+      \letintwo{y}{\gvrecv{\var{ch}}} \\
+      \gvsend{x + y}{\var{ch}}
+      \el
+    \el
+  \]
+\end{minipage}
 
-  However, even this tiny example is prone to multiple semantic errors: if the
+
+  However, even this tiny example is prone to multiple potential semantic errors: if the
   main thread only sends one integer and receives, there is a deadlock, and the
   program hangs forever. The same result happens if the main thread tries to
   receive; or if the main thread tries to send three integers; or if the child
@@ -158,8 +220,8 @@ problems for future work.
     \mkwd{AdditionServer} \defeq
     \chan{{?}\mkwd{Int}.{?}\mkwd{Int}.{!}\mkwd{Int}.\mkwd{End}}
   \]
-  (In the remainder of the chapter, we omit the $\mkwd{Chan}$ annotation when it
-  is clear that we are discussing session-typed channels.)
+  In the remainder of the chapter, we omit the $\mkwd{Chan}$ annotation when it
+  is clear that we are discussing session-typed channels.
 
   The \mkwd{AdditionServer} type denotes the type of a channel endpoint which
   receives two integers (?), sends an integer (!), and then finishes.
@@ -174,12 +236,64 @@ problems for future work.
   Where the server sends, the client receives, and where the server receives,
   the client sends. This \emph{duality} between client and server ensures that
   the two ends of the channel implement the protocol and communicate safely.
+  We denote duality with an overbar: as an example, we can define
+  $\mkwd{AdditionClient}$ as $\gvdual{\mkwd{AdditionServer}}$.
 
-  \todo{GV example of the process, discussion of linearity}
+  \begin{minipage}[t]{0.45\textwidth}
+  \[
+    \bl
+    \metadef{main} \defeq \\
+    \quad
+      \bl
+        \letintwo{\var{s}}{\calcwd{fork} \: \metadef{child}} \\
+        \letintwo{\var{s}}{\gvsend{10}{\var{s}}} \\
+        \letintwo{\var{s}}{\gvsend{5}{\var{s}}} \\
+        \letintwo{(\var{res}, s)}{\gvrecv{\var{ch}}} \\
+        \gvclose{s}; \\
+        \var{res}
+      \el
+    \el
+  \]
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.45\textwidth}
+  \[
+    \bl
+    \metadef{child} : \metadef{AdditionServer} \lto \one \\
+    \metadef{child} \defeq \lambda t .\\
+    \quad
+      \bl
+      \letintwo{(x, t)}{\gvrecv{\var{ch}}} \\
+      \letintwo{(x, y)}{\gvrecv{\var{ch}}} \\
+      \letintwo{t}{\gvsend{x + y}{\var{ch}}} \\
+      \gvclose{t}
+      \el
+    \el
+  \]
+\end{minipage}
+
+  The above example shows the implementation of the previous examples using
+  session-typed channels in the GV core session-typed
+  functional language~\cite{GayV10:last, Wadler14:prop-sessions,
+  LindleyM15:semantics}. Letting $S$ range over session types and letting
+  $A \lto B$ be the type of a linear function taking an argument $A$ and
+  producing a result of type $B$, the \calcwd{fork} construct $\calcwd{fork}$
+  creates a channel, spawns the provided function as a process, which it provides with an endpoint of
+  type $\gvdual{S}$, and returns the other channel endpoint of type $S$.
+  %
+  In order to accommodate `consumption' of a channel, the
+  $\calcwd{send}$ construct returns an updated channel endpoint, and the
+  $\calcwd{receive}$ construct returns a pair of received value and updated
+  channel endpoint.
 
   To safely implement session types, we require some form of \emph{linearity},
-  generally in the form of a linear type system. This proves to be the main
-  hurdle to overcome when implementing session types in programming languages.
+  generally in the form of a linear type system, to ensure each session endpoint
+  is used precisely once. Without linearity, a session endpoint could be reused
+  or discarded, both of which would mean that we would lose all guarantees that
+  session types provide.
+  %
+  Linearity proves to be the main hurdle to overcome when implementing session
+  types in programming languages.
 
   \subsubsection{Multiparty Session Types}\label{sec:bt:mpst}
 
@@ -533,6 +647,13 @@ typechecking.
   distributed setting, and we discuss it further in
   Section~\ref{sec:bt:failure-handling}.
 
+  \subsubsection{Parameterised Actor Systems}
+  \todo{Summarise~\cite{CharalambidesDA16:param-actors}}
+
+  \subsubsection{Types for Actor Progress}
+  \todo{Summarise~\cite{CharalambidesPA19:actor-progress}}
+
+
   \subsubsection{Mailbox Types}
   Our na\"ive behavioural type system from Section~\ref{sec:bt:actor-types} was too
   restrictive as it required that messages were received in a particular order,
@@ -756,7 +877,7 @@ typechecking.
   \subsection{Finagle}
   \subsection{Failure handling and fault tolerance}
 
-  \section{Conclusion}
+  \section{Conclusion}\label{sec:bt:conclusion}
 
 	Please place your content here. See the sample template chapter for further reference on how you could style your content here.
 

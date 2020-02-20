@@ -33,6 +33,7 @@
 \usepackage{acronym}
 \usepackage[nottoc]{tocbibind}
 \usepackage{numberpt}
+\usepackage{stmaryrd}
 
 \input{scribble-listings}
 
@@ -42,7 +43,6 @@
 \newcommand*{\chapterprefix}{02}	% your chapter number.
 
 \newcommand{\mkwd}[1]{\ensuremath{\mathsf{#1}}}
-\newcommand{\defeq}{\triangleq}
 \usepackage{subfig}
 \usepackage{tikz}
 \usetikzlibrary{matrix,fit}
@@ -62,3 +62,20 @@
 \newcommand{\totheleft}[1]{\begin{flushleft}#1\end{flushleft}}
 
 \newcommand{\chan}[1]{\mkwd{Chan}(#1)}
+\newcommand{\var}[1]{\mathit{#1}}
+\newcommand{\newch}{\calcwd{newCh}}
+\newcommand{\gvsend}[2]{\calcwd{send} \: #1 \: #2}
+\newcommand{\gvrecv}[1]{\calcwd{receive} \: #1}
+\newcommand{\gvclose}[1]{\calcwd{close} \: #1}
+\newcommand{\letintwo}[2]{\calcwd{let} \: #1 = #2 \: \calcwd{in}}
+\newcommand{\bl}{\begin{array}{l}}
+\newcommand{\blt}{\begin{array}[t]{l}}
+\newcommand{\el}{\end{array}}
+\newcommand{\defeq}{\triangleq}
+\newcommand{\metadef}{\mkwd}
+\newcommand{\lto}{\multimap}
+\newcommand{\one}{\mathbf{1}}
+\newcommand{\gvdual}[1]{\overline{#1}}
+\newcommand{\gvend}{\mkwd{End}}
+\newcommand{\gvout}[2]{{!}#1{.}#2}
+\newcommand{\gvin}[2]{{?}#1{.}#2}
