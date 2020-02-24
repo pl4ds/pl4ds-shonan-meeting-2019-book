@@ -507,7 +507,22 @@ typechecking.
   in all three cases.
 
   \subsubsection{Na\"ive approaches}
-  \todo{Indefinite redirection, etc.}
+  The simplest solution to avoiding the issues posed by distributed delegation
+  is to give up locality, and locate all buffers at some central locations. All
+  send and receive operations would then need to contact the central registry;
+  as queues do not move, delegation is as simple as passing names. Such an
+  approach excels in its simplicity, but requiring a remote call for every
+  receive operation is incredibly detrimental to performance, and introduces a
+  single point of failure.
+
+  A second na\"ive approach is indefinite redirection: given
+  $\triestosend{B}{b}{C}{c}$ in the first scenario, $B$ would be indefinitely
+  responsible for forwarding any messages destined for endpoint $b$. Such an
+  approach makes delegation somewhat more straightforward since lost messages
+  can no longer occur, while also retaining locality of message queues. It is,
+  however, impractical since $B$ must remain online indefinitely. Furthermore,
+  subsequent delegations can result in long forwarding chains.
+
   \subsubsection{Distributed Delegation Algorithms}
   \todo{Summarise Hu et al., 2008}
 
