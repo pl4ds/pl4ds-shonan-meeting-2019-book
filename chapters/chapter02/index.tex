@@ -419,14 +419,93 @@ typechecking.
   The $\pi$-calculus~\cite{Milner99:pi-calc} involves \emph{synchronous}
   communication: two peers \emph{rendezvous} over a channel in order to
   communicate. Communication cannot occur until one peer is sending, and one
-  peer is receiving, and execution cannot progres until the communication is
+  peer is receiving, and execution cannot progress until the communication is
   complete. \emph{Asynchronous} communication allows send actions to communicate
   immediately, whereas receive actions complete immediately if a value is
   available but block otherwise.  Asynchronous communication is usually
   implemented using a buffer.
 
 
-  \todo{Describe distributed delegation algorithms}
+  \begin{figure}
+    \small
+    \begin{minipage}{0.475\textwidth}
+      \subfloat[][Simple delegation ($\triestosend{B}{b}{C}{c}$)]{
+       %\begin{center}
+        \centering
+        % $\triestosend{B}{b}{C}{c}\qquad\qquad$
+       %\end{center}
+        \includegraphics[width=0.8\columnwidth]{img/DelegCase1.pdf}
+        \label{fig:bt:deleg-cases:simple}
+        %\caption{Simple Delegation}
+      }\\
+      \subfloat[][Simultaneous delegation \\ ($\triestosend{A}{a}{B}{e}$ and $\triestosend{B}{b}{C}{c}$)]{
+       %\begin{center}
+       %\vspace{1ex}
+       %$\triestosend{A}{e}{B}{a} \quad \triestosend{B}{b}{C}{c}\qquad$
+       %\end{center}
+        \centering
+        \includegraphics[width=0.9\columnwidth]{img/DelegCase3.pdf}
+        \label{fig:bt:deleg-cases:simultaneous}
+      %  \caption{Simultaneous Delegation}
+      }
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.475\textwidth}
+      \subfloat[][Entangled delegation \\
+      ($\triestosend{A}{e}{B}{a}$ and $\triestosend{B}{b}{C}{c}$)]{
+       %   \begin{center}
+       %     $\triestosend{A}{e}{B}{a} \quad \triestosend{B}{b}{C}{c}\qquad$
+       %   \end{center}
+        \centering
+          \includegraphics[width=0.8\columnwidth]{img/DelegCase2.pdf}
+          \label{fig:bt:deleg-cases:entangled}
+          %\caption{Entangled Delegation}
+        }
+    \end{minipage}
+    \caption{Cases of Distributed Delegation}
+    \label{fig:bt:deleg-cases}
+  \end{figure}
+
+
+
+  \mypar{Lost messages.}
+  A key issue with distributed delegation is the issue of \emph{lost messages}.
+  Consider Figure~\ref{fig:bt:deleg-cases:simple}: process $A$ is connected to
+  process $B$ by a channel with endpoints $a$ and $b$, and process $B$ is
+  connected to process $C$ by a channel with endpoints $c$ and $d$. Now, suppose
+  process $B$ wishes to send endpoint $b$ to process $C$ over endpoint $c$,
+  written $\triestosend{B}{b}{C}{c}$.
+
+  If endpoint $b$ has an output type (for example, $\gvout{\intty}{\gvend}$), then the
+  delegation can be done straightforwardly: it is possible to transfer all
+  messages in the buffer associated with $b$ along with the endpoint, in the
+  knowledge that no further messages will arrive while the delegation is in
+  progress. However, if endpoint $b$ has an input type (for example,
+  $\gvin{\intty}{\gvend}$), then the picture is more complicated, since $A$ can
+  send a message over $a$---but it may be the case that $A$ still believes that
+  $b$ is located at $B$ when in fact $b$ is located at $C$. Messages delivered
+  to the wrong participant in this manner are called \emph{lost messages}.
+
+  \mypar{Simultaneous and entangled delegation.}
+  We have so far only considered the simplest case of delegation, where a single
+  channel delegation takes place at a time.
+  Figure~\ref{fig:bt:deleg-cases:simultaneous} shows \emph{simultaneous}
+  delegation, where both endpoints of a channel are delegated at once.
+
+  Furthermore, Figure~\ref{fig:bt:deleg-cases:entangled} shows \emph{entangled}
+  delegation, where an endpoint is being sent over an endpoint where the
+  receiving peer endpoint is also being delegated. In the case of
+  Figure~\ref{fig:bt:deleg-cases}, we have that $A$ is sending endpoint $e$ over
+  $a$, to be received by $B$ using endpoint $b$; but at the same time, $B$ is
+  sending $b$ to $C$ over endpoint $c$. Due to a lack of causality, we have two
+  potential outcomes: either $\triestosend{A}{e}{B}{a}$ happens before
+  $\triestosend{B}{b}{C}{c}$, leading to the topology at the top of the figure,
+  or $\triestosend{B}{b}{C}{c}$ happens before $\triestosend{A}{e}{B}{a}$,
+  leading to the topology at the bottom of the figure.
+
+  A correct distributed delegation algorithm must be able to avoid lost messages
+  in all three cases.
+
   \subsubsection{Na\"ive approaches}
   \todo{Indefinite redirection, etc.}
   \subsubsection{Distributed Delegation Algorithms}
