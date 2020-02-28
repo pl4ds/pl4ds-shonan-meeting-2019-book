@@ -543,6 +543,19 @@ typechecking.
 
   \subsubsection{Continuation-passing Approaches}
 
+  Session types were originally studied in the context of specialised process
+  calculi extended with session constructs~\cite{Honda93:dyadic,
+  HondaVK98:primitives}. Later work by Kobayashi~\cite{Kobayashi02:type-systems}
+  sketches a translation into a more canonical calculus: the linear
+  $\pi$-calculus~\cite{KobayashiPT99:linear-pi}. The translation relies
+  crucially on variant types and continuation-passing style~\cite{SussmanS98:scheme}.  Kobayashi's
+  translation was significantly expanded upon by Dardha et
+  al.~\cite{DardhaGS17:revisited}, who proved that the translation was type- and
+  semantics-preserving, and showed that the techniques explored by the
+  translation could support extensions such as subtyping and polymorphism.
+
+  Scalas \& Yoshida~\cite{ScalasY16:session-scala} make use of the 
+
   \todo{Summarise Scalas and Yoshida, 2016, Scalas et al., 2017}
 
   \subsection{Behavioural types for Actor Systems}\label{sec:bt:actor-types}
