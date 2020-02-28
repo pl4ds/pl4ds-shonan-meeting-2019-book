@@ -524,9 +524,25 @@ typechecking.
   subsequent delegations can result in long forwarding chains.
 
   \subsubsection{Distributed Delegation Algorithms}
-  \todo{Summarise Hu et al., 2008}
+  The problem of distributed delegation was first studied by Hu et
+  al.~\cite{HuYH08:session-java}, who provided the first distributed
+  implementation of binary session types as an extension to Java. In order to
+  implement distributed delegation without resorting to centralising the
+  buffers or using indefinite redirection, Hu et al.\ introduce two algorithms
+  for distributed delegation. These two algorithms ensure session-fidelity by
+  ensuring that lost messages are delivered before a session progresses.
+
+  The first algorithm is the \emph{resending protocol}. The idea behind the
+  resending protocol is to use session type introspection at runtime in order to
+  calculate the set of lost messages, which can then be resent from a cache. The
+  second algorithm is the \emph{forwarding protocol}, which follows a similar
+  pattern as the indefinite redirection approach by forwarding all lost
+  messages. Unlike indefinite redirection, however, the forwarding needs only to
+  take place until the delegation step has completed, signalled by an
+  acknowledgement message.
 
   \subsubsection{Continuation-passing Approaches}
+
   \todo{Summarise Scalas and Yoshida, 2016, Scalas et al., 2017}
 
   \subsection{Behavioural types for Actor Systems}\label{sec:bt:actor-types}
@@ -540,7 +556,7 @@ typechecking.
   \input{fig/chans-mailboxes}
 
   Agha~\cite{Agha90:actors} was first to investigate the actor model as a formalism
-  for disributed systems. The actor model is particularly appealing since
+  for distributed systems. The actor model is particularly appealing since
   process IDs can be used to \emph{send} messages, but the capability to
   \emph{receive} messages is associated uniquely with an actor. In turn, this
   restriction sidesteps the issues described in
