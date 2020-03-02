@@ -544,47 +544,59 @@ typechecking.
 
   \subsubsection{Continuation-passing Approaches}
 
+  \mypar{Linear $\pi$-calculus.}
   Session types were originally studied in the context of specialised process
   calculi extended with session constructs~\cite{Honda93:dyadic,
   HondaVK98:primitives}. Later work by Kobayashi~\cite{Kobayashi02:type-systems}
   sketches a translation into a more canonical calculus: the linear
-  $\pi$-calculus~\cite{KobayashiPT99:linear-pi}. The translation relies
-  crucially on variant types and continuation-passing style~\cite{SussmanS98:scheme}.  Kobayashi's
-  translation was significantly expanded upon by Dardha et
-  al.~\cite{DardhaGS17:revisited}, who proved that the translation was type- and
-  semantics-preserving, and showed that the techniques explored by the
-  translation could support extensions such as subtyping and polymorphism.
+  $\pi$-calculus~\cite{KobayashiPT99:linear-pi}. The linear $\pi$-calculus is a
+  variation of the typed $\pi$-calculus which assigns each name a \emph{payload type},
+  \emph{polarity}, and \emph{multiplicity}. The payload type is the type of
+  value which can be transmitted over the name. The \emph{polarity} restricts
+  whether a name can be used to send or receive a name. Finally, the
+  \emph{multiplicity} states the number of times that a name can be used. For
+  our purposes, we consider names which must be used precisely once.
 
-  \todo{Maybe we need a bit more technical information / an example of the CPS
-  translation in order to make the implementation description a bit clearer.
+  Kobayashi's translation relies crucially on variant types and continuation-passing
+  style~\cite{SussmanS98:scheme}. The translation was significantly
+  expanded upon by Dardha et al.~\cite{DardhaGS17:revisited}, who proved that
+  it was type- and semantics-preserving, and showed that the
+  techniques explored by the translation could be adapted to support extensions
+  such as subtyping and polymorphism.
 
-  HOLE: describing \texttt{?A and !A types}}
-
+  \mypar{Lightweight session types in Scala.}
   Scalas \& Yoshida~\cite{ScalasY16:session-scala} make use of the
   continuation-passing encoding in order to implement \texttt{lchannels}, a
-  session type library for Scala. Linearity is checked at runtime. The library
-  represents the linear output type $!A$ and input type $?A$ by two abstract type
-  constructors \verb+Out[A]+ and \verb+In[A]+ respectively, and provides a
+  session type library for Scala.
+  %
+  To represent the linear $\pi$-calculus in a programming language, Scalas \&
+  Yoshida define two types: \verb+In[A]+, a one-shot channel which can be used
+  to receive a value of type \verb+A+, and \verb+Out[A]+, a one-shot channel
+  which can be used to send a value of type \verb+A+.
+  %
+  Linearity is checked at runtime. The library provides a
   local implementation using Scala's
-  implementation~\cite{HallerPMKKJ:futures} of futures and
+  implementations~\cite{HallerPMKKJ:futures} of futures and
   promises~\cite{LiskovS88:promises}. More specifically, the \verb+Out[A]+ type
   is implemented using a \verb+Promise[A]+, and the \verb+In[A]+ type is
   implemented using a \verb+Future[A]+.
 
-  In addition to the local implementation \texttt{lchannels} supports distribution
+  \mypar{Distributed \texttt{lchannels}.}
+  In addition to the local implementation, \texttt{lchannels} supports distribution
   by using the Akka actor library~\cite{akka} as an underlying transport.
-  The \verb+Out[A]+ type is straightforwardly implemented as an actor reference
-  \verb+ActorRef[A]+. However, since it is by design not possible to transmit
-  the receive capability of an actor (and mirroring the difficulties with
-  distributed delegation), there is no direct analogue to the \verb+In[A]+ type
-  in the actor setting.
+  The \verb+Out[A]+ type is straightforwardly implemented as a wrapper around an
+  actor reference \verb+ActorRef[A]+, which can be used to send a message of
+  type \verb+A+ to an actor. However, since it is by design not possible to
+  transmit the receive capability of an actor (and mirroring the difficulties
+  with distributed delegation), there is no direct analogue to the \verb+In[A]+
+  type in the actor setting.
 
   Their approach to serialising the \verb+In[A]+ type in the actor setting, and
   thus implementing distributed delegation, is to implement a \verb+Dispatcher+
   actor, the reference to which is shared between the \verb+In[A]+ and
   \verb+Out[A]+ channels. Sending along an \verb+Out[A]+ sends a value to the
   dispatcher, and receiving from a \verb+In[A]+ sends a request to the
-  dispatcher to retrieve a value when it arises. Since the buffer of a delegated
+  dispatcher to retrieve a value when it arrives. Since the buffer of a delegated
   receive endpoint is not tied the receive endpoint, there is no scope for
   lost messages and as such no distributed delegation algorithm is required.
   The approach is therefore a refinement on having a centralised buffer, the
@@ -592,7 +604,19 @@ typechecking.
   location of the receiver for efficiency, and that a dispatcher actor handles a
   single message at a time rather than a sequence of messages.
 
-  \todo{Summarise multiparty extension: Scalas et al., 2017}
+  \mypar{Multiparty extension.}
+  Scalas et al.~\cite{ScalasDHY17:mpst-decomposition} extend the
+  continuation-passing encoding to the multiparty setting, by showing how a
+  \emph{multiparty} session calculus can be encoded in the linear
+  $\pi$-calculus, and show that the translation is type- and
+  semantics-preserving.
+
+  By virtue of the translation into the linear $\pi$-calculus, Scalas et al.\
+  show the first implementation of \emph{multiparty} delegation by leveraging
+  the infrastructure already provided by \texttt{lchannels}. In contrast to
+  binary session types, no explicit distributed delegation algorithms exist for
+  multiparty session types due to the co-ordination needed between different
+  parties. Indeed, such an algorithm would likely be complex.
 
   \subsection{Behavioural types for Actor Systems}\label{sec:bt:actor-types}
   The \emph{actor model} was introduced as a formalism for artificial
