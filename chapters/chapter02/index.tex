@@ -529,8 +529,9 @@ typechecking.
   implementation of binary session types as an extension to Java. In order to
   implement distributed delegation without resorting to centralising the
   buffers or using indefinite redirection, Hu et al.\ introduce two algorithms
-  for distributed delegation. These two algorithms ensure session-fidelity by
-  ensuring that lost messages are delivered before a session progresses.
+  for distributed delegation. These two algorithms ensure that the session types
+  are respected by ensuring that lost messages are delivered before a session
+  progresses.
 
   The first algorithm is the \emph{resending protocol}. The idea behind the
   resending protocol is to use session type introspection at runtime in order to
@@ -554,9 +555,44 @@ typechecking.
   semantics-preserving, and showed that the techniques explored by the
   translation could support extensions such as subtyping and polymorphism.
 
-  Scalas \& Yoshida~\cite{ScalasY16:session-scala} make use of the 
+  \todo{Maybe we need a bit more technical information / an example of the CPS
+  translation in order to make the implementation description a bit clearer.
 
-  \todo{Summarise Scalas and Yoshida, 2016, Scalas et al., 2017}
+  HOLE: describing \texttt{?A and !A types}}
+
+  Scalas \& Yoshida~\cite{ScalasY16:session-scala} make use of the
+  continuation-passing encoding in order to implement \texttt{lchannels}, a
+  session type library for Scala. Linearity is checked at runtime. The library
+  represents the linear output type $!A$ and input type $?A$ by two abstract type
+  constructors \verb+Out[A]+ and \verb+In[A]+ respectively, and provides a
+  local implementation using Scala's
+  implementation~\cite{HallerPMKKJ:futures} of futures and
+  promises~\cite{LiskovS88:promises}. More specifically, the \verb+Out[A]+ type
+  is implemented using a \verb+Promise[A]+, and the \verb+In[A]+ type is
+  implemented using a \verb+Future[A]+.
+
+  In addition to the local implementation \texttt{lchannels} supports distribution
+  by using the Akka actor library~\cite{akka} as an underlying transport.
+  The \verb+Out[A]+ type is straightforwardly implemented as an actor reference
+  \verb+ActorRef[A]+. However, since it is by design not possible to transmit
+  the receive capability of an actor (and mirroring the difficulties with
+  distributed delegation), there is no direct analogue to the \verb+In[A]+ type
+  in the actor setting.
+
+  Their approach to serialising the \verb+In[A]+ type in the actor setting, and
+  thus implementing distributed delegation, is to implement a \verb+Dispatcher+
+  actor, the reference to which is shared between the \verb+In[A]+ and
+  \verb+Out[A]+ channels. Sending along an \verb+Out[A]+ sends a value to the
+  dispatcher, and receiving from a \verb+In[A]+ sends a request to the
+  dispatcher to retrieve a value when it arises. Since the buffer of a delegated
+  receive endpoint is not tied the receive endpoint, there is no scope for
+  lost messages and as such no distributed delegation algorithm is required.
+  The approach is therefore a refinement on having a centralised buffer, the
+  differences being that a dispatcher actor can be spawned at the last-known
+  location of the receiver for efficiency, and that a dispatcher actor handles a
+  single message at a time rather than a sequence of messages.
+
+  \todo{Summarise multiparty extension: Scalas et al., 2017}
 
   \subsection{Behavioural types for Actor Systems}\label{sec:bt:actor-types}
   The \emph{actor model} was introduced as a formalism for artificial
