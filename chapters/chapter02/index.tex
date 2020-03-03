@@ -70,32 +70,81 @@ problems for future work.
 	%% content
   \section{Introduction}
 
+  It is no secret that distributed types are unwieldy: they are difficult to
+  program, difficult to reason about, and difficult to test. Moving from the
+  sequential to the \emph{concurrent} setting is already challenging, in that
+  developers must reason about issues such as race conditions, deadlocks, and
+  mutual exclusion, to name but three. Moving from
+  the concurrent to the \emph{distributed} setting requires even more care,
+  since developers must take latency and failure into account.
 
-  \todo{fill me out}
+  In the world of programming languages, \emph{type systems} are an effective
+  lightweight language-level verification technique which can rule out many
+  errors before a program is run. \emph{Behavioural types} are a class of
+  expressive type systems which can encode the \emph{behaviour} of a program at
+  runtime, and present a tantalising opportunity for lightweight verification of
+  behavioural properties of distributed systems, such as deadlock-freedom and
+  communication safety. As an example, \emph{session types} are a particular
+  subclass of behavioural type system which allow static checking of whether a
+  program respects a communication protocol.
 
-  Following our discussions at the meeting which were centred around
-  communication amongst distributed systems, and in particular noting that
-  communication is a central concern in distributed systems, we concentrate
-  particularly on behavioural type systems for communication protocols.
+  However, using behavioural types in the distributed setting is still a young
+  area. Although several behavioural typing disciplines are well-suited to the
+  concurrent setting, they present unique challenges in the distributed setting.
+  We restrict our attention purely to work which pertains explicitly to the
+  interaction between behavioural types and distribution.
 
-  Furthermore, while there has been extensive work on the behavioural typing
-  disciplines described in this chapter, we restrict our attention purely to
-  work which pertains explicitly to the interaction between behavioural types
-  and distribution.
+  \subsection{Overview}
+
+  The purpose of this chapter is to provide an introduction to behavioural types
+  for distributed systems by surveying existing approaches, investigating
+  challenges unique to the distributed setting, and detailing open problems in
+  the area.
+
+  The chapter proceeds as follows.  In Section~\ref{sec:bt:background}, we
+  provide the relevant background on behavioural types.
+  The remainder of the chapter focuses on three key issues:
+
+  \mypar{Distributed Delegation}
+      Session types are a type system for communication channel endpoints.
+      Unfortunately, channels are difficult to implement in the distributed
+      setting in the presence of \emph{asynchrony} (buffered communication) and
+      \emph{delegation} (mobility of endpoints).
+
+      Various proposals have studied how to safely implement distributed
+      delegation, but it remains a challenging problem.
+      In Section~\ref{sec:bt:distrib-deleg}, we introduce the distributed delegation
+      problem, and describe previous proposals to implementing distributed
+      delegation algorithms.
+
+    \mypar{Behavioural Types for Actors}
+      Distributed delegation is difficult to implement because of the permissive
+      communication patterns allowed by channels. In contrast, the reactive
+      nature of the actor model is more restrictive but particularly amenable
+      to distribution.
+
+      However, adding even simple types to actors presents challenges.
+      To be effective for the actor model, behavioural types must move beyond
+      the ordered message delivery enforced by session types.
+
+      In Section~\ref{sec:bt:actor-types}, we detail type systems for actor
+      systems from first principles. We describe the difficulties with adding
+      simple types to actors, and describe how this can be mitigated. We then
+      show a na\"ive behavioural type system for the actor model, and describe
+      why it is insufficient. Finally, we review several proposals for behavioural
+      typing disciplines for the actor model and similar distribution-friendly
+      paradigms.
+
+    \mypar{Failure Handling}
+      In the concurrent setting, we can assume that messages are reliably
+      delivered, and that participants are available for the entirety of a
+      session. In the distributed setting, this is no longer the case. In
+      Section~\ref{sec:bt:failure-handling}, we review proposals which allow
+      behavioural typing in the presence of failure. \\
 
 
-  \mypar{Structure.}
-  The remainder of the document is structured as follows.
-
-  In Section~\ref{sec:bt:background}, we provide the relevant background on
-  behavioural types, including both binary and multiparty session types. In
-  Section~\ref{sec:bt:distrib}, we survey the literature on behavioural types
-  used in the setting of distributed programming, in particular detailing the
-  problems of distributed delegation (Section~\ref{sec:bt:distrib-deleg}); the
-  difficulties of adding behavioural types to distribution-friendly paradigms
-  such as the actor model (Section~\ref{sec:bt:actor-types}).
-  Finally, in Section~\ref{sec:bt:future}, we describe some open problems
-  and potential directions for future work.
+  In Section~\ref{sec:bt:future}, we describe future directions and open
+  problems, and Section~\ref{sec:bt:conclusion} concludes.
 
   \section{Background}\label{sec:bt:background}
   \subsection{Behavioural Types}
@@ -110,8 +159,6 @@ problems for future work.
   While data types can rule out errors such as adding $5$ and \mkwd{true},
   behavioural types can rule out more semantic errors, such as forgetting to
   close an open file handle, or failure to follow a communication protocol.
-
-  \todo{Non-session type example (file system?)}
 
   \subsection{Session Types}
   Session types are a particularly well-known subclass of behavioural type
@@ -135,14 +182,43 @@ problems for future work.
   in a compile-time error.
 
   To illustrate the use of channels, in the following program, the
-  main thread creates a channel and then spawns off a child thread. The main
+  main thread creates a channel and then spawns a child thread. The main
   then then sends two integers along the channel, which are received by the
   child thread. The child thread subsequently sends the sum of the two integers,
   which is received by the parent thread:
 
-  \todo{Write out example}
+  \begin{minipage}{0.45\textwidth}
+  \[
+    \bl
+    \metadef{main} \defeq \\
+    \quad
+      \bl
+        \letintwo{\var{ch}}{\newch} \\
+        \calcwd{spawn} \: \metadef{child}(\var{ch}); \\
+        \gvsend{10}{\var{ch}}; \\
+        \gvsend{5}{\var{ch}}; \\
+        \gvrecv{\var{ch}}
+      \el
+    \el
+  \]
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+  \[
+    \bl
+    \metadef{child}(\var{ch}) \defeq \\
+    \quad
+      \bl
+      \letintwo{x}{\gvrecv{\var{ch}}} \\
+      \letintwo{y}{\gvrecv{\var{ch}}} \\
+      \gvsend{x + y}{\var{ch}}
+      \el
+    \el
+  \]
+\end{minipage}
 
-  However, even this tiny example is prone to multiple semantic errors: if the
+
+  However, even this tiny example is prone to multiple potential semantic errors: if the
   main thread only sends one integer and receives, there is a deadlock, and the
   program hangs forever. The same result happens if the main thread tries to
   receive; or if the main thread tries to send three integers; or if the child
@@ -158,8 +234,8 @@ problems for future work.
     \mkwd{AdditionServer} \defeq
     \chan{{?}\mkwd{Int}.{?}\mkwd{Int}.{!}\mkwd{Int}.\mkwd{End}}
   \]
-  (In the remainder of the chapter, we omit the $\mkwd{Chan}$ annotation when it
-  is clear that we are discussing session-typed channels.)
+  In the remainder of the chapter, we omit the $\mkwd{Chan}$ annotation when it
+  is clear that we are discussing session-typed channels.
 
   The \mkwd{AdditionServer} type denotes the type of a channel endpoint which
   receives two integers (?), sends an integer (!), and then finishes.
@@ -174,12 +250,64 @@ problems for future work.
   Where the server sends, the client receives, and where the server receives,
   the client sends. This \emph{duality} between client and server ensures that
   the two ends of the channel implement the protocol and communicate safely.
+  We denote duality with an overbar: as an example, we can define
+  $\mkwd{AdditionClient}$ as $\gvdual{\mkwd{AdditionServer}}$.
 
-  \todo{GV example of the process, discussion of linearity}
+  \begin{minipage}[t]{0.45\textwidth}
+  \[
+    \bl
+    \metadef{main} \defeq \\
+    \quad
+      \bl
+        \letintwo{\var{s}}{\calcwd{fork} \: \metadef{child}} \\
+        \letintwo{\var{s}}{\gvsend{10}{\var{s}}} \\
+        \letintwo{\var{s}}{\gvsend{5}{\var{s}}} \\
+        \letintwo{(\var{res}, s)}{\gvrecv{\var{ch}}} \\
+        \gvclose{s}; \\
+        \var{res}
+      \el
+    \el
+  \]
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.45\textwidth}
+  \[
+    \bl
+    \metadef{child} : \metadef{AdditionServer} \lto \one \\
+    \metadef{child} \defeq \lambda t .\\
+    \quad
+      \bl
+      \letintwo{(x, t)}{\gvrecv{\var{ch}}} \\
+      \letintwo{(x, y)}{\gvrecv{\var{ch}}} \\
+      \letintwo{t}{\gvsend{x + y}{\var{ch}}} \\
+      \gvclose{t}
+      \el
+    \el
+  \]
+\end{minipage}
+
+  The above example shows the implementation of the previous examples using
+  session-typed channels in the GV core session-typed
+  functional language~\cite{GayV10:last, Wadler14:prop-sessions,
+  LindleyM15:semantics}. Letting $S$ range over session types and letting
+  $A \lto B$ be the type of a linear function taking an argument $A$ and
+  producing a result of type $B$, the \calcwd{fork} construct $\calcwd{fork}$
+  creates a channel, spawns the provided function as a process, which it provides with an endpoint of
+  type $\gvdual{S}$, and returns the other channel endpoint of type $S$.
+  %
+  In order to accommodate `consumption' of a channel, the
+  $\calcwd{send}$ construct returns an updated channel endpoint, and the
+  $\calcwd{receive}$ construct returns a pair of received value and updated
+  channel endpoint.
 
   To safely implement session types, we require some form of \emph{linearity},
-  generally in the form of a linear type system. This proves to be the main
-  hurdle to overcome when implementing session types in programming languages.
+  generally in the form of a linear type system, to ensure each session endpoint
+  is used precisely once. Without linearity, a session endpoint could be reused
+  or discarded, both of which would mean that we would lose all guarantees that
+  session types provide.
+  %
+  Linearity proves to be the main hurdle to overcome when implementing session
+  types in programming languages.
 
   \subsubsection{Multiparty Session Types}\label{sec:bt:mpst}
 
@@ -306,21 +434,204 @@ typechecking.
   The $\pi$-calculus~\cite{Milner99:pi-calc} involves \emph{synchronous}
   communication: two peers \emph{rendezvous} over a channel in order to
   communicate. Communication cannot occur until one peer is sending, and one
-  peer is receiving, and execution cannot progres until the communication is
+  peer is receiving, and execution cannot progress until the communication is
   complete. \emph{Asynchronous} communication allows send actions to communicate
   immediately, whereas receive actions complete immediately if a value is
   available but block otherwise.  Asynchronous communication is usually
   implemented using a buffer.
 
 
-  \todo{Describe distributed delegation algorithms}
+  \begin{figure}
+    \small
+    \begin{minipage}{0.475\textwidth}
+      \subfloat[][Simple delegation ($\triestosend{B}{b}{C}{c}$)]{
+       %\begin{center}
+        \centering
+        % $\triestosend{B}{b}{C}{c}\qquad\qquad$
+       %\end{center}
+        \includegraphics[width=0.8\columnwidth]{img/DelegCase1.pdf}
+        \label{fig:bt:deleg-cases:simple}
+        %\caption{Simple Delegation}
+      }\\
+      \subfloat[][Simultaneous delegation \\ ($\triestosend{A}{a}{B}{e}$ and $\triestosend{B}{b}{C}{c}$)]{
+       %\begin{center}
+       %\vspace{1ex}
+       %$\triestosend{A}{e}{B}{a} \quad \triestosend{B}{b}{C}{c}\qquad$
+       %\end{center}
+        \centering
+        \includegraphics[width=0.9\columnwidth]{img/DelegCase3.pdf}
+        \label{fig:bt:deleg-cases:simultaneous}
+      %  \caption{Simultaneous Delegation}
+      }
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.475\textwidth}
+      \subfloat[][Entangled delegation \\
+      ($\triestosend{A}{e}{B}{a}$ and $\triestosend{B}{b}{C}{c}$)]{
+       %   \begin{center}
+       %     $\triestosend{A}{e}{B}{a} \quad \triestosend{B}{b}{C}{c}\qquad$
+       %   \end{center}
+        \centering
+          \includegraphics[width=0.8\columnwidth]{img/DelegCase2.pdf}
+          \label{fig:bt:deleg-cases:entangled}
+          %\caption{Entangled Delegation}
+        }
+    \end{minipage}
+    \caption{Cases of Distributed Delegation}
+    \label{fig:bt:deleg-cases}
+  \end{figure}
+
+
+
+  \mypar{Lost messages.}
+  A key issue with distributed delegation is the issue of \emph{lost messages}.
+  Consider Figure~\ref{fig:bt:deleg-cases:simple}: process $A$ is connected to
+  process $B$ by a channel with endpoints $a$ and $b$, and process $B$ is
+  connected to process $C$ by a channel with endpoints $c$ and $d$. Now, suppose
+  process $B$ wishes to send endpoint $b$ to process $C$ over endpoint $c$,
+  written $\triestosend{B}{b}{C}{c}$.
+
+  If endpoint $b$ has an output type (for example, $\gvout{\intty}{\gvend}$), then the
+  delegation can be done straightforwardly: it is possible to transfer all
+  messages in the buffer associated with $b$ along with the endpoint, in the
+  knowledge that no further messages will arrive while the delegation is in
+  progress. However, if endpoint $b$ has an input type (for example,
+  $\gvin{\intty}{\gvend}$), then the picture is more complicated, since $A$ can
+  send a message over $a$---but it may be the case that $A$ still believes that
+  $b$ is located at $B$ when in fact $b$ is located at $C$. Messages delivered
+  to the wrong participant in this manner are called \emph{lost messages}.
+
+  \mypar{Simultaneous and entangled delegation.}
+  We have so far only considered the simplest case of delegation, where a single
+  channel delegation takes place at a time.
+  Figure~\ref{fig:bt:deleg-cases:simultaneous} shows \emph{simultaneous}
+  delegation, where both endpoints of a channel are delegated at once.
+
+  Furthermore, Figure~\ref{fig:bt:deleg-cases:entangled} shows \emph{entangled}
+  delegation, where an endpoint is being sent over an endpoint where the
+  receiving peer endpoint is also being delegated. In the case of
+  Figure~\ref{fig:bt:deleg-cases}, we have that $A$ is sending endpoint $e$ over
+  $a$, to be received by $B$ using endpoint $b$; but at the same time, $B$ is
+  sending $b$ to $C$ over endpoint $c$. Due to a lack of causality, we have two
+  potential outcomes: either $\triestosend{A}{e}{B}{a}$ happens before
+  $\triestosend{B}{b}{C}{c}$, leading to the topology at the top of the figure,
+  or $\triestosend{B}{b}{C}{c}$ happens before $\triestosend{A}{e}{B}{a}$,
+  leading to the topology at the bottom of the figure.
+
+  A correct distributed delegation algorithm must be able to avoid lost messages
+  in all three cases.
+
   \subsubsection{Na\"ive approaches}
-  \todo{Indefinite redirection, etc.}
+  The simplest solution to avoiding the issues posed by distributed delegation
+  is to give up locality, and locate all buffers at some central locations. All
+  send and receive operations would then need to contact the central registry;
+  as queues do not move, delegation is as simple as passing names. Such an
+  approach excels in its simplicity, but requiring a remote call for every
+  receive operation is incredibly detrimental to performance, and introduces a
+  single point of failure.
+
+  A second na\"ive approach is indefinite redirection: given
+  $\triestosend{B}{b}{C}{c}$ in the first scenario, $B$ would be indefinitely
+  responsible for forwarding any messages destined for endpoint $b$. Such an
+  approach makes delegation somewhat more straightforward since lost messages
+  can no longer occur, while also retaining locality of message queues. It is,
+  however, impractical since $B$ must remain online indefinitely. Furthermore,
+  subsequent delegations can result in long forwarding chains.
+
   \subsubsection{Distributed Delegation Algorithms}
-  \todo{Summarise Hu et al., 2008}
+  The problem of distributed delegation was first studied by Hu et
+  al.~\cite{HuYH08:session-java}, who provided the first distributed
+  implementation of binary session types as an extension to Java. In order to
+  implement distributed delegation without resorting to centralising the
+  buffers or using indefinite redirection, Hu et al.\ introduce two algorithms
+  for distributed delegation. These two algorithms ensure that the session types
+  are respected by ensuring that lost messages are delivered before a session
+  progresses.
+
+  The first algorithm is the \emph{resending protocol}. The idea behind the
+  resending protocol is to use session type introspection at runtime in order to
+  calculate the set of lost messages, which can then be resent from a cache. The
+  second algorithm is the \emph{forwarding protocol}, which follows a similar
+  pattern as the indefinite redirection approach by forwarding all lost
+  messages. Unlike indefinite redirection, however, the forwarding needs only to
+  take place until the delegation step has completed, signalled by an
+  acknowledgement message.
 
   \subsubsection{Continuation-passing Approaches}
-  \todo{Summarise Scalas and Yoshida, 2016, Scalas et al., 2017}
+
+  \mypar{Linear $\pi$-calculus.}
+  Session types were originally studied in the context of specialised process
+  calculi extended with session constructs~\cite{Honda93:dyadic,
+  HondaVK98:primitives}. Later work by Kobayashi~\cite{Kobayashi02:type-systems}
+  sketches a translation into a more canonical calculus: the linear
+  $\pi$-calculus~\cite{KobayashiPT99:linear-pi}. The linear $\pi$-calculus is a
+  variation of the typed $\pi$-calculus which assigns each name a \emph{payload type},
+  \emph{polarity}, and \emph{multiplicity}. The payload type is the type of
+  value which can be transmitted over the name. The \emph{polarity} restricts
+  whether a name can be used to send or receive a name. Finally, the
+  \emph{multiplicity} states the number of times that a name can be used. For
+  our purposes, we consider names which must be used precisely once.
+
+  Kobayashi's translation relies crucially on variant types and continuation-passing
+  style~\cite{SussmanS98:scheme}. The translation was significantly
+  expanded upon by Dardha et al.~\cite{DardhaGS17:revisited}, who proved that
+  it was type- and semantics-preserving, and showed that the
+  techniques explored by the translation could be adapted to support extensions
+  such as subtyping and polymorphism.
+
+  \mypar{Lightweight session types in Scala.}
+  Scalas \& Yoshida~\cite{ScalasY16:session-scala} make use of the
+  continuation-passing encoding in order to implement \texttt{lchannels}, a
+  session type library for Scala.
+  %
+  To represent the linear $\pi$-calculus in a programming language, Scalas \&
+  Yoshida define two types: \verb+In[A]+, a one-shot channel which can be used
+  to receive a value of type \verb+A+, and \verb+Out[A]+, a one-shot channel
+  which can be used to send a value of type \verb+A+.
+  %
+  Linearity is checked at runtime. The library provides a
+  local implementation using Scala's
+  implementations~\cite{HallerPMKKJ:futures} of futures and
+  promises~\cite{LiskovS88:promises}. More specifically, the \verb+Out[A]+ type
+  is implemented using a \verb+Promise[A]+, and the \verb+In[A]+ type is
+  implemented using a \verb+Future[A]+.
+
+  \mypar{Distributed \texttt{lchannels}.}
+  In addition to the local implementation, \texttt{lchannels} supports distribution
+  by using the Akka actor library~\cite{akka} as an underlying transport.
+  The \verb+Out[A]+ type is straightforwardly implemented as a wrapper around an
+  actor reference \verb+ActorRef[A]+, which can be used to send a message of
+  type \verb+A+ to an actor. However, since it is by design not possible to
+  transmit the receive capability of an actor (and mirroring the difficulties
+  with distributed delegation), there is no direct analogue to the \verb+In[A]+
+  type in the actor setting.
+
+  Their approach to serialising the \verb+In[A]+ type in the actor setting, and
+  thus implementing distributed delegation, is to implement a \verb+Dispatcher+
+  actor, the reference to which is shared between the \verb+In[A]+ and
+  \verb+Out[A]+ channels. Sending along an \verb+Out[A]+ sends a value to the
+  dispatcher, and receiving from a \verb+In[A]+ sends a request to the
+  dispatcher to retrieve a value when it arrives. Since the buffer of a delegated
+  receive endpoint is not tied the receive endpoint, there is no scope for
+  lost messages and as such no distributed delegation algorithm is required.
+  The approach is therefore a refinement on having a centralised buffer, the
+  differences being that a dispatcher actor can be spawned at the last-known
+  location of the receiver for efficiency, and that a dispatcher actor handles a
+  single message at a time rather than a sequence of messages.
+
+  \mypar{Multiparty extension.}
+  Scalas et al.~\cite{ScalasDHY17:mpst-decomposition} extend the
+  continuation-passing encoding to the multiparty setting, by showing how a
+  \emph{multiparty} session calculus can be encoded in the linear
+  $\pi$-calculus, and show that the translation is type- and
+  semantics-preserving.
+
+  By virtue of the translation into the linear $\pi$-calculus, Scalas et al.\
+  show the first implementation of \emph{multiparty} delegation by leveraging
+  the infrastructure already provided by \texttt{lchannels}. In contrast to
+  binary session types, no explicit distributed delegation algorithms exist for
+  multiparty session types due to the co-ordination needed between different
+  parties. Indeed, such an algorithm would likely be complex.
 
   \subsection{Behavioural types for Actor Systems}\label{sec:bt:actor-types}
   The \emph{actor model} was introduced as a formalism for artificial
@@ -333,7 +644,7 @@ typechecking.
   \input{fig/chans-mailboxes}
 
   Agha~\cite{Agha90:actors} was first to investigate the actor model as a formalism
-  for disributed systems. The actor model is particularly appealing since
+  for distributed systems. The actor model is particularly appealing since
   process IDs can be used to \emph{send} messages, but the capability to
   \emph{receive} messages is associated uniquely with an actor. In turn, this
   restriction sidesteps the issues described in
@@ -492,21 +803,35 @@ typechecking.
 
   \begin{figure}[t]
 
-    \todo{Two images comparing standard MPST workflow against multiparty session
-    actors}
+    \subfloat[fig:bt:mpsa1][Standard MPST Monitoring]{
+      \label{fig:bt:mpsa1}
+      \centering
+      \includegraphics[width=0.45\textwidth]{img/mpst-diag.pdf}
+    }
+    %
+    \hfill
+    %
+    \subfloat[fig:bt:mpsa2][Multiparty Session Actors]{
+      \label{fig:bt:mpsa2}
+      \centering
+      \includegraphics[width=0.4\textwidth]{img/mpsa-diag.pdf}
+    }
     \caption{Monitored processes vs. multiparty session actors}
     \label{fig:bt:mpst-actor}
   \end{figure}
 
 
   Neykova \& Yoshida~\cite{NeykovaY16:sactor} implemented a Python framework for
-  actor-style communication. The key differences over the `classic' approach to
-  monitoring processes against multiparty session types is that each actor may
-  be involved in \emph{multiple} sessions at a time; computation is driven by
-  incoming messages; and that a message received in one session may trigger
-  communication in another. In contrast, in the classic approach, each process
-  is assigned a single monitor. These differences are shown in
-  Figure~\ref{fig:bt:mpst-actor}.
+  actor-style communication.
+  In the `classic' approach to monitoring processes using multiparty session
+  types (Figure~\ref{fig:bt:mpsa1}), each process implements a single role in a
+  protocol, with communication mediated by a monitor generated from a local
+  type.
+  In the multiparty session actors approach,
+  The key differences over the `classic' approach (Figure~\ref{fig:bt:mpsa2}),
+  each actor may play \emph{multiple} roles in \emph{multiple} sessions at a
+  time; is driven by incoming messages; and that a message received in one
+  session may trigger communication in another.
 
   Neykova \& Yoshida use the Celery~\cite{celery} framework to build their
   library. Python is an imperative language which does not support native
@@ -518,6 +843,13 @@ typechecking.
   Honda~\cite{DemangeonH12:subsessions}. Failure handling is crucial in the
   distributed setting, and we discuss it further in
   Section~\ref{sec:bt:failure-handling}.
+
+  \subsubsection{Parameterised Actor Systems}
+  \todo{Summarise~\cite{CharalambidesDA16:param-actors}}
+
+  \subsubsection{Types for Actor Progress}
+  \todo{Summarise~\cite{CharalambidesPA19:actor-progress}}
+
 
   \subsubsection{Mailbox Types}
   Our na\"ive behavioural type system from Section~\ref{sec:bt:actor-types} was too
@@ -667,8 +999,19 @@ typechecking.
   a consistent state at the end of a \mkwd{try}-\mkwd{handle} block.
 
   \subsubsection{Interactional exceptions and global escape.}
+  Carbone et al.~\cite{CarboneHY08:exceptions} were first to consider extending
+  an asynchronous session-typed process calculus with an exception handling
+  construct. Their key idea is to introduce a service channel type which includes an
+  \emph{exception handling clause} describing an interaction pattern to be
+  invoked should an exception arise. As an example, this pattern makes it
+  possible to abort an otherwise infinite interaction. The approach also
+  supports nested exceptions. To guarantee liveness in the presence of nested
+  exceptions, message queues are annotated with exception levels; when an
+  exception occurs, the system guarantees liveness by propagating an exception
+  message through the system.
 
-  \todo{Write me}
+  \todo{Perhaps more detail on interactional exceptions; also summarise
+  \cite{CapecchiGY16:global-escape}}
 
 
   \subsubsection{Affine sessions.}
@@ -742,15 +1085,26 @@ typechecking.
   \subsection{Finagle}
   \subsection{Failure handling and fault tolerance}
 
-  \section{Conclusion}
+  \section{Conclusion}\label{sec:bt:conclusion}
 
-	Please place your content here. See the sample template chapter for further reference on how you could style your content here.
+  Behavioural types allow properties about the runtime behaviour of a program,
+  for example conformance to a protocol, to be checked before a program is run.
+  While behavioural typing disciplines are well-understood in the concurrent
+  setting, the distributed setting poses challenges.
 
-	%% content
+  In this section, we have given an overview of behavioural type disciplines for
+  distribution, in particular concentrating on three issues: distributed
+  delegation of session-typed channels; behavioural types for
+  distribution-friendly paradigms such as the actor model; and behavioural types
+  in the presence of failure.
 
-	\section*{Appendix}\label{appendix}
-
-	Please place your appendix content here, if applicable.
+  Although many complementary approaches have been proposed to allow various
+  behavioural properties to be checked, a notable gap is a concrete language
+  design which could gain widespread adoption. Perhaps the single largest
+  research challenge in this area is to distil the right combination of language
+  features and type system features which would be flexible enough to use in
+  practice, yet also provide helpful static typechecking to rule out more errors
+  at compile time.
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% For your bibliography, you should use a bibtex .bib file and include it here.
