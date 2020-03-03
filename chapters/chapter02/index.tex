@@ -70,25 +70,40 @@ problems for future work.
 	%% content
   \section{Introduction}
 
+  It is no secret that distributed types are unwieldy: they are difficult to
+  program, difficult to reason about, and difficult to test. Moving from the
+  sequential to the \emph{concurrent} setting is already challenging, in that
+  developers must reason about issues such as race conditions, deadlocks, and
+  mutual exclusion, to name but three. Moving from
+  the concurrent to the \emph{distributed} setting requires even more care,
+  since developers must take latency and failure into account.
 
-  \todo{fill me out}
+  In the world of programming languages, \emph{type systems} are an effective
+  lightweight language-level verification technique which can rule out many
+  errors before a program is run. \emph{Behavioural types} are a class of
+  expressive type systems which can encode the \emph{behaviour} of a program at
+  runtime, and present a tantalising opportunity for lightweight verification of
+  behavioural properties of distributed systems, such as deadlock-freedom and
+  communication safety. As an example, \emph{session types} are a particular
+  subclass of behavioural type system which allow static checking of whether a
+  program respects a communication protocol.
 
-  Following our discussions at the meeting which were centred around
-  communication amongst distributed systems, and in particular noting that
-  communication is a central concern in distributed systems, we concentrate
-  particularly on behavioural type systems for communication protocols.
-
-  Furthermore, while there has been extensive work on the behavioural typing
-  disciplines described in this chapter, we restrict our attention purely to
-  work which pertains explicitly to the interaction between behavioural types
-  and distribution.
+  However, using behavioural types in the distributed setting is still a young
+  area. Although several behavioural typing disciplines are well-suited to the
+  concurrent setting, they present unique challenges in the distributed setting.
+  We restrict our attention purely to work which pertains explicitly to the
+  interaction between behavioural types and distribution.
 
   \subsection{Overview}
 
-  Section~\ref{sec:bt:background}, we provide the relevant background on
-  behavioural types, including both binary and multiparty session types.
+  The purpose of this chapter is to provide an introduction to behavioural types
+  for distributed systems by surveying existing approaches, investigating
+  challenges unique to the distributed setting, and detailing open problems in
+  the area.
 
-  In the remainder of the chapter, we focus on three issues:
+  The chapter proceeds as follows.  In Section~\ref{sec:bt:background}, we
+  provide the relevant background on behavioural types.
+  The remainder of the chapter focuses on three key issues:
 
   \mypar{Distributed Delegation}
       Session types are a type system for communication channel endpoints.
@@ -984,8 +999,19 @@ typechecking.
   a consistent state at the end of a \mkwd{try}-\mkwd{handle} block.
 
   \subsubsection{Interactional exceptions and global escape.}
+  Carbone et al.~\cite{CarboneHY08:exceptions} were first to consider extending
+  an asynchronous session-typed process calculus with an exception handling
+  construct. Their key idea is to introduce a service channel type which includes an
+  \emph{exception handling clause} describing an interaction pattern to be
+  invoked should an exception arise. As an example, this pattern makes it
+  possible to abort an otherwise infinite interaction. The approach also
+  supports nested exceptions. To guarantee liveness in the presence of nested
+  exceptions, message queues are annotated with exception levels; when an
+  exception occurs, the system guarantees liveness by propagating an exception
+  message through the system.
 
-  \todo{Write me}
+  \todo{Perhaps more detail on interactional exceptions; also summarise
+  \cite{CapecchiGY16:global-escape}}
 
 
   \subsubsection{Affine sessions.}
@@ -1061,13 +1087,24 @@ typechecking.
 
   \section{Conclusion}\label{sec:bt:conclusion}
 
-	Please place your content here. See the sample template chapter for further reference on how you could style your content here.
+  Behavioural types allow properties about the runtime behaviour of a program,
+  for example conformance to a protocol, to be checked before a program is run.
+  While behavioural typing disciplines are well-understood in the concurrent
+  setting, the distributed setting poses challenges.
 
-	%% content
+  In this section, we have given an overview of behavioural type disciplines for
+  distribution, in particular concentrating on three issues: distributed
+  delegation of session-typed channels; behavioural types for
+  distribution-friendly paradigms such as the actor model; and behavioural types
+  in the presence of failure.
 
-	\section*{Appendix}\label{appendix}
-
-	Please place your appendix content here, if applicable.
+  Although many complementary approaches have been proposed to allow various
+  behavioural properties to be checked, a notable gap is a concrete language
+  design which could gain widespread adoption. Perhaps the single largest
+  research challenge in this area is to distil the right combination of language
+  features and type system features which would be flexible enough to use in
+  practice, yet also provide helpful static typechecking to rule out more errors
+  at compile time.
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% For your bibliography, you should use a bibtex .bib file and include it here.
