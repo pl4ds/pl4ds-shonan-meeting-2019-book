@@ -54,6 +54,7 @@ envcountchap,
 %\usepackage{pifont}
 %\usepackage{xcolor}
 %\usepackage{tabularx}
+\usepackage{multirow}
 %\usepackage{listings}
 %\usepackage{booktabs}
 %\usepackage{hyperref}
@@ -113,6 +114,25 @@ envcountchap,
         % - Essential differences between multi-core and distributed setting
         % -- Partial failure
         % -- Unbounded asynchronicity
+
+%\begin{tabular}{@{}lll@{}}
+\begin{table}
+\begin{center}
+\begin{tabular}{l|l|l}
+%  \toprule
+%  &&&& \multicolumn2c{query accesses} \\ \cmidrule(l){5-6}
+  & Weak & Strong\\
+  \hline
+%  \midrule
+  Multicore & Thread local & Locks \& Atomics\\
+  \hline
+  Distributed & CRDTs & Consensus\\
+  \hline
+%  \bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
 
         (say something about scale in terms of number of nodes and physical distance, the impacts of asynchrony and address the topics in comment. Contrast asynchronous geo-distributed systems with shared memory multi-core settings)
 
