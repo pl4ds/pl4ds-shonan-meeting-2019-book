@@ -25,55 +25,53 @@
 %% When you hand in your contribution, please uncomment or remove the preamble again.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% start of preamble
-%\documentclass[
-%graybox,
-%envcountchap,
-%%natbib
-%]{svmult}
-%
-%\usepackage[utf8]{inputenc}
-%%\usepackage{type1cm}        % activate if the above 3 fonts are 
-%% not available on your system
-%
-%\usepackage{makeidx}         % allows index generation
-%\usepackage{graphicx}        % standard LaTeX graphics tool
-%% when including figure files
-%\usepackage{multicol}        % used for the two-column index
-%\usepackage[bottom]{footmisc}% places footnotes at page bottom
-%
-%\usepackage{newtxtext}       % 
-%\usepackage{newtxmath}       % selects Times Roman as basic font
-%
-%% \usepackage{natbib}
-%\usepackage{footmisc}
-%
-%%% Additional packages added. Add necessary packages here.
-%%\usepackage[english]{babel}
-%\usepackage{siunitx}
-%\usepackage{amssymb}
-%\usepackage{pifont}
-%\usepackage{xcolor}
-%\usepackage{tabularx}
-%\usepackage{listings}
-%\usepackage{booktabs}
-%\usepackage{hyperref}
-%\usepackage{url}
-%\usepackage{mathtools}
-%\usepackage{lipsum}
-%\usepackage{import}
-%\usepackage{bibunits}
-%\usepackage{acronym}
-%\usepackage[nottoc]{tocbibind}
-%\usepackage{numberpt}
-%
-%\newcommand*{\CHAPTERSROOT}{../.}	% root path for chapters.
-%\newcommand*{\chapterprefix}{01}	% your chapter number.
-%
-%\makeindex % used for the subject index
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% end of preamble
+\documentclass[
+graybox,
+envcountchap,
+natbib
+]{svmult}
 
-%% uncomment the \begin{document} statement to make this file stand-alone compileable.
-%\begin{document}
+\usepackage[utf8]{inputenc}
+\usepackage{type1cm}        % activate if the above 3 fonts are not available on your system
+
+\usepackage{makeidx}         % allows index generation
+\usepackage{graphicx}        % standard LaTeX graphics tool when including figure files
+\usepackage{multicol}        % used for the two-column index
+\usepackage[bottom]{footmisc}% places footnotes at page bottom
+
+\usepackage{newtxtext}       % 
+\usepackage{newtxmath}       % selects Times Roman as basic font
+
+\usepackage{natbib}
+\usepackage{footmisc}
+
+% Additional packages added. Add necessary packages here.
+\usepackage[english]{babel}
+\usepackage{siunitx}
+\usepackage{amssymb}
+\usepackage{pifont}
+\usepackage{xcolor}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{mathtools}
+\usepackage{lipsum}
+\usepackage{import}
+\usepackage{bibunits}
+\usepackage{acronym}
+\usepackage[nottoc]{tocbibind}
+\usepackage{numberpt}
+
+\newcommand*{\CHAPTERSROOT}{../.}	% root path for chapters.
+\newcommand*{\chapterprefix}{01}	% your chapter number.
+
+\makeindex % used for the subject index
+%%end of preamble
+
+%uncomment the \begin{document} statement to make this file stand-alone compileable.
+\begin{document}
 
 \begin{bibunit}
 	
@@ -93,15 +91,128 @@
 	\abstract{Please place your abstract here.}
 	
 	%% content
-	\section{Content}\label{sec:1}
+	\section{Programming Cyber Physical Systems: Introduction}\label{sec:1} %(3pp)
+
+         CPS = communication, computation, and control
+
+        \section{Models} %(3pp)
+
+        \subsection{Control theory}
+
+         Control theory approach (plant model and feedback controller)
+
+         \subsection{Hybrid/Timed Automata}
+
+         \subsection{Process Algebra}
+
+         \subsection{Dynamic Logic}
+
+         \subsection{Markov Processes}
+
+         \section{Communication} %(4pp)
+
+         \subsection{Synchronous rendez-vous communication}
+
+         fits well with automata models, good abstraction for slow dynamics and fast
+
+         \subsection{Actor Model}
+
+         \subsection{Functional Reactive Programming}
+
+         communication using streams
+
+         \subsection{Session Types}
+
+         % cvarela:  really needed here?  or just a ref to chapter 2?
+
+         \subsection{Networked Control System}
+
+         centralized vs distributed controller
+
+         \section{Communication Imperfection and Control} %(2pp)
+
+         analogous to consistency question in distributed system but about the freshness of physical informations
+
+         \subsection{Clock synchronization}
+
+         a basis on which other functionality are built
+
+         \subsection{Robustness against perturbation of communication}
+
+         example: work on Skorokhod Distance by Ichiro Hasuo
+
+         \subsection{Efficient use of communication}
+
+         example: work by Sebastian Trimpe on event triggered and wireless control systems
+
+         \subsection{Interpolation and extrapolation}
+
+         example: tfs2 ROS library use timestamped messages to interpolate/extrapolate data
+
+         \section{Impact of the Physical Layer and the Communication} %(2pp)
+
+         \subsection{Point-to-point vs broadcast communication}
+
+         \subsection{Large number of processes}
+
+         swarm / sensor networks
+
+         \subsection{Line-of-sight / limited range}
+
+         gossip protocol
+
+         \section{Open Research Questions} %(2-5pp)
+
+         \subsection{Discrete vs continuous systems}
+
+         Process algebra, actors, and others model discrete systems.
+         Differential equations, calculus, and others model the physical world.
+
+         \begin{itemize}
+         \item How to incorporate continuous time and space into concurrency models?
+         \item How to go beyond bi-simulation and observational equivalence to reason about continuous systems?
+         \end{itemize}
+         
+         \subsection{Hardware/Software interface}
+
+         Cyber-physical systems have a hardware (physical) and a software (cyber) component
+        
+         \begin{itemize}
+         \item How to model SW/HW interface?
+         \item Are real-time properties properly modeled?
+         \item  How to tackle complexity via abstraction without losing key properties?  (Translucency vs black box approaches)
+         \item How to verify infinite-space systems?
+         \end{itemize}
+
+         \subsection{Dealing with uncertainty}
+
+         Stochastic nature of cyber-physical systems, e.g., weather, requires probabilistic approach.
+        
+         \begin{itemize}
+         \item Are heterogeneous latencies, failure modes properly accounted for?
+         \item How to accurately model, quantify, propagate uncertainty?
+         \item Need for statistical reasoning libraries suitable for interactive/automated proof assistants.
+         \end{itemize}
+
+         \subsection{Modal logics and reasoning}
+        
+         \begin{itemize}
+         \item  Is first-order logic sufficient to reason about cyber-physical systems?
+         \item Are spatial logics, temporal logics, and combinations thereof better suited for specifying and reasoning about CPS?
+         \item What are their expressive power?   Are there efficient decision procedures?  (SAT modulo theory approaches?)
+         \end{itemize}
+
+         \subsection{Robust control}
+
+         Can we reason about properties of feedback loop control systems incorporating the above (hybrid, SW/HW/Network, uncertainty/failures, modal logics/reasoning)?
+         
+         \subsection{AI and data-driven systems}
+
+         As more CPS are model-driven and more models are data-driven, how can we trust these systems?  Are there inherent theoretical limits to dynamic data-driven applications and systems? (e.g., Cramer-Rao lower bounds, etc.)
+
+	% \section*{Appendix}\label{appendix}
 	
-	Please place your content here. See the sample template chapter for further reference on how you could style your content here.
-	
-	%% content
-	
-	\section*{Appendix}\label{appendix}
-	
-	Please place your appendix content here, if applicable.
+	% Please place your appendix content here, if applicable.
 	
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% For your bibliography, you should use a bibtex .bib file and include it here.
@@ -121,4 +232,4 @@
 \end{bibunit}
 	
 %% uncomment the \end{document} statement to make this file stand-alone compileable.
-%\end{document}
+\end{document}
