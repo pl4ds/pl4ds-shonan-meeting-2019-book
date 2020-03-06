@@ -877,8 +877,7 @@ typechecking.
   to the receive-only nature of mailboxes, it does not suffer from the
   distributed delegation issues described in Section~\ref{sec:bt:distrib-deleg}.
   Third, even without considering message ordering, the type system ensures
-  useful
-  safety properties.
+  useful safety properties.
 
   \subsection{Failure handling}\label{sec:bt:failure-handling}
 
@@ -966,16 +965,16 @@ typechecking.
   used should the subsession fail. The authors illustrate the technique on the
   rotating coordinators algorithm~\cite{Tel00:dist-algorithms}.
 
-
   \mypar{Broadcast.}
   Kouzapas et al.~\cite{KouzapasGVG19:async-broadcast} describe a session
   process calculus designed for broadcast communication, where a single sender
-  can send messages to multiple
-  receivers. A key distinguishing feature is that their calculus allows for
-  \emph{unreliable} interactions, where messages can be lost during
-  transmissions. The authors show that their approach is expressive enough to
-  encode the failure-aware Paxos~\cite{Lamport98:paxos} protocol for distributed
-  consensus.
+  can send messages to multiple receivers. A key distinguishing feature is that
+  their calculus allows for \emph{unreliable} interactions, where messages can
+  be lost during transmissions. Similarly to the approach taken by Adameit et
+  al.~\cite{AdameitPN17:link-failures}, default values are used to ensure
+  progress in the case of message loss.  The authors show that their approach is
+  expressive enough to encode the failure-aware Paxos~\cite{Lamport98:paxos}
+  protocol for distributed consensus.
 
   \mypar{Crash handling via a coordinator process.}
   Viering et al.~\cite{VieringCEHZ18:crash-handling} describe a process calculus
@@ -1009,7 +1008,7 @@ typechecking.
   exceptions, message queues are annotated with exception levels; when an
   exception occurs, the system guarantees liveness by propagating an exception
   message through the system. Although the seminal work on considering session
-  types with exceptions, perhaps due in part to its complexity, the system has
+  types with exceptions, perhaps in part due to its complexity, the system has
   not been implemented.
 
   Capecchi et al.~\cite{CapecchiGY16:global-escape} propose a similar approach
