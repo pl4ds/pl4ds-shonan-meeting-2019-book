@@ -53,8 +53,7 @@ envcountchap
 
   \abstract{
   Behavioural types go beyond the power of regular type systems by
-    classifying the \emph{behaviour} of an application at
-  runtime.
+    classifying the \emph{behaviour} of an application.
 %
   Since distributed systems are notoriously difficult to design,
 implement, and check for correctness, behavioural types provide an appealing
@@ -386,6 +385,29 @@ and decline and quit the protocol.
 The global protocol can then be \emph{projected} into \emph{local protocols} for
 each role, which strip out unnecessary information and can therefore be used in
 typechecking.
+
+  \mypar{Distributed implementations.}
+  Hu \& Yoshida~\cite{HuY16:hybrid} were first to implement multiparty session
+  types in Java; their technique relies on two key ideas. The first is to
+  make use of the correspondence between local types and finite state machines
+  to generate Java APIs from Scribble local protocols: coupled with an IDE such
+  as Eclipse, the APIs can then be used in a `dot-driven' style. The second is
+  to use \emph{hybrid} verification in order to enforce linearity. Since full
+  linear type systems are difficult to emulate in mainstream programming
+  languages, Hu et al.\ opt instead to check linear usage of endpoints at
+  runtime. The generated APIs can communicate in a distributed setting using the
+  Java socket API.
+
+  A restriction on classic multiparty session types is that all participants
+  must be known at the point of session initiation.  Hu \&
+  Yoshida~\cite{HuY17:explicit} further build on their API generation framework
+  in order to introduce \emph{explicit connection actions}, which allow
+  participants to join midway through a session. Such an extension is useful in
+  order to invite participants whose identity depends on data exchanged
+  previously in the session.
+  \todo{expressiveness}
+
+  \todo{Hu and Yoshida FASE papers. Parameterised Go paper.}
 
   \mypar{Runtime monitoring.}
   Multiparty session types have a close correspondence with communicating
