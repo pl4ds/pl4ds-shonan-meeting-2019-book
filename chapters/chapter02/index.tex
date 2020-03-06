@@ -1008,11 +1008,15 @@ typechecking.
   supports nested exceptions. To guarantee liveness in the presence of nested
   exceptions, message queues are annotated with exception levels; when an
   exception occurs, the system guarantees liveness by propagating an exception
-  message through the system.
+  message through the system. Although the seminal work on considering session
+  types with exceptions, perhaps due in part to its complexity, the system has
+  not been implemented.
 
-  \todo{Perhaps more detail on interactional exceptions; also summarise
-  \cite{CapecchiGY16:global-escape}}
-
+  Capecchi et al.~\cite{CapecchiGY16:global-escape} propose a similar approach
+  for multiparty session types. Instead of providing services with an exception
+  handling clause, they include an explicit $\mkwd{try}-\mkwd{catch}$ block
+  along with labelled queue levels; care is required in order to propagate the
+  exception to all affected parties.
 
   \subsubsection{Affine sessions.}
 
@@ -1065,8 +1069,29 @@ typechecking.
   is a set containing multiple names, then $x$ is used for multicast.
 
   \section{Future Directions}\label{sec:bt:future}
+  Although there has been much work on behavioural typing, including much
+  pertaining to the distributed session, the field remains ripe for future work.
+  A key theme is putting theory into practice, in particular developing ideas
+  conceived for process calculi into concrete language designs and
+  implementations. In this section, we propose four concrete directions: formal
+  models of distributed delegation algorithms; a programming language based on
+  the Mailbox Calculus; an implementation of exception handling in the
+  multiparty setting; and behavioural types for future combinator libraries.
 
-  \subsection{A language based on the mailbox calculus}
+  \subsection{Formal models of distributed delegation algorithms}
+  To handle the intricacies of session delegation in the presence of
+  distribution and asynchrony, Hu et al.~\cite{HuYH08:session-java} developed
+  distributed delegation algorithms. These algorithms were presented by example
+  and proved informally. It would be interesting to implement the algorithms in
+  a tool such as TLA+~\cite{Lamport2002:tlaplus} in order to provide a reference
+  algorithmic presentation, and to machine-check their correctness.
+
+  Additionally, it would be interesting to perform a performance comparison
+  between the explicit distributed delegation algorithms presented by Hu et
+  al.~\cite{HuYH08:session-java} and the continuation-passing approach presented
+  by Scalas \& Yoshida~\cite{ScalasY16:session-scala}.
+
+  \subsection{A language based on the Mailbox Calculus}
   The Mailbox Calculus, proposed by de'Liguoro \&
   Padovani~\cite{deLiguoroP18:mailbox}, is a particularly
   appealing proposal for a distribution-friendly behavioural type system.
@@ -1081,9 +1106,32 @@ typechecking.
   concurrent language runtime, perhaps by compilation to the BEAM virtual
   machine used by Erlang.
 
+  \subsection{Implementing exception handling for multiparty session types}
+  While Fowler et al.~\cite{FowlerLMD19:stwt} proposed the first full design and
+  implementation of exception handling in a linearly-typed functional
+  programming language with session types, based on the work of Mostrous and
+  Vasconcelos~\cite{MostrousV18:affine}, their work only handles the binary setting. An
+  implementation of multiparty session types with exceptions is still an open
+  problem. A key prerequisite is to firstly develop a language design
+  incorporating multiparty session types, perhaps extending the functional GV
+  calculus~\cite{Wadler14:prop-sessions,LindleyM15:semantics}.
 
-  \subsection{Finagle}
-  \subsection{Failure handling and fault tolerance}
+  \subsection{Behavioural types for future combinator libraries}
+  As touched upon earlier in the chapter, a \emph{future} is a placeholder for a
+  value that is in the process of being computed, and are widely-used for a
+  variety of potentially-blocking operations such as network calls. Libraries
+  such as Finagle~\cite{finagle} provide combinators for sequencing futures and
+  handling potential failures, and have seen significant use in industry. In
+  particular, Finagle is widely used at Twitter.
+
+  Although futures are widely adopted, they provide weak guarantees. As a simple
+  example, it is possible to wait on a function which never terminates, or to
+  create an infinite cycle of futures which will never be resolved.
+  It would be interesting to see whether behavioural types could be used in
+  order to provide guarantees such as deadlock-freedom. Another avenue for
+  exploration could be behavioural-type-guided static analysis techniques such
+  as those used proposed by Lange et al.~\cite{LangeNTY17:fencing-off-go} for
+  the Go programming language~\cite{DonovanK15:go}.
 
   \section{Conclusion}\label{sec:bt:conclusion}
 
