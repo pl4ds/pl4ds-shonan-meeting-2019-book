@@ -405,9 +405,28 @@ typechecking.
   participants to join midway through a session. Such an extension is useful in
   order to invite participants whose identity depends on data exchanged
   previously in the session.
-  \todo{expressiveness}
 
-  \todo{Hu and Yoshida FASE papers. Parameterised Go paper.}
+  A prerequisite to supporting explicit connection actions is to move away from
+  the syntactic notion of global type projection originally described in the
+  multiparty session types literature, to a more flexible notion based on
+  multiparty compatibility~\cite{DenielouY13:multiparty-compatibility}. In this
+  approach, a more permissive projection algorithm is used, and then bounded
+  model checking is used in order to verify safety and progress. In addition to
+  supporting explicit connection actions, the more flexible checking allows more
+  protocols than those supported by the standard syntactic checks.
+
+  The technique of endpoint code generation has been shown to be useful in
+  multiple distributed implementations involving multiparty session types. As an
+  example, Neykova et al.~\cite{neykovaHYA18:session-type-provider} use the
+  endpoint generation technique to implement a \emph{type
+  provider}~\cite{PetricekGS16:type-providers}
+  for the F\# programming language, which allows a Scribble global type to be
+  specified at compile time, and development to be guided by the IDE.
+  Furthermore, Castro et al.~\cite{CastroHJNY19:param-go} make use of the API generation
+  technique, along with extending the theory of parameterised multiparty session
+  types~\cite{DenielouYBH12:param-mpst}, to implement a framework for Go which
+  allows the distributed implementation of programs which can make use of
+  parametric communication patterns such as ring and wave topologies.
 
   \mypar{Runtime monitoring.}
   Multiparty session types have a close correspondence with communicating
@@ -866,13 +885,6 @@ typechecking.
   distributed setting, and we discuss it further in
   Section~\ref{sec:bt:failure-handling}.
 
-  \subsubsection{Parameterised Actor Systems}
-  \todo{Summarise~\cite{CharalambidesDA16:param-actors}}
-
-  \subsubsection{Types for Actor Progress}
-  \todo{Summarise~\cite{CharalambidesPA19:actor-progress}}
-
-
   \subsubsection{Mailbox Types}
   Our na\"ive behavioural type system from Section~\ref{sec:bt:actor-types} was too
   restrictive as it required that messages were received in a particular order,
@@ -900,6 +912,17 @@ typechecking.
   distributed delegation issues described in Section~\ref{sec:bt:distrib-deleg}.
   Third, even without considering message ordering, the type system ensures
   useful safety properties.
+
+  \subsubsection{Types for Actor Progress}
+  While the mailbox calculus is built around typing disciplines governing the
+  use of first-class mailboxes,~\cite{CharalambidesPA19:actor-progress} propose
+  a typing discipline which ensures progress for a more classic actor paradigm.
+  %
+  Specifically, they develop an actor language where message handlers are
+  invoked upon the reception of a message, and the programmer can specify
+  \emph{requirements} that a message is eventually received. The type system,
+  based on typestate~\cite{StromY86:typestate}, ensures that in a well-typed
+  program, all message requirements are eventually fulfilled.
 
   \subsection{Failure handling}\label{sec:bt:failure-handling}
 
