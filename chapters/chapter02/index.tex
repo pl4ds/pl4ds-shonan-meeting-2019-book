@@ -53,24 +53,23 @@ envcountchap
 
   \abstract{
   Behavioural types go beyond the power of regular type systems by
-    classifying the \emph{behaviour} of an application at
-  runtime.
+    classifying the \emph{behaviour} of an application.
 %
   Since distributed systems are notoriously difficult to design,
 implement, and check for correctness, behavioural types provide an appealing
 promise for lightweight verification.
 %
-Unfortunately, several behavioural typing
-disciplines pose challenges in the distributed setting. In this chapter, we
-survey the literature on behavioural types for distribution; we describe the
-difficulties with distributed delegation; we investigate behavioural typing
-disciplines for concurrency models suited to distribution; and describe open
-problems for future work.
+Unfortunately, several behavioural typing disciplines which work well in the
+concurrent setting pose challenges in the presence of distribution. In this chapter,
+we describe the difficulties with distributed delegation, we discuss
+behavioural typing disciplines for concurrency models suited to distribution, we
+describe how behavioural typing disciplines can support failure handling, and
+finally describe open problems for future work.
 }
 	%% content
   \section{Introduction}
 
-  It is no secret that distributed types are unwieldy: they are difficult to
+  It is no secret that distributed systems are unwieldy: they are difficult to
   program, difficult to reason about, and difficult to test. Moving from the
   sequential to the \emph{concurrent} setting is already challenging, in that
   developers must reason about issues such as race conditions, deadlocks, and
@@ -84,15 +83,17 @@ problems for future work.
   expressive type systems which can encode the \emph{behaviour} of a program at
   runtime, and present a tantalising opportunity for lightweight verification of
   behavioural properties of distributed systems, such as deadlock-freedom and
-  communication safety. As an example, \emph{session types} are a particular
+  communication safety. As an example, \emph{session
+  types}~\cite{Honda93:dyadic, HondaVK98:primitives} are a particular
   subclass of behavioural type system which allow static checking of whether a
   program respects a communication protocol.
 
   However, using behavioural types in the distributed setting is still a young
   area. Although several behavioural typing disciplines are well-suited to the
   concurrent setting, they present unique challenges in the distributed setting.
-  We restrict our attention purely to work which pertains explicitly to the
-  interaction between behavioural types and distribution.
+  While behavioural typing is a vast area, in this chapter we focus our
+  attention on work which pertains explicitly to the interaction between
+  behavioural types and distribution.
 
   \subsection{Overview}
 
@@ -227,8 +228,8 @@ problems for future work.
   informally-specified protocol, which cannot be checked for correctness.
 
   \emph{Session types} allow us to generalise this type to be more descriptive.
-  We can assign the channel endpoint for the main thread the following session
-  type:
+  We can assign the following session type to the channel endpoint for the main
+  thread:
 
   \[
     \mkwd{AdditionServer} \defeq
@@ -301,10 +302,10 @@ problems for future work.
   channel endpoint.
 
   To safely implement session types, we require some form of \emph{linearity},
-  generally in the form of a linear type system, to ensure each session endpoint
-  is used precisely once. Without linearity, a session endpoint could be reused
-  or discarded, both of which would mean that we would lose all guarantees that
-  session types provide.
+  generally in the form of a linear type system~\cite{Wadler90:linear-types}, to
+  ensure each session endpoint is used precisely once. Without linearity, a
+  session endpoint could be reused or discarded, both of which would mean that
+  we would lose all guarantees that session types provide.
   %
   Linearity proves to be the main hurdle to overcome when implementing session
   types in programming languages.
@@ -387,6 +388,48 @@ The global protocol can then be \emph{projected} into \emph{local protocols} for
 each role, which strip out unnecessary information and can therefore be used in
 typechecking.
 
+  \mypar{Distributed implementations.}
+  Hu \& Yoshida~\cite{HuY16:hybrid} were first to implement multiparty session
+  types in Java; their technique relies on two key ideas. The first is to
+  make use of the correspondence between local types and finite state machines
+  to generate Java APIs from Scribble local protocols: coupled with an IDE such
+  as Eclipse, the APIs can then be used in a `dot-driven' style. The second is
+  to use \emph{hybrid} verification in order to enforce linearity. Since full
+  linear type systems are difficult to emulate in mainstream programming
+  languages, Hu \& Yoshida instead opt to check linear usage of endpoints at
+  runtime. The generated APIs can communicate in a distributed setting using the
+  Java socket API.
+
+  A restriction on classic multiparty session types is that all participants
+  must be known at the point of session initiation.  Hu \&
+  Yoshida~\cite{HuY17:explicit} further build on their API generation framework
+  in order to introduce \emph{explicit connection actions}, which allow
+  participants to join midway through a session. Such an extension is useful in
+  order to invite participants whose identity depends on data exchanged
+  previously in the session.
+
+  A prerequisite to supporting explicit connection actions is to move away from
+  the syntactic notion of global type projection originally described in the
+  multiparty session types literature, to a more flexible notion based on
+  multiparty compatibility~\cite{DenielouY13:multiparty-compatibility}. In this
+  approach, a more permissive projection algorithm is used, and then bounded
+  model checking is used in order to verify safety and progress. In addition to
+  supporting explicit connection actions, the more flexible checking allows more
+  protocols than those supported by the standard syntactic checks.
+
+  The technique of endpoint code generation has been shown to be useful in
+  multiple distributed implementations involving multiparty session types. As an
+  example, Neykova et al.~\cite{neykovaHYA18:session-type-provider} use the
+  endpoint generation technique to implement a \emph{type
+  provider}~\cite{PetricekGS16:type-providers}
+  for the F\# programming language, which allows a Scribble global type to be
+  specified at compile time, and development to be guided by the IDE.
+  Furthermore, Castro et al.~\cite{CastroHJNY19:param-go} make use of the API generation
+  technique, along with extending the theory of parameterised multiparty session
+  types~\cite{DenielouYBH12:param-mpst}, to implement a framework for Go which
+  allows the distributed implementation of programs which can make use of
+  parametric communication patterns such as ring and wave topologies.
+
   \mypar{Runtime monitoring.}
   Multiparty session types have a close correspondence with communicating
   automata~\cite{DenielouY12:mpst-automata}. Communicating finite-state
@@ -422,9 +465,7 @@ typechecking.
   constraints within protocols~\cite{NeykovaBY17:timed-monitoring}.
 
 
-  \section{Behavioural Types and Distribution}\label{sec:bt:distrib}
-
-  \subsection{Distributed Delegation}\label{sec:bt:distrib-deleg}
+  \section{Distributed Delegation}\label{sec:bt:distrib-deleg}
   Session types are designed as type system for channel endpoints.
   In addition to sending values, we can also send channel endpoints themselves;
   a technique known as \emph{delegation}. Unfortunately, this mobility of
@@ -521,7 +562,7 @@ typechecking.
   A correct distributed delegation algorithm must be able to avoid lost messages
   in all three cases.
 
-  \subsubsection{Na\"ive approaches}
+  \subsection{Na\"ive approaches}
   The simplest solution to avoiding the issues posed by distributed delegation
   is to give up locality, and locate all buffers at some central locations. All
   send and receive operations would then need to contact the central registry;
@@ -538,7 +579,7 @@ typechecking.
   however, impractical since $B$ must remain online indefinitely. Furthermore,
   subsequent delegations can result in long forwarding chains.
 
-  \subsubsection{Distributed Delegation Algorithms}
+  \subsection{Distributed Delegation Algorithms}
   The problem of distributed delegation was first studied by Hu et
   al.~\cite{HuYH08:session-java}, who provided the first distributed
   implementation of binary session types as an extension to Java. In order to
@@ -557,7 +598,7 @@ typechecking.
   take place until the delegation step has completed, signalled by an
   acknowledgement message.
 
-  \subsubsection{Continuation-passing Approaches}
+  \subsection{Continuation-passing Approaches}
 
   \mypar{Linear $\pi$-calculus.}
   Session types were originally studied in the context of specialised process
@@ -633,8 +674,13 @@ typechecking.
   multiparty session types due to the co-ordination needed between different
   parties. Indeed, such an algorithm would likely be complex.
 
-  \subsection{Behavioural types for Actor Systems}\label{sec:bt:actor-types}
-  The \emph{actor model} was introduced as a formalism for artificial
+  \section{Behavioural types for Actor Systems}\label{sec:bt:actor-types}
+  While session types are a popular approach to typing conformance to
+  communication protocols, distributed delegation proves challenging.
+  Consequently, a natural question is to consider typing disciplines for more
+  distribution-friendly message-passing paradigms.
+
+  One such model is the \emph{actor model}, introduced as a formalism for artificial
   intelligence by Hewitt et al.~\cite{HewittBS73:actors}. An actor is an entity with a
   unique identifier which upon receiving a message can perform
   three actions: it can send a finite set of messages to other actors; spawn a
@@ -739,7 +785,7 @@ typechecking.
   judgement can be read ``Under typing environment $\Gamma$, with the ability to
   receive a sequence of values with types $\seq{A}$, term $M$ has type $B$, and the
   remainder of the program has the ability to receive a sequence of values with
-  type $\seq{A}'$. As values are pure, the value typing judgement $\Gamma \vdash
+  type $\seq{A}'$''. As values are pure, the value typing judgement $\Gamma \vdash
   V : A$ states that under type environment $\Gamma$, value $V$ has type $A$.
 
   Given the ability to receive values of types $A \cdot \seq{A}$, rule \textsc{TA-Receive}
@@ -761,7 +807,7 @@ typechecking.
   In the remainder of this section, we survey various approaches to assigning
   behavioural types to actor-like systems.
 
-  \subsubsection{Featherweight Erlang}
+  \subsection{Featherweight Erlang}
   Erlang~\cite{Armstrong10:erlang} is a dynamically-typed concurrent functional
   programming language, originally designed for telecommunications applications.
   Erlang was designed to allow developers to write applications with strong
@@ -795,7 +841,7 @@ typechecking.
   Section~\ref{sec:bt:distrib-deleg}, it is likely that supporting
   delegation would be challenging.
 
-  \subsubsection{Runtime Monitoring}
+  \subsection{Runtime Monitoring}
   In Section~\ref{sec:bt:mpst}, we described how the correspondence between
   multiparty session types and communicating finite state automata has given
   rise to implementations which allow conformance to multiparty session types to
@@ -844,14 +890,7 @@ typechecking.
   distributed setting, and we discuss it further in
   Section~\ref{sec:bt:failure-handling}.
 
-  \subsubsection{Parameterised Actor Systems}
-  \todo{Summarise~\cite{CharalambidesDA16:param-actors}}
-
-  \subsubsection{Types for Actor Progress}
-  \todo{Summarise~\cite{CharalambidesPA19:actor-progress}}
-
-
-  \subsubsection{Mailbox Types}
+  \subsection{Mailbox Types}
   Our na\"ive behavioural type system from Section~\ref{sec:bt:actor-types} was too
   restrictive as it required that messages were received in a particular order,
   which in turn necessitated that a reference used to send messages to an actor
@@ -877,10 +916,21 @@ typechecking.
   to the receive-only nature of mailboxes, it does not suffer from the
   distributed delegation issues described in Section~\ref{sec:bt:distrib-deleg}.
   Third, even without considering message ordering, the type system ensures
-  useful
-  safety properties.
+  useful safety properties.
 
-  \subsection{Failure handling}\label{sec:bt:failure-handling}
+  \subsection{Types for Actor Progress}
+  While the mailbox calculus is built around typing disciplines governing the
+  use of first-class mailboxes, Charalambides et
+  al.~\cite{CharalambidesPA19:actor-progress} propose a typing discipline which
+  ensures progress for a more classic actor paradigm.
+  %
+  Specifically, they develop an actor language where message handlers are
+  invoked upon the reception of a message, and the programmer can specify
+  \emph{requirements} that a message is eventually received. The type system,
+  based on typestate~\cite{StromY86:typestate}, ensures that in a well-typed
+  program, all message requirements are eventually fulfilled.
+
+  \section{Failure handling}\label{sec:bt:failure-handling}
 
   A key difference between the concurrent and distributed settings is the
   ability to handle failures. Whereas in the concurrent setting it is reasonable
@@ -899,7 +949,7 @@ typechecking.
     \label{fig:bt:supervision}
   \end{figure}
 
-  \subsubsection{Erlang}
+  \subsection{Erlang}
   In distributed systems, failure is inevitable. Key to Erlang's success is that
   it was  designed with failure handling as a key concern. In Erlang, processes
   are arranged in supervision hierarchies~\cite{Armstrong03:thesis} (see
@@ -930,7 +980,7 @@ typechecking.
   performance of the approach is evaluated empirically to show that protocol
   recovery outperforms the na\"ive recovery strategies.
 
-  \subsubsection{Availability and crash handling.}
+  \subsection{Availability and crash handling.}
 
   \mypar{Typing availability.}
   Choreographic programming~\cite{CarboneM13:df-design} allows a developer to
@@ -966,16 +1016,16 @@ typechecking.
   used should the subsession fail. The authors illustrate the technique on the
   rotating coordinators algorithm~\cite{Tel00:dist-algorithms}.
 
-
   \mypar{Broadcast.}
   Kouzapas et al.~\cite{KouzapasGVG19:async-broadcast} describe a session
   process calculus designed for broadcast communication, where a single sender
-  can send messages to multiple
-  receivers. A key distinguishing feature is that their calculus allows for
-  \emph{unreliable} interactions, where messages can be lost during
-  transmissions. The authors show that their approach is expressive enough to
-  encode the failure-aware Paxos~\cite{Lamport98:paxos} protocol for distributed
-  consensus.
+  can send messages to multiple receivers. A key distinguishing feature is that
+  their calculus allows for \emph{unreliable} interactions, where messages can
+  be lost during transmissions. Similarly to the approach taken by Adameit et
+  al.~\cite{AdameitPN17:link-failures}, default values are used to ensure
+  progress in the case of message loss.  The authors show that their approach is
+  expressive enough to encode the failure-aware Paxos~\cite{Lamport98:paxos}
+  protocol for distributed consensus.
 
   \mypar{Crash handling via a coordinator process.}
   Viering et al.~\cite{VieringCEHZ18:crash-handling} describe a process calculus
@@ -998,7 +1048,7 @@ typechecking.
   which have crashed), and the system is guaranteed by the type system to be in
   a consistent state at the end of a \mkwd{try}-\mkwd{handle} block.
 
-  \subsubsection{Interactional exceptions and global escape.}
+  \subsection{Interactional exceptions and global escape}
   Carbone et al.~\cite{CarboneHY08:exceptions} were first to consider extending
   an asynchronous session-typed process calculus with an exception handling
   construct. Their key idea is to introduce a service channel type which includes an
@@ -1008,13 +1058,17 @@ typechecking.
   supports nested exceptions. To guarantee liveness in the presence of nested
   exceptions, message queues are annotated with exception levels; when an
   exception occurs, the system guarantees liveness by propagating an exception
-  message through the system.
+  message through the system. Although the seminal work on considering session
+  types with exceptions, perhaps in part due to its complexity, the system has
+  not been implemented.
 
-  \todo{Perhaps more detail on interactional exceptions; also summarise
-  \cite{CapecchiGY16:global-escape}}
+  Capecchi et al.~\cite{CapecchiGY16:global-escape} propose a similar approach
+  for multiparty session types. Instead of providing services with an exception
+  handling clause, they include an explicit $\mkwd{try}-\mkwd{catch}$ block
+  along with labelled queue levels; care is required in order to propagate the
+  exception to all affected parties.
 
-
-  \subsubsection{Affine sessions.}
+  \subsection{Affine sessions}
 
   Linear type systems forbid the properties of weakening (computationally,
   allowing a resource to be discarded) and contraction (computationally,
@@ -1065,8 +1119,29 @@ typechecking.
   is a set containing multiple names, then $x$ is used for multicast.
 
   \section{Future Directions}\label{sec:bt:future}
+  Although there has been much work on behavioural typing, including much
+  pertaining to the distributed session, the field remains ripe for future work.
+  A key theme is putting theory into practice, in particular developing ideas
+  conceived for process calculi into concrete language designs and
+  implementations. In this section, we propose four concrete directions: formal
+  models of distributed delegation algorithms; a programming language based on
+  the Mailbox Calculus; an implementation of exception handling in the
+  multiparty setting; and behavioural types for future combinator libraries.
 
-  \subsection{A language based on the mailbox calculus}
+  \subsection{Formal models of distributed delegation algorithms}
+  To handle the intricacies of session delegation in the presence of
+  distribution and asynchrony, Hu et al.~\cite{HuYH08:session-java} developed
+  distributed delegation algorithms. These algorithms were presented by example
+  and proved informally. It would be interesting to implement the algorithms in
+  a tool such as TLA+~\cite{Lamport2002:tlaplus} in order to provide a reference
+  algorithmic presentation, and to machine-check their correctness.
+
+  Additionally, it would be interesting to perform a performance comparison
+  between the explicit distributed delegation algorithms presented by Hu et
+  al.~\cite{HuYH08:session-java} and the continuation-passing approach presented
+  by Scalas \& Yoshida~\cite{ScalasY16:session-scala}.
+
+  \subsection{A language based on the Mailbox Calculus}
   The Mailbox Calculus, proposed by de'Liguoro \&
   Padovani~\cite{deLiguoroP18:mailbox}, is a particularly
   appealing proposal for a distribution-friendly behavioural type system.
@@ -1081,9 +1156,32 @@ typechecking.
   concurrent language runtime, perhaps by compilation to the BEAM virtual
   machine used by Erlang.
 
+  \subsection{Implementing exception handling for multiparty session types}
+  While Fowler et al.~\cite{FowlerLMD19:stwt} proposed the first full design and
+  implementation of exception handling in a linearly-typed functional
+  programming language with session types, based on the work of Mostrous and
+  Vasconcelos~\cite{MostrousV18:affine}, their work only handles the binary setting. An
+  implementation of multiparty session types with exceptions is still an open
+  problem. A key prerequisite is to firstly develop a language design
+  incorporating multiparty session types, perhaps extending the functional GV
+  calculus~\cite{Wadler14:prop-sessions,LindleyM15:semantics}.
 
-  \subsection{Finagle}
-  \subsection{Failure handling and fault tolerance}
+  \subsection{Behavioural types for future combinator libraries}
+  As touched upon earlier in the chapter, a \emph{future} is a placeholder for a
+  value that is in the process of being computed, and are widely-used for a
+  variety of potentially-blocking operations such as network calls. Libraries
+  such as Finagle~\cite{finagle} provide combinators for sequencing futures and
+  handling potential failures, and have seen significant use in industry. In
+  particular, Finagle is widely used at Twitter.
+
+  Although futures are widely adopted, they provide weak guarantees. As a simple
+  example, it is possible to wait on a function which never terminates, or to
+  create an infinite cycle of futures which will never be resolved.
+  It would be interesting to see whether behavioural types could be used in
+  order to provide guarantees such as deadlock-freedom. Another avenue for
+  exploration could be behavioural-type-guided static analysis techniques such
+  as those used proposed by Lange et al.~\cite{LangeNTY17:fencing-off-go} for
+  the Go programming language~\cite{DonovanK15:go}.
 
   \section{Conclusion}\label{sec:bt:conclusion}
 
