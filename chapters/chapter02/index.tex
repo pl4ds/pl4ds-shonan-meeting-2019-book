@@ -436,7 +436,7 @@ typechecking.
   machines (CFSMs)~\cite{BrandZ83:cfsms} are a version of finite-state automata
   where a transition between two states can be predicated on a communication
   action with another CFSM. A drawback of CFSMs is that properties such as
-  deadlock-freedom are undecidable. Denielou \&
+  deadlock-freedom are undecidable. Deni\'elou \&
   Yoshida~\cite{DenielouY12:mpst-automata} show that multiparty session types
   can be translated into \emph{multiparty session automata}, a class of CFSM
   which satisfy deadlock-freedom by construction.
@@ -447,7 +447,7 @@ typechecking.
   monitor the types of messages sent by processes, as opposed to statically
   ruling out erroneous messages. Crucially for distributed systems,
   the authors prove that if a network of monitored and unmonitored processes
-  behave well according to their speicfications, then the communication in the
+  behave well according to their specifications, then the communication in the
   network precisely follows the specification. A corollary is that if some
   components in a system are statically checked against their session types, and
   other components are monitored, then the entire network will behave according
@@ -717,7 +717,7 @@ typechecking.
   %
   Typed mailboxes were first investigated by~He et al.~\cite{HeWT14:actors}, who
   introduced a typed extension of Akka, called TAkka. The authors highlighted
-  the \emph{type pollution} problem, aparticular challenge with typed mailboxes
+  the \emph{type pollution} problem, a particular challenge with typed mailboxes
   arising due to the coarser granularity of typing.
 
   \begin{figure}[t]
@@ -1000,7 +1000,7 @@ typechecking.
 
   \mypar{Protocol types.}
   Chen et al.~\cite{ChenVBZE16:failure-handling} introduce \emph{protocol
-  types}, a type disipline inspired by multiparty session types. Communication
+  types}, a type discipline inspired by multiparty session types. Communication
   actions are annotated by failure conditions that might be raised as a result
   of a message, and failures can be handled by performing a set of interactions
   described in an associated failure handling block. Analogously to projecting a
@@ -1037,7 +1037,7 @@ typechecking.
 %
   Although the assumptions of a robust co-ordinator process and reliable failure
   detection sound strong, robust processes are implemented in practice using
-  techniques such as redundant services and consensus prototcols; an example is
+  techniques such as redundant services and consensus protocols; an example is
   the popular Apache ZooKeeper project~\cite{JunqueiraR13:zookeeper}. Reliable
   failure detection can be approximated by timeouts, and signalling that a
   process should crash if it is suspected of having failed.
