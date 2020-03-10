@@ -25,10 +25,14 @@
 %% When you hand in your contribution, please uncomment or remove the preamble again.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% start of preamble
+%\documentclass[
+%graybox,
+%envcountchap,
+%natbib
+%]{svmult}
 \documentclass[
 graybox,
-envcountchap,
-natbib
+envcountchap
 ]{svmult}
 
 \usepackage[utf8]{inputenc}
@@ -42,7 +46,6 @@ natbib
 \usepackage{newtxtext}       % 
 \usepackage{newtxmath}       % selects Times Roman as basic font
 
-\usepackage{natbib}
 \usepackage{footmisc}
 
 % Additional packages added. Add necessary packages here.
@@ -62,7 +65,8 @@ natbib
 \usepackage{bibunits}
 \usepackage{acronym}
 \usepackage[nottoc]{tocbibind}
-\usepackage{numberpt}
+%\usepackage{numberpt}
+\usepackage{todonotes}
 
 \newcommand*{\CHAPTERSROOT}{../.}	% root path for chapters.
 \newcommand*{\chapterprefix}{01}	% your chapter number.
@@ -75,140 +79,180 @@ natbib
 
 \begin{bibunit}
 	
-	\title*{Cyber-physical Systems}
-	\author{Carlos Varela and Damien Zufferey}
+\title*{Cyber-physical Systems}
+\author{Carlos Varela and Damien Zufferey}
 	
-	\institute{
-		Carlos Varela \at Rensselaer Polytechnic Institute, USA, \email{cvarela@cs.rpi.edu}
-		\and Damien Zufferey \at Max Planck Institute for Software Systems, Germany \email{zufferey@mpi-sws.org}
-		\and Gul Agha \at University of Illinois, USA, \email{agha@illinois.edu}
-		\and Takuo Watanabe \at Tokyo Institute of Technology, Japan, \email{takuo@c.titech.ac.jp}
-		\and Shoji Yuen \at Nagoya University, Japan, \email{yuen@is.nagoya-u.ac.jp}
-		\and Marjan Sirjani \at Mälardalen University, Sweden, \email{marjan.sirjani@mdh.se}
-	}
-	\maketitle
+\institute{
+	Carlos Varela \at Rensselaer Polytechnic Institute, USA, \email{cvarela@cs.rpi.edu}
+	\and Damien Zufferey \at Max Planck Institute for Software Systems, Germany \email{zufferey@mpi-sws.org}
+	\and Gul Agha \at University of Illinois, USA, \email{agha@illinois.edu}
+	\and Takuo Watanabe \at Tokyo Institute of Technology, Japan, \email{takuo@c.titech.ac.jp}
+	\and Shoji Yuen \at Nagoya University, Japan, \email{yuen@is.nagoya-u.ac.jp}
+	\and Marjan Sirjani \at Mälardalen University, Sweden, \email{marjan.sirjani@mdh.se}
+}
+\maketitle
 	
-	\abstract{Please place your abstract here.}
+\abstract{Please place your abstract here.}
 	
-	%% content
-	\section{Programming Cyber Physical Systems: Introduction}\label{sec:1} %(3pp)
+%% content
+\section{Programming Cyber Physical Systems: Introduction}\label{sec:1} %(3pp)
 
-         CPS = communication, computation, and control
+The term Cyber-Physical Systems (CPS) broadly covers any distributed computing infrastructure interacting with the physical world in a feedback loop.
+At an high level, CPS integrates communication, computation, and control.
+CPS is the evolution of embedded systems as communication and distribution becomes the norm.
+Development and deployment of CPS is increasing~\cite{DBLP:journals/cacm/KumarK15}.
+However, CPS present their own challenges from a software perspective as the usual software abstractions are not always suitable for CPS~\cite{Lee:EECS-2008-8}.
+CPS combines the challenges of normal software with the extra complexity of sensing and acting on a dynamical system.
+With both distributed software and hardware components acting in a shared world, CPS can communicate explicitly through the exchange of messages and implicitly through the environment.
+Communication for CPS need to account for synchronization through messages, time, and the environment.
 
-        \section{Models} %(3pp)
+\todo[inline]{examples: Give concrete examples of CPS and the challenges for each of them}
 
-        \subsection{Control theory}
 
-         Control theory approach (plant model and feedback controller)
 
-         \subsection{Hybrid/Timed Automata}
+\section{Models} %(3pp)
 
-         \subsection{Process Algebra}
+Many computational approaches have been developed for concurrent and real-time communication and computation, but few cover the combination of communication, and dynamic control of physical state.
+In this section, we give a short overview of models used to formalize CPS.
 
-         \subsection{Dynamic Logic}
+    \subsection{Control theory}
 
-         \subsection{Markov Processes}
+    Control theory approach (plant model and feedback controller)
 
-         \section{Communication} %(4pp)
+    \subsection{Hybrid/Timed Automata}
 
-         \subsection{Synchronous rendez-vous communication}
+Modeling paradigms for hybrid systems such as hybrid automata and its extensions \cite{DBLP:conf/lics/Henzinger96,AlurGLS06,DBLP:journals/iandc/LynchSV03} allow expressive dynamics, but little support for compositional programming and reasoning about communication.
+Hybrid Automaton extends discrete state-based models, i.e. automata, with the continuous evolution of a dynamical systems.
+Each state of an hybrid automaton is associated with a set of ordinary differential equations (ODE) and the transitions are guarded with expressions ranging over the continuous variables.
 
-         fits well with automata models, good abstraction for slow dynamics and fast
+An run of an hybrid automaton is an sequence of discrete \emph{jumps} and continuous \emph{flows}.
+When the automaton is in a state, the continuous state changes, or flows, as described by the state's ODE.
+A discrete jumps can happen when the guard of the corresponding transition evaluates to true.
+A jump does two changes to the automaton: (1) it changes the automaton's state and (2) it can changes the values of the continuous states.
 
-         \subsection{Actor Model}
+\todo[inline]{example: temperature control with bang bang controller. start with single room, then multiple rooms with communication and heat transfer between rooms.}
 
-         \subsection{Functional Reactive Programming}
+For the most part, analysis algorithms for these models are intractable.
+Timed automata~\cite{DBLP:journals/tcs/AlurD94} are a special case of hybrid automata where all the continuous dimension are clocks which increase at constant speed.
+The guards on the transitions are limited to difference logic, i.e. inequalities with at most two clock variables, and 
 
-         communication using streams
 
-         \subsection{Session Types}
+    \subsection{Process Algebra and Differential Dynamic Logic}
 
-         % cvarela:  really needed here?  or just a ref to chapter 2?
+Hybrid process algebras \cite{RoundsS03,BERGSTRA2005215,10.1007/978-3-319-53733-7_8,DBLP:conf/case/CampbellTLPOF16} and Differential dynamic logic \cite{PlatzerBook,Platzer18,PlatzerT18} has been developped for the deductive verification for hybrid systems attempts to define logics and invariant-based reasoning to hybrid systems.
+These models enable reasoning about arbitrarily complex concurrent and hybrid programs.
+Differential dynamic logic is a general logical framework to deductively reason about hybrid systems.
+It extends dynamic logic with differential operators and shows sound and (relatively) complete axiomatizations for the logic.
+Keymaera \cite{QueselMLAP16} is an interactive theorem prover based on this approach and it has been used to successfully verify some complex models.
+Extensions of differential dynamic logic have been used to model loosely coupled distributed hybrid systems \cite{Platzer12}.
+However, it has not been extended with structured message-based concurrency or with resource reasoning.
 
-         \subsection{Networked Control System}
+\todo[inline]{explain what it is and give an example}
 
-         centralized vs distributed controller
+    \subsection{Markov Processes}
 
-         \section{Communication Imperfection and Control} %(2pp)
+    %another extension of state-based model but this time with probabilities
 
-         analogous to consistency question in distributed system but about the freshness of physical informations
+\section{Communication} %(4pp)
 
-         \subsection{Clock synchronization}
+    \subsection{Synchronous rendez-vous communication}
 
-         a basis on which other functionality are built
+    fits well with automata models, good abstraction for slow dynamics and fast
 
-         \subsection{Robustness against perturbation of communication}
+    \subsection{Actor Model}
 
-         example: work on Skorokhod Distance by Ichiro Hasuo
+    \subsection{Functional Reactive Programming}
 
-         \subsection{Efficient use of communication}
+    communication using streams
 
-         example: work by Sebastian Trimpe on event triggered and wireless control systems
+    \subsection{Session Types}
 
-         \subsection{Interpolation and extrapolation}
+    % cvarela:  really needed here?  or just a ref to chapter 2?
 
-         example: tfs2 ROS library use timestamped messages to interpolate/extrapolate data
+    \subsection{Networked Control System}
 
-         \section{Impact of the Physical Layer and the Communication} %(2pp)
+    centralized vs distributed controller
 
-         \subsection{Point-to-point vs broadcast communication}
+\section{Communication Imperfection and Control} %(2pp)
 
-         \subsection{Large number of processes}
+    analogous to consistency question in distributed system but about the freshness of physical informations
 
-         swarm / sensor networks
+    \subsection{Clock synchronization}
 
-         \subsection{Line-of-sight / limited range}
+    a basis on which other functionality are built
 
-         gossip protocol
+    \subsection{Robustness against perturbation of communication}
 
-         \section{Open Research Questions} %(2-5pp)
+    example: work on Skorokhod Distance by Ichiro Hasuo
 
-         \subsection{Discrete vs continuous systems}
+    \subsection{Efficient use of communication}
 
-         Process algebra, actors, and others model discrete systems.
-         Differential equations, calculus, and others model the physical world.
+    example: work by Sebastian Trimpe on event triggered and wireless control systems
 
-         \begin{itemize}
-         \item How to incorporate continuous time and space into concurrency models?
-         \item How to go beyond bi-simulation and observational equivalence to reason about continuous systems?
-         \end{itemize}
-         
-         \subsection{Hardware/Software interface}
+    \subsection{Interpolation and extrapolation}
 
-         Cyber-physical systems have a hardware (physical) and a software (cyber) component
-        
-         \begin{itemize}
-         \item How to model SW/HW interface?
-         \item Are real-time properties properly modeled?
-         \item  How to tackle complexity via abstraction without losing key properties?  (Translucency vs black box approaches)
-         \item How to verify infinite-space systems?
-         \end{itemize}
+    example: tfs2 ROS library use timestamped messages to interpolate/extrapolate data
 
-         \subsection{Dealing with uncertainty}
+\section{Impact of the Physical Layer and the Communication} %(2pp)
 
-         Stochastic nature of cyber-physical systems, e.g., weather, requires probabilistic approach.
-        
-         \begin{itemize}
-         \item Are heterogeneous latencies, failure modes properly accounted for?
-         \item How to accurately model, quantify, propagate uncertainty?
-         \item Need for statistical reasoning libraries suitable for interactive/automated proof assistants.
-         \end{itemize}
+    \subsection{Point-to-point vs broadcast communication}
 
-         \subsection{Modal logics and reasoning}
-        
-         \begin{itemize}
-         \item  Is first-order logic sufficient to reason about cyber-physical systems?
-         \item Are spatial logics, temporal logics, and combinations thereof better suited for specifying and reasoning about CPS?
-         \item What are their expressive power?   Are there efficient decision procedures?  (SAT modulo theory approaches?)
-         \end{itemize}
+    \subsection{Large number of processes}
 
-         \subsection{Robust control}
+    swarm / sensor networks
 
-         Can we reason about properties of feedback loop control systems incorporating the above (hybrid, SW/HW/Network, uncertainty/failures, modal logics/reasoning)?
-         
-         \subsection{AI and data-driven systems}
+    \subsection{Line-of-sight / limited range}
 
-         As more CPS are model-driven and more models are data-driven, how can we trust these systems?  Are there inherent theoretical limits to dynamic data-driven applications and systems? (e.g., Cramer-Rao lower bounds, etc.)
+    gossip protocol
+
+\section{Open Research Questions} %(2-5pp)
+
+    \subsection{Discrete vs continuous systems}
+
+    Process algebra, actors, and others model discrete systems.
+    Differential equations, calculus, and others model the physical world.
+
+    \begin{itemize}
+    \item How to incorporate continuous time and space into concurrency models?
+    \item How to go beyond bi-simulation and observational equivalence to reason about continuous systems?
+    \end{itemize}
+    
+    \subsection{Hardware/Software interface}
+
+    Cyber-physical systems have a hardware (physical) and a software (cyber) component
+    
+    \begin{itemize}
+    \item How to model SW/HW interface?
+    \item Are real-time properties properly modeled?
+    \item  How to tackle complexity via abstraction without losing key properties?  (Translucency vs black box approaches)
+    \item How to verify infinite-space systems?
+    \end{itemize}
+
+    \subsection{Dealing with uncertainty}
+
+    Stochastic nature of cyber-physical systems, e.g., weather, requires probabilistic approach.
+    
+    \begin{itemize}
+    \item Are heterogeneous latencies, failure modes properly accounted for?
+    \item How to accurately model, quantify, propagate uncertainty?
+    \item Need for statistical reasoning libraries suitable for interactive/automated proof assistants.
+    \end{itemize}
+
+    \subsection{Modal logics and reasoning}
+    
+    \begin{itemize}
+    \item  Is first-order logic sufficient to reason about cyber-physical systems?
+    \item Are spatial logics, temporal logics, and combinations thereof better suited for specifying and reasoning about CPS?
+    \item What are their expressive power?   Are there efficient decision procedures?  (SAT modulo theory approaches?)
+    \end{itemize}
+
+    \subsection{Robust control}
+
+    Can we reason about properties of feedback loop control systems incorporating the above (hybrid, SW/HW/Network, uncertainty/failures, modal logics/reasoning)?
+    
+    \subsection{AI and data-driven systems}
+
+    As more CPS are model-driven and more models are data-driven, how can we trust these systems?  Are there inherent theoretical limits to dynamic data-driven applications and systems? (e.g., Cramer-Rao lower bounds, etc.)
 
 	% \section*{Appendix}\label{appendix}
 	
@@ -227,7 +271,7 @@ natbib
 	%% uncomment and state path to your .bib to use a bibtex file as your bibliography.
 	%% NOTE: relative paths don't work in \putbib => During development, you might delete the "\CHAPTERSROOT/chapter\chapterprefix/" part to refer to your bib file. When you're done, please make this path absolute by adding the prefix again.
 	%%
-	% \putbib[\CHAPTERSROOT/chapter\chapterprefix/bibliography] %
+	\putbib[\CHAPTERSROOT/chapter\chapterprefix/bibliography] %
 	
 \end{bibunit}
 	
