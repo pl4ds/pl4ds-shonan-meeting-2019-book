@@ -1,0 +1,11 @@
+\begin{tikzpicture}[->, auto, node distance=2cm]
+
+    \node[haState] (off) { OFF \nodepart{second} $\dot t = -0.1 \cdot t$ \\ $t > t_{\mathit{ref}} - h - 1$ };
+    \node[haState] (on) [right of=off,xshift=1cm] { ON  \nodepart{second} $\dot t = 5 -0.1 \cdot t$ \\ $t < t_{\mathit{ref}} + h + 1$ };
+    \node (init) [left of=off] {$t = t_{\mathit{ref}}$};
+
+    \path (init) edge (off);
+    \path (off) edge [bend left] node[above] { $t < t_{\mathit{ref}} - h$ } (on);
+    \path (on) edge [bend left] node[below] { $t > t_{\mathit{ref}} - h$ } (off);
+
+\end{tikzpicture}

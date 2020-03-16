@@ -1,0 +1,46 @@
+\begin{tikzpicture}[->, auto, node distance=45mm]
+
+    \node[haState] (offoff) {
+        OFF/OFF \nodepart{second}
+        $\dot t_1 = -0.1 \cdot t_1 \color{red!90!black}{ +\, 0.07 \cdot (t_2 - t_1)}$ \\
+        $\dot t_2 = -0.2 \cdot t_2 \color{red!90!black}{ +\, 0.03 \cdot (t_1 - t_2)}$ \\
+        $t_1 > t_{\mathit{ref}_1} - h_1 - 1$ \\
+        $t_2 > t_{\mathit{ref}_2} - h_2 - 1$
+    };
+    \node[haState] (onoff) [right of=offoff,xshift=1cm] {
+        ON/OFF \nodepart{second}
+        $\dot t_1 = 5 -0.1 \cdot t_1 \color{red!90!black}{ +\, 0.07 \cdot (t_2 - t_1)}$ \\
+        $\dot t_2 =   -0.2 \cdot t_2 \color{red!90!black}{ +\, 0.03 \cdot (t_1 - t_2)}$ \\
+        $t_1 < t_{\mathit{ref}_1} + h_1 + 1$ \\
+        $t_2 > t_{\mathit{ref}_2} - h_2 - 1$
+    };
+    \node[haState] (offon) [below of=offoff,yshift=7mm] {
+        OFF/ON \nodepart{second}
+        $\dot t_1 =   -0.1 \cdot t_1 \color{red!90!black}{ +\, 0.07 \cdot (t_2 - t_1)}$ \\
+        $\dot t_2 = 8 -0.2 \cdot t_2 \color{red!90!black}{ +\, 0.03 \cdot (t_1 - t_2)}$ \\
+        $t_1 > t_{\mathit{ref}_1} - h_1 - 1$ \\
+        $t_2 < t_{\mathit{ref}_2} + h_2 + 1$
+    };
+    \node[haState,semitransparent] (onon) [below of=onoff,yshift=7mm] {
+        ON/ON  \nodepart{second}
+        $\dot t_1 = 5 -0.1 \cdot t_1 \color{red!90!black}{ +\, 0.07 \cdot (t_2 - t_1)}$ \\
+        $\dot t_2 = 8 -0.2 \cdot t_2 \color{red!90!black}{ +\, 0.03 \cdot (t_1 - t_2)}$ \\
+        $t_1 < t_{\mathit{ref}_1} + h_1 + 1$ \\
+        $t_2 < t_{\mathit{ref}_2} + h_2 + 1$
+    };
+    \node[align=center] (init) [left of=offoff,xshift=1cm] {
+        $t_1 = t_{\mathit{ref}_1}$ \\
+        $t_2 = t_{\mathit{ref}_2}$
+    };
+
+    \path (init) edge (offoff);
+    \path (offoff) edge [bend left=25]  node[above] { $t_1 < t_{\mathit{ref}_1} - h_1$ } (onoff);
+    \path (onoff)  edge [bend left=25]  node[below] { $t_1 > t_{\mathit{ref}_1} - h_1$ } (offoff);
+    \path (offoff) edge [bend left=15]  node[right] { $t_2 < t_{\mathit{ref}_2} - h_2$ } (offon);
+    \path (offon)  edge [bend left=15]  node[left]  { $t_2 > t_{\mathit{ref}_2} - h_2$ } (offoff);
+    \path[semitransparent] (offon)  edge [bend left=25]  node[above] { $t_1 < t_{\mathit{ref}_1} - h_1$ } (onon);
+    \path[semitransparent] (onon)   edge [bend left=25]  node[below] { $t_1 > t_{\mathit{ref}_1} - h_1$ } (offon);
+    \path[semitransparent] (onoff)  edge [bend left=15]  node[right] { $t_2 < t_{\mathit{ref}_2} - h_2$ } (onon);
+    \path[semitransparent] (onon)   edge [bend left=15]  node[left]  { $t_2 > t_{\mathit{ref}_2} - h_2$ } (onoff);
+
+\end{tikzpicture}

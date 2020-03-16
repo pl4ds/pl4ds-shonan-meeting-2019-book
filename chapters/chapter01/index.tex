@@ -68,6 +68,13 @@ envcountchap
 %\usepackage{numberpt}
 \usepackage{todonotes}
 
+
+\usepackage{tikz}
+\usepackage{color}
+\usetikzlibrary{calc,shapes,automata,backgrounds,petri}
+\tikzstyle{haState}=[rectangle split,rectangle split parts=2,draw,align=center,rounded corners]
+
+
 \newcommand*{\CHAPTERSROOT}{../.}	% root path for chapters.
 \newcommand*{\chapterprefix}{01}	% your chapter number.
 
@@ -123,23 +130,34 @@ In this section, we give a short overview of models used to formalize CPS.
 
 Modeling paradigms for hybrid systems such as hybrid automata and its extensions \cite{DBLP:conf/lics/Henzinger96,AlurGLS06,DBLP:journals/iandc/LynchSV03} allow expressive dynamics, but little support for compositional programming and reasoning about communication.
 Hybrid Automaton extends discrete state-based models, i.e. automata, with the continuous evolution of a dynamical systems.
-Each state of an hybrid automaton is associated with a set of ordinary differential equations (ODE) and the transitions are guarded with expressions ranging over the continuous variables.
+Each state of an hybrid automaton is associated with a set of ordinary differential equations (ODE) and an invariant.
+The transitions are guarded with expressions ranging over the continuous variables.
+Fig.~\ref{fig:HA-ex1} shows an hybrid automaton.
+
+\begin{figure}
+\centering
+\input{assets/hybrid_automata_1}
+\caption{Hybrid automata representing a bang-bang controller for an heating system.}
+\label{fig:HA-ex1}
+\end{figure}
 
 An run of an hybrid automaton is an sequence of discrete \emph{jumps} and continuous \emph{flows}.
 When the automaton is in a state, the continuous state changes, or flows, as described by the state's ODE.
 A discrete jumps can happen when the guard of the corresponding transition evaluates to true.
 A jump does two changes to the automaton: (1) it changes the automaton's state and (2) it can changes the values of the continuous states.
 
-\todo[inline]{example: temperature control with bang bang controller. start with single room, then multiple rooms with communication and heat transfer between rooms.}
+Hybrid automaton does not natively include any mechanism for communication.
+Communication needs to be encoded within the finite state structure of the automaton.
 
 For the most part, analysis algorithms for these models are intractable.
 Timed automata~\cite{DBLP:journals/tcs/AlurD94} are a special case of hybrid automata where all the continuous dimension are clocks which increase at constant speed.
-The guards on the transitions are limited to difference logic, i.e. inequalities with at most two clock variables, and 
+The guards on the transitions are limited to difference logic, i.e. inequalities with at most two clock variables.
+This model is expressive enough to express real-time constraints and can by analyzed efficiently. %emptiness is PSpace
 
 
     \subsection{Process Algebra and Differential Dynamic Logic}
 
-Hybrid process algebras \cite{RoundsS03,BERGSTRA2005215,10.1007/978-3-319-53733-7_8,DBLP:conf/case/CampbellTLPOF16} and Differential dynamic logic \cite{PlatzerBook,Platzer18,PlatzerT18} has been developped for the deductive verification for hybrid systems attempts to define logics and invariant-based reasoning to hybrid systems.
+Hybrid process algebras \cite{RoundsS03,BERGSTRA2005215,10.1007/978-3-319-53733-7_8,DBLP:conf/case/CampbellTLPOF16} and Differential dynamic logic \cite{PlatzerBook,Platzer18,PlatzerT18} has been developed for the deductive verification for hybrid systems attempts to define logics and invariant-based reasoning to hybrid systems.
 These models enable reasoning about arbitrarily complex concurrent and hybrid programs.
 Differential dynamic logic is a general logical framework to deductively reason about hybrid systems.
 It extends dynamic logic with differential operators and shows sound and (relatively) complete axiomatizations for the logic.
@@ -151,13 +169,46 @@ However, it has not been extended with structured message-based concurrency or w
 
     \subsection{Markov Processes}
 
-    %another extension of state-based model but this time with probabilities
+    another extension of state-based model but this time with probabilities
 
 \section{Communication} %(4pp)
 
+CPS need communication at the level of the controllers to acheive some goals.
+At the physical level, the physical elements of a CPS influence with each other and the controllers need to adapt.
+Communication between processes is the main mechanism, at the controller level, used when one process observations or actuation capabilities are insufficient to allow it to satifies its specification independently.
+In Fig.~\ref{fig:HA-ex2}, we show an extension of the exmaple from Fig.~\ref{fig:HA-ex1} with two adjacent rooms each having its own heating system.
+We highlight in {\color{red!90!black}red} the interaction of the two physical elements.
+As the room are adjacents, heats spread between the two.
+As presented, this system does not use communication.
+However, we could imagine that there are constraint on the power for the system and that it is not possible to have both heating ON at the same time, i.e.~the lower right state does not exist.
+In that case, coordination between the two controller is required.
+
+
+\begin{figure}
+\centering
+\input{assets/hybrid_automata_2}
+\caption{
+    Hybrid automata representing a the product of two bang-bang controllers for an heating system.
+}
+\label{fig:HA-ex2}
+\end{figure}
+
+In the previous section, we introduced a models for CPS.
+Now, we looks at the role and influence of communication models.
+
     \subsection{Synchronous rendez-vous communication}
 
-    fits well with automata models, good abstraction for slow dynamics and fast
+Synchronous communication is arguabely the simplest communication model.
+It is easy to define, e.g. $P \stackrel{!a}{\rightarrow} P' \land Q \stackrel{?a}{\rightarrow} Q' \Rightarrow P \mid Q \stackrel{\tau}{\rightarrow} P' \mid Q'$.
+As it does not increas the state-space, i.e.~no channels as extra memory, it is also the easiest to analyze.
+
+For CPS, synchronous communication is suitable for system's where the systems dynamic is slow w.r.t. the message propagaion delay.
+However, synchronus communication has some drawback.
+It this model, processes block both on sending and receiving.
+Most message-passing implementation only blocks on receivng.
+Therefore, is is often used in cunjunction with extra sufficient conditions to prevent bloquing.
+For instance, a process is required to be ready to receive a messages at any time \cite{?}. \todo{find ref (interface automata ?)}
+
 
     \subsection{Actor Model}
 
