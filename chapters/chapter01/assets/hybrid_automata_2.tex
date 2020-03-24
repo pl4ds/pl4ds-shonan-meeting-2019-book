@@ -35,12 +35,12 @@
 
     \path (init) edge (offoff);
     \path (offoff) edge [bend left=25]  node[above] { $t_1 < t_{\mathit{ref}_1} - h_1$ } (onoff);
-    \path (onoff)  edge [bend left=25]  node[below] { $t_1 > t_{\mathit{ref}_1} - h_1$ } (offoff);
+    \path (onoff)  edge [bend left=25]  node[below] { $t_1 > t_{\mathit{ref}_1} + h_1$ } (offoff);
     \path (offoff) edge [bend left=15]  node[right] { $t_2 < t_{\mathit{ref}_2} - h_2$ } (offon);
-    \path (offon)  edge [bend left=15]  node[left]  { $t_2 > t_{\mathit{ref}_2} - h_2$ } (offoff);
+    \path (offon)  edge [bend left=15]  node[left]  { $t_2 > t_{\mathit{ref}_2} + h_2$ } (offoff);
     \path[semitransparent] (offon)  edge [bend left=25]  node[above] { $t_1 < t_{\mathit{ref}_1} - h_1$ } (onon);
-    \path[semitransparent] (onon)   edge [bend left=25]  node[below] { $t_1 > t_{\mathit{ref}_1} - h_1$ } (offon);
+    \path[semitransparent] (onon)   edge [bend left=25]  node[below] { $t_1 > t_{\mathit{ref}_1} + h_1$ } (offon);
     \path[semitransparent] (onoff)  edge [bend left=15]  node[right] { $t_2 < t_{\mathit{ref}_2} - h_2$ } (onon);
-    \path[semitransparent] (onon)   edge [bend left=15]  node[left]  { $t_2 > t_{\mathit{ref}_2} - h_2$ } (onoff);
+    \path[semitransparent] (onon)   edge [bend left=15]  node[left]  { $t_2 > t_{\mathit{ref}_2} + h_2$ } (onoff);
 
 \end{tikzpicture}

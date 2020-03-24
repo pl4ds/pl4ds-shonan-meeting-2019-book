@@ -91,18 +91,22 @@ envcountchap
 	
 \institute{
 	Carlos Varela \at Rensselaer Polytechnic Institute, USA, \email{cvarela@cs.rpi.edu}
-	\and Damien Zufferey \at Max Planck Institute for Software Systems, Germany \email{zufferey@mpi-sws.org}
+	\and Damien Zufferey \at Max Planck Institute for Software Systems, Germany, \email{zufferey@mpi-sws.org}
 	\and Gul Agha \at University of Illinois, USA, \email{agha@illinois.edu}
 	\and Takuo Watanabe \at Tokyo Institute of Technology, Japan, \email{takuo@c.titech.ac.jp}
 	\and Shoji Yuen \at Nagoya University, Japan, \email{yuen@is.nagoya-u.ac.jp}
 	\and Marjan Sirjani \at Mälardalen University, Sweden, \email{marjan.sirjani@mdh.se}
+	\and YoungMin Kwon \at SUNY Stonybrook, Korea, \email{youngmin.kwon@sunykorea.ac.kr}
 }
 \maketitle
 	
 \abstract{Please place your abstract here.}
 	
 %% content
-\section{Programming Cyber Physical Systems: Introduction}\label{sec:1} %(3pp)
+%\section{Programming Cyber Physical Systems: Introduction}\label{sec:1}
+\section{Motivation}\label{sec:Intro}
+%(3pp)
+
 
 The term Cyber-Physical Systems (CPS) broadly covers any distributed computing infrastructure interacting with the physical world in a feedback loop.
 At an high level, CPS integrates communication, computation, and control.
@@ -117,7 +121,7 @@ Communication for CPS need to account for synchronization through messages, time
 
 
 
-\section{Models} %(3pp)
+\section{Modeling and Reasoning} %(3pp)
 
 Many computational approaches have been developed for concurrent and real-time communication and computation, but few cover the combination of communication, and dynamic control of physical state.
 In this section, we give a short overview of models used to formalize CPS.
@@ -126,7 +130,7 @@ In this section, we give a short overview of models used to formalize CPS.
 
     Control theory approach (plant model and feedback controller)
 
-    \subsection{Hybrid/Timed Automata}
+    \subsection{Hybrid and Timed Automata}
 
 Modeling paradigms for hybrid systems such as hybrid automata and its extensions \cite{DBLP:conf/lics/Henzinger96,AlurGLS06,DBLP:journals/iandc/LynchSV03} allow expressive dynamics, but little support for compositional programming and reasoning about communication.
 Hybrid Automaton extends discrete state-based models, i.e. automata, with the continuous evolution of a dynamical systems.
@@ -137,6 +141,9 @@ Fig.~\ref{fig:HA-ex1} shows an hybrid automaton.
 \begin{figure}
 \centering
 \input{assets/hybrid_automata_1}
+% t is current temp
+% t_ref is target temp
+% h is hysteresis
 \caption{Hybrid automata representing a bang-bang controller for an heating system.}
 \label{fig:HA-ex1}
 \end{figure}
@@ -154,6 +161,7 @@ Timed automata~\cite{DBLP:journals/tcs/AlurD94} are a special case of hybrid aut
 The guards on the transitions are limited to difference logic, i.e. inequalities with at most two clock variables.
 This model is expressive enough to express real-time constraints and can by analyzed efficiently. %emptiness is PSpace
 
+% Should we also discuss communicating state machines along with automata
 
     \subsection{Process Algebra and Differential Dynamic Logic}
 
@@ -171,14 +179,22 @@ However, it has not been extended with structured message-based concurrency or w
 
     another extension of state-based model but this time with probabilities
 
+\subsection{Actor Models and Timed Rebeca??}
+%\subsection{Actor Model}
+
+\subsection{Functional Reactive Programming}
+
+    communication using streams
+    
+\section{Programming and Verification}\label{sec:Programming}
 \section{Communication} %(4pp)
 
-CPS need communication at the level of the controllers to acheive some goals.
+CPS need communication at the level of the controllers to achieve some goals.
 At the physical level, the physical elements of a CPS influence with each other and the controllers need to adapt.
-Communication between processes is the main mechanism, at the controller level, used when one process observations or actuation capabilities are insufficient to allow it to satifies its specification independently.
-In Fig.~\ref{fig:HA-ex2}, we show an extension of the exmaple from Fig.~\ref{fig:HA-ex1} with two adjacent rooms each having its own heating system.
+Communication between processes is the main mechanism, at the controller level, used when one process observations or actuation capabilities are insufficient to allow it to satisfies its specification independently.
+In Fig.~\ref{fig:HA-ex2}, we show an extension of the example from Fig.~\ref{fig:HA-ex1} with two adjacent rooms each having its own heating system.
 We highlight in {\color{red!90!black}red} the interaction of the two physical elements.
-As the room are adjacents, heats spread between the two.
+As the room are adjacent, heats spread between the two.
 As presented, this system does not use communication.
 However, we could imagine that there are constraint on the power for the system and that it is not possible to have both heating ON at the same time, i.e.~the lower right state does not exist.
 In that case, coordination between the two controller is required.
@@ -198,25 +214,21 @@ Now, we looks at the role and influence of communication models.
 
     \subsection{Synchronous rendez-vous communication}
 
-Synchronous communication is arguabely the simplest communication model.
+Synchronous communication is arguably the simplest communication model.
 It is easy to define, e.g. $P \stackrel{!a}{\rightarrow} P' \land Q \stackrel{?a}{\rightarrow} Q' \Rightarrow P \mid Q \stackrel{\tau}{\rightarrow} P' \mid Q'$.
-As it does not increas the state-space, i.e.~no channels as extra memory, it is also the easiest to analyze.
+As it does not increase the state-space, i.e.~no channels as extra memory, it is also the easiest to analyze.
 
-For CPS, synchronous communication is suitable for system's where the systems dynamic is slow w.r.t. the message propagaion delay.
-However, synchronus communication has some drawback.
+For CPS, synchronous communication is suitable for system's where the systems dynamic is slow w.r.t. the message propagation delay.
+However, synchronous communication has some drawback.
 It this model, processes block both on sending and receiving.
-Most message-passing implementation only blocks on receivng.
-Therefore, is is often used in cunjunction with extra sufficient conditions to prevent bloquing.
+Most message-passing implementation only blocks on receiving.
+Therefore, is is often used in conjunction with extra sufficient conditions to prevent blocking.
 For instance, a process is required to be ready to receive a messages at any time \cite{?}. \todo{find ref (interface automata ?)}
 
 
-    \subsection{Actor Model}
+    
 
-    \subsection{Functional Reactive Programming}
-
-    communication using streams
-
-    \subsection{Session Types}
+%    \subsection{Session Types}
 
     % cvarela:  really needed here?  or just a ref to chapter 2?
 
@@ -224,27 +236,46 @@ For instance, a process is required to be ready to receive a messages at any tim
 
     centralized vs distributed controller
 
-\section{Communication Imperfection and Control} %(2pp)
+\section{Algorithmic and Implementation Aspects} %(2pp)
 
-    analogous to consistency question in distributed system but about the freshness of physical informations
+    Similar to consistency question in distributed system, the freshness of physical information is important for CPS.
+    The main difference between data consistency for CPS and non-CPS is that instead of a logical of operations, CPS are sensitive to time.
+    In previous section, we discussed general models which model time and communication in various ways.
+    In this section, we review general strategies which can be used to deal with time and communication assuming that continuous time and communication with bounded delay, i.e., there is a lower and upper bound on the time it takes to send a message.
 
-    \subsection{Clock synchronization}
+    \subsection{Clock Synchronization}
 
     a basis on which other functionality are built
+    % recent survey: https://ieeexplore.ieee.org/document/7509657, https://d-scholarship.pitt.edu/32584/1/TimeSynchSurvey-Final.pdf (no paywall link)
+    % assuming clock sync is needed to implement some languages: work by Lee at Berkley
+ 
+    \subsection{Robustness against Perturbation of Communication}
 
-    \subsection{Robustness against perturbation of communication}
+    example: work on Skorokhod Distance by Rupak Majumdar and similar work by Ichiro Hasuo
 
-    example: work on Skorokhod Distance by Ichiro Hasuo
+    \subsection{State Estimation, Interpolation, and Extrapolation}
+    
+    Wider discussion about state estimation: (extended) Kalman filter, particle filter, etc.
+    This can then used for interpolation and extrapolation.
+    Example: ROS uses timestamp all over the place, e.g. the TF2 library use timestamped messages to interpolate/extrapolate data
 
-    \subsection{Efficient use of communication}
 
-    example: work by Sebastian Trimpe on event triggered and wireless control systems
+    \subsection{Efficient Use of Communication}
 
-    \subsection{Interpolation and extrapolation}
+    Simple strategy: devise a centralised controller and have processes send messages to each other so that they can each have a sufficiently complete view of the global system.
+    Then each process can compute what it needs to do using the central model and act accordingly.
+    The time-triggered approach fixes a time interval small enough for the controller to work.
+    However, this can be quite inefficient as the communication only depends on time and not on what the underlying physical system does.
+    A different strategy is event-triggered control.
+    The starting point is similar, each process maintains a copy of the global model.
+    When it detects a significant deviation between what it locally measure and the model, then it sends messages to the other processes so they can update their model.
+    This can lead to more efficient use of the network.
+    When the system evolve slowly and the disturbances are small, little communication is needed.
+    When the disturbance are larger and the systems has a faster dynamic, more messages are exchanged.
+    Example: work by Sebastian Trimpe on event triggered and wireless control systems
 
-    example: tfs2 ROS library use timestamped messages to interpolate/extrapolate data
 
-\section{Impact of the Physical Layer and the Communication} %(2pp)
+% \section{Impact of the Physical Layer and the Communication} %(2pp)
 
     \subsection{Point-to-point vs broadcast communication}
 
@@ -322,7 +353,8 @@ For instance, a process is required to be ready to receive a messages at any tim
 	%% uncomment and state path to your .bib to use a bibtex file as your bibliography.
 	%% NOTE: relative paths don't work in \putbib => During development, you might delete the "\CHAPTERSROOT/chapter\chapterprefix/" part to refer to your bib file. When you're done, please make this path absolute by adding the prefix again.
 	%%
-	\putbib[\CHAPTERSROOT/chapter\chapterprefix/bibliography] %
+    \putbib[\CHAPTERSROOT/chapter\chapterprefix/bibliography] %
+
 	
 \end{bibunit}
 	

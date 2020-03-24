@@ -6,6 +6,6 @@
 
     \path (init) edge (off);
     \path (off) edge [bend left] node[above] { $t < t_{\mathit{ref}} - h$ } (on);
-    \path (on) edge [bend left] node[below] { $t > t_{\mathit{ref}} - h$ } (off);
+    \path (on) edge [bend left] node[below] { $t > t_{\mathit{ref}} + h$ } (off);
 
 \end{tikzpicture}
