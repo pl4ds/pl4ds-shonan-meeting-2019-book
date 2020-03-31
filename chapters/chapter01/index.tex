@@ -119,7 +119,15 @@ Communication for CPS need to account for synchronization through messages, time
 
 \todo[inline]{examples: Give concrete examples of CPS and the challenges for each of them}
 
+Consider a {\it smart wing} with piezo-electric sensors on its skin to estimate one of three conditions:  {\it normal}, {\it stall}, and {\it flutter.}  A CPS controlling the wing would need to actuate on it, e.g., reducing its angle of attack to prevent a stall or conversely, increasing its angle of attack to prevent flutter.  Structural health monitoring could also be accomplished whereby cracks detected early would restrict the flight envelope to prevent high-strain maneuvers, such as steep bank angles, that would impose prohibitive loads on damaged areas.
 
+Consider a {\it smart building} with temperature and humidity sensors and actuators that aims to maximize occupants' comfort while minimizing energy consumption.  \todo{Please add some desired properties here.}
+
+Consider a {\it smart car} with multiple cameras, LIDAR, sound, and multimodal sensors navigating in an open environment.  A CPS controlling the car would need to accelerate, slow down, or stop the vehicle if a collision is imminent.
+
+All these {\it smart infrastructure} scenarios depend on sensors providing accurate information and actuators working reliably.  When sensors or actuators fail, it is critical to have both physical and analytical redundancy to detect and isolate the failure, reconfigure the CPS system, and model its behavior under such failure to enable reasoning about its dynamic behavior.
+
+In this chapter, we will describe modeling and reasoning techniques, programming and verification methodologies, and algorithmic and communication aspects for CPS.  We will conclude by discussing open research questions to address the challenges of future CPS.
 
 \section{Modeling and Reasoning} %(3pp)
 
@@ -231,6 +239,8 @@ For instance, a process is required to be ready to receive a messages at any tim
 %    \subsection{Session Types}
 
     % cvarela:  really needed here?  or just a ref to chapter 2?
+    % cvarela 3/24: ok as long as chapter is self-contained, ref to ch2 can be included.
+    % DZ: covers a bit with the process algebra
 
     \subsection{Networked Control System}
 
@@ -244,20 +254,30 @@ For instance, a process is required to be ready to receive a messages at any tim
     In this section, we review general strategies which can be used to deal with time and communication assuming that continuous time and communication with bounded delay, i.e., there is a lower and upper bound on the time it takes to send a message.
 
     \subsection{Clock Synchronization}
-
-    a basis on which other functionality are built
-    % recent survey: https://ieeexplore.ieee.org/document/7509657, https://d-scholarship.pitt.edu/32584/1/TimeSynchSurvey-Final.pdf (no paywall link)
-    % assuming clock sync is needed to implement some languages: work by Lee at Berkley
- 
-    \subsection{Robustness against Perturbation of Communication}
-
-    example: work on Skorokhod Distance by Rupak Majumdar and similar work by Ichiro Hasuo
-
+    
+    As processes share the same physical world which implicitly assume the existence of a global time.
+    At the software level, clock synchronization protocols are used to establish a common time shared by all the processes.
+    Clock synchronization forms the basis on which other functionalities are built.
+    For instance, a common strategy in control is to build a model of the system which can be used for prediction and the optimize what the controller does (Model Predictive Control).
+    In the case of CPS, estimating the state of the system requires exchanging messages and, because of the communication delay, processes need to add timestamps to the sensor reading sent over messages.
+    With this information, it is possible to build an coherent model of the system.
+    While synchronized clocks are most of the time assumed and used at the application level, it is also possible to rely on it while the semantics of programming language \cite{DBLP:conf/dac/LohstrohSGWGSL19,DBLP:conf/emsoft/LohstrohSJWL19}.
+    
+    The most commonly used clock synchronization protocols are Network Time Protocol (NTP) \cite{rfc5905} and Precision Time Protocol (PTP) \cite{4579760}.
+    Both these protocol works by periodically sending timestamped messages to estimate and correct the time difference between a reference time source and the local clock.
+    NTP is implemented purely in software and can achieve millisecond accuracy and PTP, with hardware support, can achieve microsecond accuracy.
+    A more in depth overview of this field is found in a survey by L\'evesque and Tipper \cite{DBLP:journals/comsur/LevesqueT16}.
+  
     \subsection{State Estimation, Interpolation, and Extrapolation}
     
     Wider discussion about state estimation: (extended) Kalman filter, particle filter, etc.
     This can then used for interpolation and extrapolation.
-    Example: ROS uses timestamp all over the place, e.g. the TF2 library use timestamped messages to interpolate/extrapolate data
+    Example: ROS uses timestamp all over the place, e.g. the TF2 library use timestamped messages to interpolate/extrapolate data    
+   
+    \subsection{Robustness against Perturbation of Communication}
+
+    example: work on Skorokhod Distance by Rupak Majumdar \cite{DBLP:conf/cav/DeshmukhMP15,DBLP:conf/hybrid/MajumdarP15} and similar work by Ichiro Hasuo \cite{DBLP:conf/cyphy/KidoSH17,DBLP:conf/adhs/KidoSH18}
+
 
 
     \subsection{Efficient Use of Communication}
@@ -289,7 +309,7 @@ For instance, a process is required to be ready to receive a messages at any tim
 
 \section{Open Research Questions} %(2-5pp)
 
-    \subsection{Discrete vs continuous systems}
+    \subsection{Discrete and continuous systems}
 
     Process algebra, actors, and others model discrete systems.
     Differential equations, calculus, and others model the physical world.
@@ -354,7 +374,6 @@ For instance, a process is required to be ready to receive a messages at any tim
 	%% NOTE: relative paths don't work in \putbib => During development, you might delete the "\CHAPTERSROOT/chapter\chapterprefix/" part to refer to your bib file. When you're done, please make this path absolute by adding the prefix again.
 	%%
     \putbib[\CHAPTERSROOT/chapter\chapterprefix/bibliography] %
-
 	
 \end{bibunit}
 	
