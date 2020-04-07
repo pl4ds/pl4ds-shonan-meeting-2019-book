@@ -134,9 +134,11 @@ In this chapter, we will describe modeling and reasoning techniques, programming
 Many computational approaches have been developed for concurrent and real-time communication and computation, but few cover the combination of communication, and dynamic control of physical state.
 In this section, we give a short overview of models used to formalize CPS.
 
+     \subsection{Temporal logics}
+     
     \subsection{Control theory}
 
-    Control theory approach (plant model and feedback controller)
+Control theory approach (plant model and feedback controller), discuss the kind of property like stability
 
     \subsection{Hybrid and Timed Automata}
 
@@ -181,20 +183,57 @@ Keymaera \cite{QueselMLAP16} is an interactive theorem prover based on this appr
 Extensions of differential dynamic logic have been used to model loosely coupled distributed hybrid systems \cite{Platzer12}.
 However, it has not been extended with structured message-based concurrency or with resource reasoning.
 
+% DZ: restructure
+% 1. process algebra, take the \phi-calculus as an example
+% 2. session types with time and motion
+% 3. DDL
 \todo[inline]{explain what it is and give an example}
 
     \subsection{Markov Processes}
 
-    another extension of state-based model but this time with probabilities
+Concurrent systems are often modeled by a state transition system, such as Kripke structure, where uncertainties in the state transitions are captured by nondeterministic choices of the next state. Properties of such systems can be described using temporal logics such as LTL, CTL, and CTL*. Through a computerized process called model checking, a model can be validated against such properties.
+
+Replacing the nondeterminism in the state transition with state transition probabilities, the state transition systems can be modeled by Markov chains. A Continuous Time Markov Chain (CTMC) comprises a set of states and an infinitesimal generator matrix, representing the rate of the state transition between two states. Similarly, a Discrete Time Markov Chain (DTMC) comprises a set of states and a probability transition matrix, representing the probability of the state transition between two states. Temporal logics like PCTL and PCTL* and their model checkers have been used to quantitatively describe and validate the probability of satisfying certain properties of a model.
+
+Another research direction on Markov chains is to describe statistical properties of a large scale system. In this approach, the state of a system as a whole is a Probability Mass Function (PMF), representing the portions of individual systems in a certain state and the computation paths are the trajectories of PMFs over time. iLTL is a probabilistic temporal logic that can describe the evolutions of PMFs from their initial states to limiting states. 
+
+\begin{figure}
+\centering
+\includegraphics[width=.6\columnwidth]{assets/compartment_model.png}
+\caption{
+    A compartment model (CTMC), describing a drug ADME process: the boxes are the compartments representing Fast-acting Drug, Slow-acting Drug, Plasma, Interstitial Fluid, Site of Utilization, and Cleared respectively; and the numbers are the state transition rates. Re is an artificial state, where the drug is cleared instantly.}
+\label{fig:comparment}
+\end{figure}
+
+For example, Fig.~\ref{fig:comparment} shows a compartment model for a drug Absorption, Distribution, Metabolism, and Excretion (ADME) process. Compartment models are a Markov chain that has been used in Pharmaceutics to describe drug kinetics. Using iLTL one can specify desirable properties such as a minimum toxic concentration, minimum effective concentration, conditions for multi-dosage regimen, etc. and find a prescription (the portions of drug in FD, SD, and Re at the initial state) that can satisfy the specification.
+
 
 \subsection{Actor Models and Timed Rebeca??}
 %\subsection{Actor Model}
+The Reactive Object Language, Rebeca, is an actor-based modeling language  supported by a model checking tool Afra.
+Rebeca is used for modeling and formal verification of concurrent and distributed systems that are mainly event-driven and asynchronous.
+
 
 \subsection{Functional Reactive Programming}
 
     communication using streams
     
 \section{Programming and Verification}\label{sec:Programming}
+
+Starting from more general-purpose languages, like Erlang, ABCL, and Salsa ...
+
+Talk about fairness problems ... these languages are designed for distributed systems.
+
+If we consider CPS covering different dimensions: distributed systems, real-time, hybrid (interface of physical and cyber), then we can talk about languages addressing "distributed" systems,  "real-time" systems.
+
+Then talk about the domain specific languages that target CPS.
+
+Like Pilot and Lingua Franca
+%DZ: maybe discuss ROS, not really a language but based around message passing and communication
+
+\subsection{Lingua Franca}
+Actor-based, a coordination language for cyber-physical systems
+
 \section{Communication} %(4pp)
 
 CPS need communication at the level of the controllers to achieve some goals.
@@ -234,13 +273,6 @@ Therefore, is is often used in conjunction with extra sufficient conditions to p
 For instance, a process is required to be ready to receive a messages at any time \cite{?}. \todo{find ref (interface automata ?)}
 
 
-    
-
-%    \subsection{Session Types}
-
-    % cvarela:  really needed here?  or just a ref to chapter 2?
-    % cvarela 3/24: ok as long as chapter is self-contained, ref to ch2 can be included.
-    % DZ: covers a bit with the process algebra
 
     \subsection{Networked Control System}
 
@@ -295,17 +327,6 @@ For instance, a process is required to be ready to receive a messages at any tim
     Example: work by Sebastian Trimpe on event triggered and wireless control systems
 
 
-% \section{Impact of the Physical Layer and the Communication} %(2pp)
-
-    \subsection{Point-to-point vs broadcast communication}
-
-    \subsection{Large number of processes}
-
-    swarm / sensor networks
-
-    \subsection{Line-of-sight / limited range}
-
-    gossip protocol
 
 \section{Open Research Questions} %(2-5pp)
 
@@ -374,6 +395,7 @@ For instance, a process is required to be ready to receive a messages at any tim
 	%% NOTE: relative paths don't work in \putbib => During development, you might delete the "\CHAPTERSROOT/chapter\chapterprefix/" part to refer to your bib file. When you're done, please make this path absolute by adding the prefix again.
 	%%
     \putbib[\CHAPTERSROOT/chapter\chapterprefix/bibliography] %
+	%\putbib[bibliography] %
 	
 \end{bibunit}
 	
