@@ -1,0 +1,88 @@
+env int samplingRate = 25; 
+env int numberOfNodes = 6;
+env int bufferSize = 2; 
+env int sensorTaskDelay = 2;
+env int OnePacketTransmissionTime = 7; 
+env int miscTaskDelay = 10;
+env int tmdaSlotSize = 10; 
+env int miscPeriod = 120;
+env int packetMaximumSize = 112;
+reactiveclass Sensor(10) {
+    knownrebecs { CPU cpu; }
+    Sensor() { self.sensorFirst(); }
+    msgsrv sensorFirst() {
+        self.sensorLoop() after(?(10, 20, 30));
+    }
+    msgsrv sensorLoop() {
+        int period = 1000 / samplingRate;
+        cpu.sensorEvent(period);
+        self.sensorLoop() after(period);
+ }   }
+reactiveclass Misc(10) { ... }
+reactiveclass CPU(10) {
+    knownrebecs {
+        CommunicationDevice senderDev, receiverDev;
+        Sensor sensor;}
+    statevars { int collectedSamplesCounter; }
+    CPU() { collectedSamplesCounter = 0; }
+    msgsrv sensorEvent(int period) {
+        self.sensorTask(period, currentMessageWaitingTime);
+    }
+    msgsrv sensorTask(int period, int lag) {
+        int tmp = period - lag - currentMessageWaitingTime;
+        assertion(tmp >= 0);
+        delay(sensorTaskDelay);
+        collectedSamplesCounter += 1;
+        if (collectedSamplesCounter == bufferSize){
+            senderDev.send(receiverDev, 0, 1);
+            collectedSamplesCounter = 0;
+    }    }
+   msgsrv miscEvent() { delay(miscTaskDelay); }
+reactiveclass CommunicationDevice (10) {   
+    knownrebecs { WirelessMedium medium; }
+    statevars {
+        byte id;
+        int sendingData;
+        int sendingPacketsNumber;
+        CommunicationDevice receiverDev;}
+    CommunicationDevice(byte myId) {
+        id = myId;
+        sendingData = 0;
+        sendingPacketsNumber = 0;
+        receiverDev = null;}
+    msgsrv send(CommunicationDevice receiver, int data, int packetsNumber) {
+        assertion(receiverDev == null);
+        sendingPacketsNumber = packetsNumber;
+        receiverDev = receiver;
+        sendingData = data;
+        medium.getStatus();}
+    msgsrv receiveStatus(boolean result) { ... }
+    msgsrv receiveResult(boolean result) { ... }
+    msgsrv receiveData(CommunicationDevice receiver, int data, int receivingPacketsNumber) { ... }
+reactiveclass WirelessMedium(5) {
+    statevars {
+        CommunicationDevice senderDev;
+        CommunicationDevice receiverDev;
+        int maxTraffic;}
+    WirelessMedium() {
+        senderDev = null;
+        receiverDev = null;
+        maxTraffic = (125 * 1024) / 8;
+    }
+    msgsrv getStatus() { ... }
+    msgsrv broadcast(CommunicationDevice receiver, int data, int packetsNumber){ ... }
+    msgsrv broadcastingIsCompleted() {
+        senderDev = null;
+        receiverDev = null;
+}    }
+main {
+	WirelessMedium medium():();
+    CPU cpu (sensorNodeSenderDevice, receiver, sensor):();
+    Sensor sensor(cpu):();
+    Misc misc(cpu):();
+    CommunicationDevice sensorNodeSenderDevice(medium): ((byte)1);
+    CommunicationDevice receiver(medium):((byte)0);}
+
+
+
+

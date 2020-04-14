@@ -74,7 +74,44 @@ envcountchap
 \usetikzlibrary{calc,shapes,automata,backgrounds,petri}
 \tikzstyle{haState}=[rectangle split,rectangle split parts=2,draw,align=center,rounded corners]
 
+%%%%%%%%%%%%%%%
+\usepackage{mdframed}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{minibox}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{verbatim}
+\newcommand{\listingcaption}[1]%
+{%
+	\refstepcounter{lstlisting}\hfill%
+	Listing \thelstlisting : #1\hfill%\hfill%
+}%
+\newcommand{\at}{\makeatletter @\makeatother}
 
+\lstdefinelanguage{rebeca}{morekeywords={reactiveclass, knownrebecs, statevars, main, msgsrv, main, define, property, LTL, TCTL, boolean, int, shortint, byte, if, else, while, for, wait, msg, reset, set, self, false, true, now, after, delay, deadline, initial},
+otherkeywords={=>,<-,<\%,<:,>:,\#,@},sensitive=true,morecomment=[l]{//}, morecomment=[n]{/*}{*/},morestring=[b]",morestring=[b]',  morestring=[b]"""}
+
+
+\lstset{frame=tb, language=rebeca,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  %basicstyle={\myttsize\ttfamily},
+  basicstyle={\scriptsize\ttfamily},
+  keywordstyle=\color{blue},
+  numbers=left,
+  numberstyle=\color{black},
+  numbersep=5pt,
+  stepnumber=1,
+  frame=l,
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=2,
+  xleftmargin=15pt,
+  xrightmargin=-10pt}
+%%%%%%%%%%%%%%%
 \newcommand*{\CHAPTERSROOT}{../.}	% root path for chapters.
 \newcommand*{\chapterprefix}{01}	% your chapter number.
 
@@ -208,11 +245,88 @@ Another research direction on Markov chains is to describe statistical propertie
 For example, Fig.~\ref{fig:comparment} shows a compartment model for a drug Absorption, Distribution, Metabolism, and Excretion (ADME) process. Compartment models are a Markov chain that has been used in Pharmaceutics to describe drug kinetics. Using iLTL one can specify desirable properties such as a minimum toxic concentration, minimum effective concentration, conditions for multi-dosage regimen, etc. and find a prescription (the portions of drug in FD, SD, and Re at the initial state) that can satisfy the specification.
 
 
-\subsection{Actor Models and Timed Rebeca??}
+\subsection{Actor Models,  Timed and Hybrid Rebeca}
 %\subsection{Actor Model}
-The Reactive Object Language, Rebeca, is an actor-based modeling language  supported by a model checking tool Afra.
-Rebeca is used for modeling and formal verification of concurrent and distributed systems that are mainly event-driven and asynchronous.
+The Reactive Object Language, Rebeca, is an actor-based modeling language  supported by a model checking tool Afra \cite{DBLP:journals/fuin/SirjaniMSB04,DBLP:conf/birthday/SirjaniJ11}.
+Rebeca is used for modeling and formal verification of concurrent and distributed systems.
+The model of computation in  Rebeca is event-driven and the communication is asynchronous.
+The syntax shown in Figure \ref{fig::TRebecaSyntax} is Java-like. 
+Actors have message queues, each actor takes the message on the top of the queue, execute the method related to that message (called message server) in an atomic and non-preemptive way. While executing a method, messages can be sent to other actors (or itself), and the values of the state variables can change. Sending messages are non-blocking and there is no explicit receive statement.
 
+In Timed Rebeca three keywords are added to model logical time: \texttt{delay}, \texttt{after} and \texttt{deadline}. Time tags are attached to events and states of each actor. Using the keyword \texttt{delay}, one can model progress of time while executing a method. If a \texttt{send} statement is augmented by \texttt{after(t)},  the time tag  of the message when it is put in the queue of the receiver is \texttt{t} units more than the time tag of the message when it is sent. The time tag of the message when it is sent is the current logical time of the sender. By using \texttt{after}, one can model the network delay; periodic events can be modeled using send messages to itself augmented by  \texttt{after}.
+The \texttt{deadline} keyword models the timeout, if the current time of the receiver actor at the time of triggering the event (taking the message to handle it) is more than the expressed deadline then the model checking tool will complain and raise the deadline-miss warning.
+
+
+
+
+\todo[inline]{Hybrid Rebeca}
+
+\begin{figure*}[!htbp]
+ 	\begin{center}
+ 		\small
+ 		\begin{mdframed}
+ 			\begin{align*}
+ 		\mathit{Model} &\Coloneqq  Class^* ~ Main \qquad \\
+ 				Main &\Coloneqq \mathbf{main} ~ \{ ~ InstanceDcl^* ~ \} \qquad \\
+ 				InstanceDcl &\Coloneqq \mathit{className} ~ \mathit{rebecName}~(\langle \mathit{rebecName} \rangle ^*)  : (\langle literal \rangle ^*);\\
+ 				Class &\Coloneqq \mathbf{reactiveclass} ~ \mathit{className} ~ (\mathit{queueLength}) ~ 
+ 				\\ ~~~& ~~~~~~~~~~~~ 
+ 				\{ ~ \mathit{KnownRebecs} ~ \mathit{Vars} ~ Constructor ~ \mathit{MsgSrv}^* ~ \}\\
+ 				KnownRebecs &\Coloneqq \mathbf{knownrebecs} ~ \{ ~ \mathit{VarDcl}^* ~ \} ~ \\
+ 				\mathit{Vars} &\Coloneqq \mathbf{statevars} ~ \{ ~ \mathit{VarDcl}^* ~ \} ~ \\
+ 				\mathit{VarDcl} &\Coloneqq type ~ \langle v \rangle ^+;\\
+ 				Constructor &\Coloneqq className ~ (\langle type ~ v \rangle ^*) ~ \{ ~ Stmt^* ~ \} \\
+ 				MsgSrv &\Coloneqq \mathbf{msgsrv} ~ methodName(\langle type ~ v \rangle ^*) ~ \{ ~ Stmt^* ~ \} \\
+ 				Stmt &\Coloneqq v = e; ~| ~ v = ?(e\langle ,e \rangle^+); ~| ~ Call;| ~ {\it if} ~ (e) ~ \{ ~ Stmt^* ~ \} ~ [else ~ \{ ~ Stmt^* ~ \}]; \\ ~~~& ~~~~~~  |  ~ \mathbf{delay}(t); \\
+ 				Call &\Coloneqq rebecName.methodName(\langle e \rangle ^*) ~  [\mathbf{after}(t)]  [\mathbf{deadline}(t)]
+ 			\end{align*}
+ 		\end{mdframed}
+ 		\caption{Abstract syntax of Timed Rebeca (adapted from \cite{DBLP:journals/scp/KhamespanahSSKI15}). Angled brackets $\langle$...$\rangle$ are used as meta parenthesis, superscript $+$ for repetition at least once, superscript $*$ for repetition zero or more times, whereas using $\langle$...$\rangle$ with repetition denotes a comma separated list. Brackets $[...]$ indicates that the text within the brackets is optional. Identifiers $className$, $rebecName$, $methodName$, $queueLength$, $v$, $literal$, and $type$ denote class name, rebec name, method name, queue length, variable, literal, and type, respectively; and $e$ denotes an (arithmetic, boolean or nondetermistic choice) expression.
+ 		%
+ 		In the instance declaration (rule $InstanceDcl$), the list of rebec names $(\langle \mathit{rebecName} \rangle ^*)$ passed as parameters denotes the known rebecs of that instance, and the list of literals $(\langle literal \rangle ^*)$ denotes the parameters of its constructor.
+ 		%Note that $\mathit{queueLength}$ in the declaration of a reactive class,  is an integer  which specifies the queue length of this actor type. Also, in the instance declaration of rule $\mathit{InstanceDcl}$, a list of $\mathit{rebecName}$s is passed to assign to the known rebecs of that instance and a list of $\mathit{literal}$s is passed as the parameters of its constructor.
+ 		 }
+ 		\label{fig::TRebecaSyntax}
+ 	\end{center}
+ \end{figure*}
+
+\textbf{A Timed Rebeca Example of a Cyber-Physical System.} Wireless sensor and actuator network (WSANs) consist of  nodes that collect the data from the surroundings in order to control a system and reach specific application objectives.
+A WSAN application is a distributed system where multiple nodes are used to monitor  features like temperature, humidity, pressure, or position, and  perform various tasks like smart detecting, and target tracking.
+%
+Building WSAN applications is particularly challenging  because of the complexity of concurrent and distributed programming, networking, real-time requirements, and power constraints. It can be hard to find a configuration that satisfies these constraints while optimizing resource use 
+\cite{DBLP:journals/sttt/KhamespanahSMA18}. 
+WSAN applications are sensitive to timing, with soft deadlines at each step of the process that are required to ensure correct and efficient operation.
+
+Figure \ref{fig::WSAN-actor-model} shows a visual mapping of real world entities to actors in the Rebeca model, and Figure \ref{fig::wsan-model} shows the Rebeca code.
+We have a set of actors (concurrent and asynchronously executing objects) which all are located in a sensor node, the \texttt{Sensor} actors for sensing, \texttt{CPU} actor for processing, \texttt{Communication Device} actor for transmitting (CD), and \texttt{Misc} actor for performing miscellaneous tasks. In some applications a sensor node works as a router and passes the data that it  has received, this is done by the Communication Device.
+Moreover, there is the \texttt{Wireless Medium} actor that models the communication medium.
+
+Wireless Medium  informs the Communication Device of the status of the network and performs broadcasting of the data.
+%Each of these two tasks are modeled as a message server (i.e. event handler) in Rebeca.
+%
+The details of the communication protocol, like the implementation of the Media Access Control (MAC) level, is modeled in the Communication Device actor.
+Different protocols that are modeled in the Communication Device actor basically trigger the two events of the Wireless Medium (asking for the status of the network, and asking for broadcasting the data) in different ways.
+%
+During the application design phase, different components, services, and protocols may be considered, and different implementations of communication protocols can be replaced without significantly impacting the remainder of the model. 
+%For example, TDMA~\cite{DBLP:conf/iscc/El-Hoiydi02} as a MAC-level communication protocol may be replaced by B-MAC~\cite{DBLP:conf/sensys/PolastreHC04} with minimal changes. 
+
+
+
+\begin{figure*}
+\centering
+\includegraphics[width=0.85\textwidth]{assets/TinyOS}
+\caption{Modeling the behavior of a WSAN application in its real-world installation as an actor model 
+(from \cite{DBLP:journals/sttt/KhamespanahSMA18})}
+\label{fig::WSAN-actor-model}
+\end{figure*}
+
+\begin{center}
+\begin{figure}
+\lstinputlisting[language=rebeca, multicols=2]{assets/TinyOSPV6-MACB.rebeca}
+\caption{The Rebeca model of a WSAN application (based on the code in \cite{DBLP:journals/sttt/KhamespanahSMA18})}
+\label{fig::wsan-model}
+\end{figure}
+\end{center}
 
 \subsection{Functional Reactive Programming}
 
@@ -234,7 +348,7 @@ Like Pilot and Lingua Franca
 \subsection{Lingua Franca}
 Actor-based, a coordination language for cyber-physical systems
 
-\section{Communication} %(4pp)
+\section{Communication}
 
 CPS need communication at the level of the controllers to achieve some goals.
 At the physical level, the physical elements of a CPS influence with each other and the controllers need to adapt.
@@ -278,7 +392,7 @@ For instance, a process is required to be ready to receive a messages at any tim
 
     centralized vs distributed controller
 
-\section{Algorithmic and Implementation Aspects} %(2pp)
+\section{Algorithmic and Implementation Aspects}
 
     Similar to consistency question in distributed system, the freshness of physical information is important for CPS.
     The main difference between data consistency for CPS and non-CPS is that instead of a logical of operations, CPS are sensitive to time.
@@ -302,30 +416,42 @@ For instance, a process is required to be ready to receive a messages at any tim
   
     \subsection{State Estimation, Interpolation, and Extrapolation}
     
-    Wider discussion about state estimation: (extended) Kalman filter, particle filter, etc.
-    This can then used for interpolation and extrapolation.
-    Example: ROS uses timestamp all over the place, e.g. the TF2 library use timestamped messages to interpolate/extrapolate data    
+    Estimating the state of a system from partial observations is a common part to many CPS.
+    Given an estimation of the system's past state, the system's dynamic, and partial observations from sensors, the goal is to keep find the most likely state of the system.
+    The problem is often related to sensor fusions and uses algorithms such as (extended) Kalman filter, particle filter, etc.
+    It is possible to use the same strategy in a distributed system with the additional challenge that the observation are delayed by the time it takes to communicate.
+    A common strategy is to first run a clock synchronization algorithm and then timestamp messages when sending them.
+    When a message it received it can be added to the state estimation for the state at the time the observation was made.
+    This can be coupled with interpolation and extrapolation to fill gaps in observation and guess the most likely state before the measurements have been received.
+    For instance, the Robotic Operating System (ROS) \cite{ROS} has timestamped messages and all the navigation, state estimation, and most sensor messages integrate timestamps.
    
-    \subsection{Robustness against Perturbation of Communication}
+    \subsection{Robustness against Communication Delays}
 
-    example: work on Skorokhod Distance by Rupak Majumdar \cite{DBLP:conf/cav/DeshmukhMP15,DBLP:conf/hybrid/MajumdarP15} and similar work by Ichiro Hasuo \cite{DBLP:conf/cyphy/KidoSH17,DBLP:conf/adhs/KidoSH18}
+    An important concern to design a controller is the stability of the system and the controller's ability to correct for disturbances.
+    The robustness of a controller tells how much interference can be tolerated.
+    Usually the disturbances are related to external elements which affect the system but are not explicitly modeled.
+    Therefore, people have tried to consider communication delays as a disturbances and design controllers which are robust against communication imperfection.
 
-
+    As communication delays are about time, the idea is to account for time when looking at how far a system is from its expected trajectory.
+    For instance, a robot may be off from its trajectory by some distance or following its trajectory but just late.
+    Skorokhod metrics \cite{DBLP:conf/cav/DeshmukhMP15,DBLP:conf/hybrid/MajumdarP15,DBLP:conf/cyphy/KidoSH17,DBLP:conf/adhs/KidoSH18} are a prime candidate to quantify CPS robustness because they model both disturbances in space and time.
+    Adding robustness to the proof system may paradoxically simplify it.
+    For instance, if the controller for a motion is robust enough to absorb communication delays, the communication can be modeled with 0-time messages.
 
     \subsection{Efficient Use of Communication}
 
-    Simple strategy: devise a centralised controller and have processes send messages to each other so that they can each have a sufficiently complete view of the global system.
-    Then each process can compute what it needs to do using the central model and act accordingly.
-    The time-triggered approach fixes a time interval small enough for the controller to work.
+   A simple strategy for distributed control is to devise a centralised deterministic controller and then the processes send messages to each other so that they can each maintain a view of the global system.
+    Then each process computes what it needs to do using the central model and acts accordingly.
+    The time-triggered approach fixes a time period for sending messages between processes.
+    This period has to be small enough for the controller to work.
     However, this can be quite inefficient as the communication only depends on time and not on what the underlying physical system does.
-    A different strategy is event-triggered control.
+    A different strategy is event-triggered control \cite{Lemmon2010}.
     The starting point is similar, each process maintains a copy of the global model.
     When it detects a significant deviation between what it locally measure and the model, then it sends messages to the other processes so they can update their model.
     This can lead to more efficient use of the network.
     When the system evolve slowly and the disturbances are small, little communication is needed.
     When the disturbance are larger and the systems has a faster dynamic, more messages are exchanged.
-    Example: work by Sebastian Trimpe on event triggered and wireless control systems
-
+    This approach has been successfully applied constrained network with low bandwidth \cite{DBLP:conf/icra/TrimpeB15} and multi-hop wireless network \cite{DBLP:journals/csysl/BaumannMZT20}
 
 
 \section{Open Research Questions} %(2-5pp)
@@ -394,7 +520,7 @@ For instance, a process is required to be ready to receive a messages at any tim
 	%% uncomment and state path to your .bib to use a bibtex file as your bibliography.
 	%% NOTE: relative paths don't work in \putbib => During development, you might delete the "\CHAPTERSROOT/chapter\chapterprefix/" part to refer to your bib file. When you're done, please make this path absolute by adding the prefix again.
 	%%
-    \putbib[\CHAPTERSROOT/chapter\chapterprefix/bibliography] %
+	\putbib[\CHAPTERSROOT/chapter\chapterprefix/bibliography] %
 	%\putbib[bibliography] %
 	
 \end{bibunit}
