@@ -1,3 +1,4 @@
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % chapter05 - Language Abstractions
@@ -25,13 +26,13 @@
 %% When you hand in your contribution, please uncomment or remove the preamble again.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% start of preamble
-%\documentclass[
-%graybox,
-%envcountchap,
-%%natbib
-%]{svmult}
-%
-%\usepackage[utf8]{inputenc}
+\documentclass[
+graybox,
+envcountchap,
+%natbib
+]{svmult}
+
+\usepackage[utf8]{inputenc}
 %%\usepackage{type1cm}        % activate if the above 3 fonts are 
 %% not available on your system
 %
@@ -61,7 +62,7 @@
 %\usepackage{mathtools}
 %\usepackage{lipsum}
 %\usepackage{import}
-%\usepackage{bibunits}
+\usepackage{bibunits}
 %\usepackage{acronym}
 %\usepackage[nottoc]{tocbibind}
 %\usepackage{numberpt}
@@ -69,11 +70,11 @@
 %\newcommand*{\CHAPTERSROOT}{../.}	% root path for chapters.
 %\newcommand*{\chapterprefix}{05}	% your chapter number.
 %
-%\makeindex % used for the subject index
+\makeindex % used for the subject index
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% end of preamble
 
-%% uncomment the \begin{document} statement to make this file stand-alone compileable.
-%\begin{document}
+% uncomment the \begin{document} statement to make this file stand-alone compileable.
+\begin{document}
 
 \begin{bibunit}
 	
@@ -83,23 +84,419 @@
 	\institute{
 		Wolfgang De Meuter \at Vrije Universiteit Brussel, Belgium, \email{wdmeuter@vub.ac.be}
 		\and Elisa Gonzalez Boix \at Vrije Universiteit Brussel, Belgium, \email{egonzale@vub.ac.be}
-		\and Heather Miller \at Northeastern University, USA, \email{heather.miller@cs.cmu.edu}
 		\and Carla Ferreira \at NOVA University Lisbon, Portugal, \email{carla.ferreira@fct.unl.pt}
+        \and Guido Salvaneschi \at TU Darmstadt, Germany,
+        \email{salvaneschi@st.informatik.tu-darmstadt.de}
 	}
 	\maketitle
 	
-	\abstract{Please place your abstract here.}
+\abstract{
+Programming abstractions play a fundamental role in 
+developing robust scalable and secure distributed systems.
+Over the years, researchers and practitioners have developed
+language mechanisms that have contributed to simplifying the 
+development of distributed systems in several ways.
+First, they enable abstracting over several 
+aspects that complicate the development, such as heterogeneous platforms, 
+different data formats, and low-level communication protocols.
+Second, they restrict programs to certain computational schemes 
+and patterns, for example to enable parallel processing over 
+several machines by forbidding shared state. 
+Third, they directly address well-known issues in distributed systems,
+for example supporting data at different consistency levels or providing 
+notification mechanisms and reaction strategies to faults.
+}
 	
-	%% content
-	\section{Content}\label{sec:1}
+%% content
+
+\section{Introduction}
+\label{sec:intro}
+
+%% Instructions to follow:
+%%[up to 2 pages]
+%%What the chapter is about. Define the subject, e.g., what are CPS?
+%%How is relevant to distributed systems and programming languages?
+%%Promise of what development in PL4DS could achieve.
+
+
+% Guido
+With programming languages being the primary tool developers 
+use to create software, language abstractions have an 
+enormous influence in computer science.
+Generations of programming languages have strongly influenced 
+the complexity, size and stability of software.
+For example, structured programming have led to more 
+maintainable code, garbage collection has dramatically 
+reduced the presence of memory management bugs and
+extensibility mechanisms, such as those introduced
+by object-oriented programming have significantly 
+improved code reuse.
+Not surprisingly, language abstractions
+have played a primary role in distributed systems software,
+too, supporting the development of larger distributed systems
+and enabling crucial properties like scalability and 
+fault tolerance.
+%
+An example of the influence of programming abstractions
+on the success of distributed systems is the MapReduce
+big data processing framework.
+In MapReduce~\cite{Dean:2008:MSD:1327452.1327492}, 
+developers are forced to express their programs
+using a restricted set of programming abstractions, specifically
+a sequence of map and reduce operations from functional programming.
+Thanks to this functional design, data processing can 
+be distributed to several workers that operate in parallel and
+do not share any state. Fault tolerance is ensured by persisting the
+data after each map-reduce computation.
+In summery, functional programming enables scalabilty to 
+thousands of machines and ensures a reliable recovery scheme
+in presence of hardware failures.
+
+
+
+\section{State of the Art}
+\label{sec:sota}
+%% Instructions to follow:
+%%[up to 10 pages]
+%%How is <subject> being used? What are motivating applications? How easy is it to %%program these correctly and efficiently?
+%%What are recent developments?
+
+\section{Research Directions}
+\label{sec:directions}
+%%[at least 5 pages]
+%%What are current weaknesses and open problems? How can they be addressed? Relate back to applications.
+%%What are promising research directions? How can they address the needs of applications?
+%%What are the additional capabilities that could be enabled? Which novel applications will become possible?
+
+\subsection{Computational Models}
+\label{sub:sec:comp}
+
+\subsubsection{The Basics} %% responsible for section: WOLF 
+\label{sub:sub:sec:comp-basic}
+-Actors: types of actors, joeri’s overview paper, Continuous and stochastic variables for actors (agha + carlos)
+-reactors
+-streams
+-Function-based => map/reduce + spark RDDs + function as a service a la Burckhardt.
+-Micro-services
+
+
+Actors are the natural “unit of distribution”
+On clusters: work by haller and miller and scala loci; work by Bernstein and Burckhardt on geo and orleans
+On mobile devices: AmbientTalk
+On web: Javascript and web workers, tierless languages
+Micorservices = another name for actors
+Akka?
+Erlang : phone switches in the 80ies, Elixir
+Applications in IoT and CPS
+
+
+\subsubsection{Advanced Features} %% responsible for section: GUIDO
+\label{sub:sub:sec:comp-adv}
+
+% Guido
+Context-oriented programming 
+(COP)~\cite{hirschfeld08,Salvaneschi:2012:CPS:2221990.2222313} 
+is a programming paradigm that supports
+language abstractions for adapting the software behavior during 
+the execution based on run time conditions. 
+In COP, software applications present a basic behavior and 
+{\it behavioral variations}. Behavioral variations are expressed 
+with {\it layers}, that can be activated at run time. Each layer
+contains the (crosscutting) functionalities associated to a 
+behavioral variation. Once the layer is activated, the functionalities
+it contains can replace the basic functionalities or can compose with 
+them, e.g., similar to before, after and around methods in Lisp's CLOS.
+As multiple layers can be activated at the same time, behavioral
+variations can be composed to define complex adaptive behavior.
+Activation can follow various schemes, for example, it can be lexically
+scoped or dynamically scoped.
+
+
+To address the requirements of distributed systems, COP has been
+applied to the Actor model, combining the condcurrency properties and
+the fault-tolerance guarantees ensured by actors with run time 
+adaptability offered by COP.
+%
+ContextErlang~\cite{Salvaneschi:2012:CIC:2162049.2162072,ContextErlangSCP} 
+is a COP extension of the Erlang programming language
+which supports activating layers on per-actor bases. This way, the 
+behavior of each single actor can be adapted independently, ensuring
+that is conforms to its environment. To ensure that behavioral variations 
+are activated correctly, developers can specify constraints among them
+to ensure that incompatible variations are not activated together 
+and that require relations among variations are automatically satisfied.
+
+
+-Change behavior of group of actors
+-Problem: asynchronous communication only?
+
+\subsection{Modularity}
+\label{sub:sec:mod}
+
+\subsubsection{Basic Modularity}
+\label{sub:sec:mod-basic}
+(wolf)Composition of actors vs. composition of actor behaviours
+(wolf)Composition of, streams, reactors
+
+% Guido
+Multitier languages support developing the code for different tiers 
+(e.g., web client, web server, database) withing the same compilation unit.
+The multitier compiler then splits the code into the parts that 
+correspond to each tier, performs a translation to the target platform 
+(e.g, to JavaScript) and adds the necessary communication code 
+(e.g., using web sockets and HTTP). As a result, multitier languages 
+abstract over several complex aspects of distributed systems,
+including the need for different languages depending on the technology 
+of each tier, communication code, serialization, different data 
+representations and conversions among them.
+%
+Even more importantly, multitier languages ensure that the 
+modularization of a functionality is not imposed by network boundaries,
+but can cross several tiers. For example, searching for emails 
+in an email client is a functionality that spans over several tiers.
+The database needs to perform the query (e.g., to retrieve the emails
+with a certain address in CC), the server needs to convert the result 
+of the query into a format suitable for the web (e.g., JSON) and 
+sent it to the client. Finally, the client needs to process the 
+results sent by the server to generate the user interface 
+(e.g., the elements in the DOM that correspond to each email).
+In a multitier language, this whole functionality can be expressed within
+the same module abstracting over both network communication and 
+differences over data formats.
+
+
+
+
+\subsubsection{Advanced Modularity}
+\label{sub:sec:mod-adv}
+(wolf)DSLs and extensible actor-languages
+(Takuo?)Reflection and Metaprogramming (Takuo’s work)
+
+\subsection{Communication and coordination}
+\label{sub:sec:comm}
+
+-Object designation and service discovery: capabilities, 
+-Point to point messages, multicast, futures, multifutures
+-as opposed to Tuples and “replication-based”)
+-More expressive communication technologies: join patterns, rete/rule
+
+
+\subsection{Fault tolerance} %% responsible for section: Elisa
+\label{sub:sec:fault}
+-actors supervision trees
+-exceptions
+-(Philipp) Lineage - recontration.
+-Replicated data types
+
+
+\section{Research directions}
+\label{sec:dir}
+
+\subsection{Programming Abstractions Evaluation}
+\label{sub:sec:eval}
+
+% Guido
+Despite the primary role played over the years,
+evaluating programming abstractions remains an 
+open challenge. On the one hand, scientific publications
+can be easily be rejected without qualitative case study
+that demonstrates the new programming abstractions at
+work in a concrete scenario.
+On the other hand, the choice of the correct scenario 
+and the evaluation of the result can be arbitrary and 
+we lack common standards in the research community.
+There are some metrics that are somehow related 
+to software quality, like lines of code, code complexity
+metrics, code repetitions and clones. It is however
+unclear how to interpret these values and how to clearly 
+relate them to software quality.
+Yet, more qualitative indicators, such as 
+``intuitiveness'' of code, understandability, 
+``closeness'' to programmer's intentions are
+hard to measure or require organizing complex controlled
+experiments. 
+%
+A first step to improve this state of the things is to 
+select a clear set of examples that are considered relevant 
+(both their amount and type) by the whole research community.
+A number of questions still remain open.
+How to evaluate the implementation of such examples? 
+How to compare it with a ``reference'' implementation.
+Is it possible to have a “Qualitative Argument Checklist” 
+to evaluate abstractions?
+%Can we distill the essence?
+%Problematic argument?
+%APL superior language?
+
+\subsection{Exception Handling in Distributed Systems}
+\label{sub:sec:exc}
+
+-Exceptions as actors
+- Handling the same exception in many actors (Elisa)
+- Handling one exception in actors that do not understand them (Gul)
+-Audit trail: who (which actor) was involved in getting into this state? Which messages caused this? Which interactions?
+
+\section{Outlook and Conclusion}
+\label{sec:conc}
+%%[up to 3 pages]
+%%Why is it now appropriate to pursue this work?
+%%<evangelical section>
+%%summarize promise
 	
-	Please place your content here. See the sample template chapter for further reference on how you could style your content here.
-	
-	%% content
 	
 	\section*{Appendix}\label{appendix}
 	
 	Please place your appendix content here, if applicable.
+	
+	\subsection{Raw Notes from Shonan Brainstorming by Guido}
+	
+	Language Abstractions Group
+
+Topics
+Actors, Reactors
+Programming Models
+Streams
+Modularity, composition
+Fault handling, recovery
+Message passing
+
+Open Questions/Issues
+
+Which abstractions are needed?
+Which problems do we need to solve?
+How to evaluate abstractions and language design?
+Interactions/conflicts/interference between language constructs, abstractions
+Embedded DSLs
+In practice, too few guarantees on communication channels
+How to specify and enforce message-passing protocols in practical languages?
+Static vs. dynamic checking (incl. monitoring) of protocols
+Unreliable channels in session types
+Recent work on session types and unreliable broadcast communication (Kouzapas et al.) -- currently a draft I believe (https://arxiv.org/abs/1902.01353) -- Paxos is a case study
+Not yet on protocol level
+
+
+Research Directions: 10 year perspective
+
+
+General Notes/Discussion
+Actor model not perceived as relevant in all communities
+What’s an actor?
+More general understanding
+Web services can be understood as actors
+Micro-services
+Everything that is doing message-passing?
+Serverless computing is quite different
+Don’t send explicit messages
+Hiding the underlying infrastructure
+Makes it difficult to create stateful services
+Difficult to define protocols for message-passing systems
+Is this a limitation of actor systems?
+How to define sophisticated protocols?
+Behavioral/Session types might be one way
+Big challenge: how to make these type systems practical
+Ugo de Liguoro and Luca Padovani: Mailbox types -- behavioural type system for (generalisation of) actors
+Programmer experience
+usability of such type systems
+usability of compiler errors/messages
+A problem with notation:
+Dispersed over different places in the code
+Nested in the code (various receive statements)
+No high-level overview
+Abstractions often not enforced by current languages
+Left to discipline of programmers
+Example: Erlang, always passing your own pid, etc.
+Is type inference possible?
+Session subtyping in asynchronous systems is undecidable problem
+Mixing subtyping with actors will need heuristics
+Alternative to types:
+Dynamic contracts to model behavioral types, blame
+Group communication
+Multi-futures
+Probabilistic session types
+For lost messages, unreliable communication
+Combining with run-time monitoring
+Handling exceptional behavior
+
+
+Interactions with other language constructs
+Embedding DSLs
+Problems with escaping from DSL, violating invariants
+DevOps
+Distributed Shells, HPC
+Deployment and updating of distributed programs
+Do we oversimplify the problems people try to solve?
+Do we provide too high-level of abstractions for distributed programs/programmers?
+Observed behavior in Scala programmers
+Some people not used to it may try to circumvent type systems
+Example: Apache Spark
+Akka not as typed as it could be?
+How can we get people to adopt complex types? (session types)
+
+
+
+
+Extensions necessary for the actor model
+Continuous streams
+One approach to handle it: reactors
+Parallelism in actors
+Communication between replicated data
+Implicit communication via replication constraints on data
+Mobility, Mobile Actors
+Handling external resources (file handles, network sockets, etc) still problematic
+Moving computation to data
+Load balancing
+Avoid privacy/security concerns
+Cost optimization
+Performance optimization (appropriate computation platform)
+More expressive abstractions
+Synchronization (ABCL)
+Join continuations, join calculus
+Patterns
+Complex conditions on activations
+Rete/rule network to choose activations
+Fairness issues
+grouping/assembly of actors
+Use case: matrix multiplication, block, column structure
+Operations with indexes
+Compiler optimization to coarsen parallel actor code for efficiency
+Use case: IoT
+Groups of devices, types of devices
+Composing actors from fragments, traits
+Security domains Intel, SGX
+Only message-passing interface
+Behavioral learning
+Algorithmic selection of behavior
+Message dispatch based on machine learning
+Program definition based on constraints, instead of imperatively
+Needs heuristics, or machine learning to optimize/realize effectively
+Self-modifying code
+Use case: Prolog, if you find contradiction, you could use it to modify rules
+Code improving itself all the time
+IoT, battery operated systems
+Instead of deadline driven, energy driven
+Self-modifying code may be more optimal
+constraints/domain-specific language approaches
+Constraint-based systems are used in graphics
+Constraints between streams
+Multi-actor constraints
+Synchronization constraints just one example
+Continuous variables, stochastic variables
+Sub-symbolic descriptions of actors
+Fuzziness
+Errors with continuous variables
+
+
+Secure reflection
+Capability-based reflection support
+Shared memory seen as very fine-granular actors
+It’s just read/write messages
+Granularity of actor
+Smart reflection, reflection over system-level functions
+As means to optimize
+
+
+	
+	
 	
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% For your bibliography, you should use a bibtex .bib file and include it here.
@@ -119,4 +516,4 @@
 \end{bibunit}
 	
 %% uncomment the \end{document} statement to make this file stand-alone compileable.
-%\end{document}
+\end{document}
