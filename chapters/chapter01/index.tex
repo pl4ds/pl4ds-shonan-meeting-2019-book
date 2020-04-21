@@ -209,30 +209,108 @@ The guards on the transitions are limited to difference logic, i.e. inequalities
 This model is expressive enough to express real-time constraints and can by analyzed efficiently. %emptiness is PSpace
 
 % Should we also discuss communicating state machines along with automata
+\paragraph{Concurrency and Product Construction.}
+%CPS need communication at the level of the controllers to achieve some goals.
+%At the physical level, the physical elements of a CPS influence with each other and the controllers need to adapt.
+%Communication between processes is the main mechanism, at the controller level, used when one process observations or actuation capabilities are insufficient to allow it to satisfies its specification independently.
+In Fig.~\ref{fig:HA-ex2}, we show an extension of the example from Fig.~\ref{fig:HA-ex1} with two adjacent rooms each having its own heating system.
+We highlight in {\color{red!90!black}red} the interaction of the two physical elements.
+As the room are adjacent, heats spread between the two.
+As presented, this system does not use communication.
+However, we could imagine that there are constraint on the power for the system and that it is not possible to have both heating ON at the same time, i.e.~the lower right state does not exist.
+In that case, coordination between the two controller is required.
+
+%In the previous section, we introduced a models for CPS.
+%Now, we looks at the role and influence of communication models.
+
+The simplest modality of concurrency in hybrid automata is a product construction.
+This corresponds to synchronous rendez-vous communication.
+%Synchronous communication is arguably the simplest communication model.
+It is easy to define, e.g. $P \stackrel{!a}{\rightarrow} P' \land Q \stackrel{?a}{\rightarrow} Q' \Rightarrow P \mid Q \stackrel{\tau}{\rightarrow} P' \mid Q'$.
+As it does not increase the state-space, i.e.~no channels as extra memory, it is also the easiest to analyze.
+
+For CPS, synchronous communication is suitable for system's where the systems dynamic is slow w.r.t. the message propagation delay.
+However, synchronous communication has some drawback.
+It this model, processes block both on sending and receiving.
+Most message-passing implementation only blocks on receiving.
+Therefore, is is often used in conjunction with extra sufficient conditions to prevent blocking.
+For instance, a process is required to be ready to receive a messages at any time \cite{?}. \todo{find ref (interface automata ?)}
+
+If synchronous communication is not an appropriate model, i.e., the message transmission delay is significant relative to the system's dynamic, then it is possible to use a communicating state machine semantics \cite{DBLP:journals/jacm/BrandZ83} augmented with flows.
+
+\begin{figure}
+\centering
+\resizebox{.8\linewidth}{!}{
+    \input{assets/hybrid_automata_2}
+}
+\caption{
+    Hybrid automata representing a the product of two bang-bang controllers for an heating system.
+}
+\label{fig:HA-ex2}
+\end{figure}
 
     \subsection{Process Algebra and Differential Dynamic Logic}
 
-Hybrid process algebras \cite{RoundsS03,BERGSTRA2005215,10.1007/978-3-319-53733-7_8,DBLP:conf/case/CampbellTLPOF16} and Differential dynamic logic \cite{PlatzerBook,Platzer18,PlatzerT18} has been developed for the deductive verification for hybrid systems attempts to define logics and invariant-based reasoning to hybrid systems.
-These models enable reasoning about arbitrarily complex concurrent and hybrid programs.
-Differential dynamic logic is a general logical framework to deductively reason about hybrid systems.
+Hybrid process algebras \cite{RoundsS03,BERGSTRA2005215,10.1007/978-3-319-53733-7_8,DBLP:conf/case/CampbellTLPOF16} extend process algebras in a similar way that hybrid automata extend automata.
+Process algebra identifies the minimal set of constructs required to model a particular type of systems.
+For instance, the $\pi$-calculus \cite{short:MilnerR:calmp1} focuses on communicating systems and features the following constructs:
+  parallel composition ($P | Q$),
+  choice ($P + Q$),
+  recursion ($\mu X. P$), and
+  actions $\pi.P$.
+The action in the $\pi$-calculus are sending ($a(\vec a)$), receiving ($\overline{a}\langle \vec a \rangle$), and internal $\tau$. \todo{CSP notation?}
+The $\phi$-calculus \cite{RoundsS03} extends the $\pi$-calculus by adding a new kind of action for continuous flows.
+The flows are defined in the same way as hybrid automata: an assignement, ODEs, and an invariant.
+
+The minimalism of process algebra lends itself well to deductive reasoning and induction proofs.
+The processes, by their syntax, are the actions they can take, and therefore, process algebra is used to study how processes compare: simulation, bisimulation, etc.
+This stands in contrast to hybrid automata where verification questions such as reachability are the main focus and the techniques is state-space exploration (model checking).
+
+It is worth noting that hybrid process algebra and deductive reasoning can also be used for verification.
+Differential dynamic logic (dL) \cite{PlatzerBook,Platzer18,PlatzerT18} is a prime example.
+dL is a general logical framework to deductively reason about hybrid systems.
 It extends dynamic logic with differential operators and shows sound and (relatively) complete axiomatizations for the logic.
+Logics allow to reason about safety (whether a process stays within a region) and liveness (a process eventually reach a region).
+The proof systems is based on induction and uses differential invariant for safety and differential variant for liveness.
 Keymaera \cite{QueselMLAP16} is an interactive theorem prover based on this approach and it has been used to successfully verify some complex models.
 Extensions of differential dynamic logic have been used to model loosely coupled distributed hybrid systems \cite{Platzer12}.
-However, it has not been extended with structured message-based concurrency or with resource reasoning.
+However, it has not been extended with structured message-based concurrency.
 
+\todo[inline]{a concrete example}
 % DZ: restructure
-% 1. process algebra, take the \phi-calculus as an example
 % 2. session types with time and motion
-% 3. DDL
-\todo[inline]{explain what it is and give an example}
 
     \subsection{Markov Processes}
 
-Concurrent systems are often modeled by a state transition system, such as Kripke structure, where uncertainties in the state transitions are captured by nondeterministic choices of the next state. Properties of such systems can be described using temporal logics such as LTL, CTL, and CTL*. Through a computerized process called model checking, a model can be validated against such properties.
+Concurrent systems are often modeled by a state transition system, such as Kripke structure, where uncertainties in the state transitions are captured by nondeterministic choices of the next state. Replacing the nondeterminism in the state transitions with state transition probabilities, the structure can be modeled by Markov chains. A Continuous Time Markov Chain (CTMC) comprises a set of states and an infinitesimal generator matrix, representing the rate of the state transition between two states. Similarly, a Discrete Time Markov Chain (DTMC) comprises a set of states and a probability transition matrix, representing the probability of the state transition between two states. 
 
-Replacing the nondeterminism in the state transition with state transition probabilities, the state transition systems can be modeled by Markov chains. A Continuous Time Markov Chain (CTMC) comprises a set of states and an infinitesimal generator matrix, representing the rate of the state transition between two states. Similarly, a Discrete Time Markov Chain (DTMC) comprises a set of states and a probability transition matrix, representing the probability of the state transition between two states. Temporal logics like PCTL and PCTL* and their model checkers have been used to quantitatively describe and validate the probability of satisfying certain properties of a model.
 
-Another research direction on Markov chains is to describe statistical properties of a large scale system. In this approach, the state of a system as a whole is a Probability Mass Function (PMF), representing the portions of individual systems in a certain state and the computation paths are the trajectories of PMFs over time. iLTL is a probabilistic temporal logic that can describe the evolutions of PMFs from their initial states to limiting states. 
+Formally, Markov chains can be defined as a stochastic process and represented by a state transition diagram. Let $\mathcal{P}=\langle\Omega,F,P\rangle$ be a probability space, where $\Omega$ is a sample description space, $F\subseteq 2^\Omega$ is a sigma-algebra of events and $P:F\rightarrow[0,1]$ is a probability measure. A Random Variable (RV) $X:\Omega\rightarrow\mathbb{R}$ is a mapping from the sample description space to the real line such that the set $\{\zeta\in\Omega:X(\zeta)\leq x\}$ is an event for every $x\in\mathbb{R}$. For Markov chains with a finite set of states $S=\{s_1,\ldots,s_n\}$, we can write a RV $X$ as a mapping $X:\Omega\rightarrow S$. With this representation, we write $P[X=s_i]$ for the probability $P(\{\zeta\in\Omega:X(\zeta)=s_i\})$. 
+For a discrete RV $X:\Omega\rightarrow S$, the {\em Probability Mass Function} (PMF) of $X$ is a function $P_X:S\rightarrow[0,1]$ that associates a probability to each state $s\in S$ as $P_X(s)=P[X=s]$ such that $\sum_{s\in S} P_X(s)=1$.
+
+
+A stochastic process $X:\mathbb{R}^+\rightarrow(\Omega\rightarrow\mathbb{R})$ is a mapping from the time to RVs. Additionally, a sample function $X:\Omega\rightarrow(\mathbb{R}^+\rightarrow\mathbb{R})$ is also called a stochastic process. A DTMC is a stochastic process $D:\mathbb{N}^+\rightarrow(\Omega\rightarrow S)$ that satisfies the memoryless property $P[D(k)=s_k|D(k-1)=s_{k-1},\ldots,D(0)=s_0]=P[D(k)=s_k|D(k-1)]$ for all $s_k,\ldots,s_0\in S$ and for all $k\in\mathbb{N}^+$. DTMCs can be represented by {\em State Transition Diagram} (STD) of $\langle S,\mathbf{M}\rangle$, where $S=\{s_1,\ldots,s_n\}$ is a set of states and $\mathbf{M}\in\mathbb{R}^{n\times n}$ is a probability transition matrix such that $\mathbf{M}_{ij}$ = $P[D(k+1)=s_i|D(k)=s_j]$ for $k\geq 0$. An STD $D$ is a labeled directed graph whose nodes are $S$ and whose labeled directed edges are $\{(s_j, s_i, \mathbf{M}_{ij})\in S\times S\times [0,1]: \mathbf{M}_{ij} > 0\}$.
+
+
+In order to compute the fraction of paths that satisfy certain properties, an STD of a DTMC can be extended with an initial state and a function that maps each state with a set of atomic properties that are true in the state. Formally, the structure is a quadruple $\langle S, S_i, T, L\rangle$, where
+\begin{itemize}
+\item $S$ is a finite set of states
+\item $S_i\in S$ is an initial state,
+\item $T$ is a transition probability function, $T: S\times S \rightarrow [0,1]$ such that for all $s\in S$
+$\sum_{s’\in S} T(s,s’) = 1$
+\item $L$ is a labeling function assigning atomic propositions to states, i.e. $L: S->2^A$
+\end{itemize}
+
+
+A path from a state $s_0$ in a structure is an infinite sequence
+$s_0 \rightarrow s_1 \rightarrow \cdots \rightarrow s_n \rightarrow\cdots$ of states. Given a structure and a state $s_0$, a probability measure $\mu_m$ can be defined on the set of paths starting from $s_0$. $\mu_m$ is defined on the probability space $\langle X, A\rangle$, where $X$ is the set of paths starting from $s_0$ and $A$ is a sigma-algebra on $X$ generated by sets $\{\sigma \in X: \sigma\uparrow n = s_0 \rightarrow\cdots\rightarrow s_n\}$ of paths with a common finite prefix $s_0\rightarrow\cdots\rightarrow s_n$.
+
+The measure $\mu_m$ is defined as follows:
+$\mu_m(\{\sigma \in X: \sigma\uparrow n = s_0 \rightarrow\cdots\rightarrow s_n\}) = 
+T(s_0,s_1)\times\cdots\times T(s_{n-1},s_n)$ and $\mu_m(\{\sigma \in X: \sigma\uparrow 0 = s_0\}) = 1$. The measure $\mu_m$ defines the measure on all sets of paths in the sigma-algebra $A$.
+
+
+Another research direction on Markov chains is to model statistical properties of a large scale system. In this approach, the state of a system as a whole is a Probability Mass Function (PMF), representing the portions of individual systems in a certain state and the computation paths are the trajectories of PMFs over time.
 
 \begin{figure}
 \centering
@@ -243,6 +321,7 @@ Another research direction on Markov chains is to describe statistical propertie
 \end{figure}
 
 For example, Fig.~\ref{fig:comparment} shows a compartment model for a drug Absorption, Distribution, Metabolism, and Excretion (ADME) process. Compartment models are a Markov chain that has been used in Pharmaceutics to describe drug kinetics. Using iLTL one can specify desirable properties such as a minimum toxic concentration, minimum effective concentration, conditions for multi-dosage regimen, etc. and find a prescription (the portions of drug in FD, SD, and Re at the initial state) that can satisfy the specification.
+
 
 
 \subsection{Actor Models,  Timed and Hybrid Rebeca}
@@ -348,45 +427,6 @@ Like Pilot and Lingua Franca
 \subsection{Lingua Franca}
 Actor-based, a coordination language for cyber-physical systems
 
-\section{Communication}
-
-CPS need communication at the level of the controllers to achieve some goals.
-At the physical level, the physical elements of a CPS influence with each other and the controllers need to adapt.
-Communication between processes is the main mechanism, at the controller level, used when one process observations or actuation capabilities are insufficient to allow it to satisfies its specification independently.
-In Fig.~\ref{fig:HA-ex2}, we show an extension of the example from Fig.~\ref{fig:HA-ex1} with two adjacent rooms each having its own heating system.
-We highlight in {\color{red!90!black}red} the interaction of the two physical elements.
-As the room are adjacent, heats spread between the two.
-As presented, this system does not use communication.
-However, we could imagine that there are constraint on the power for the system and that it is not possible to have both heating ON at the same time, i.e.~the lower right state does not exist.
-In that case, coordination between the two controller is required.
-
-
-\begin{figure}
-\centering
-\input{assets/hybrid_automata_2}
-\caption{
-    Hybrid automata representing a the product of two bang-bang controllers for an heating system.
-}
-\label{fig:HA-ex2}
-\end{figure}
-
-In the previous section, we introduced a models for CPS.
-Now, we looks at the role and influence of communication models.
-
-    \subsection{Synchronous rendez-vous communication}
-
-Synchronous communication is arguably the simplest communication model.
-It is easy to define, e.g. $P \stackrel{!a}{\rightarrow} P' \land Q \stackrel{?a}{\rightarrow} Q' \Rightarrow P \mid Q \stackrel{\tau}{\rightarrow} P' \mid Q'$.
-As it does not increase the state-space, i.e.~no channels as extra memory, it is also the easiest to analyze.
-
-For CPS, synchronous communication is suitable for system's where the systems dynamic is slow w.r.t. the message propagation delay.
-However, synchronous communication has some drawback.
-It this model, processes block both on sending and receiving.
-Most message-passing implementation only blocks on receiving.
-Therefore, is is often used in conjunction with extra sufficient conditions to prevent blocking.
-For instance, a process is required to be ready to receive a messages at any time \cite{?}. \todo{find ref (interface automata ?)}
-
-
 
     \subsection{Networked Control System}
 
@@ -456,6 +496,16 @@ For instance, a process is required to be ready to receive a messages at any tim
 
 \section{Open Research Questions} %(2-5pp)
 
+   \subsection{Distributed and timed systems}
+   
+   We have real-time systems and we have distributed systems, CPSs are real-time and distributed, 
+   \begin{itemize}
+    \item How we address the problem of aligning the  the logical time in the software and the physical time in the physical world? 
+      %I think the above item may fit better under Hardware/Software interface
+    \item How we address the problem of synchronised clocks and clock drifts?
+     %This one is more related to the timed distributed systems
+    \end{itemize}
+   
     \subsection{Discrete and continuous systems}
 
     Process algebra, actors, and others model discrete systems.
