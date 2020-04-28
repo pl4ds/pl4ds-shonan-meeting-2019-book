@@ -134,6 +134,7 @@ otherkeywords={=>,<-,<\%,<:,>:,\#,@},sensitive=true,morecomment=[l]{//}, morecom
 	\and Shoji Yuen \at Nagoya University, Japan, \email{yuen@is.nagoya-u.ac.jp}
 	\and Marjan Sirjani \at Mälardalen University, Sweden, \email{marjan.sirjani@mdh.se}
 	\and YoungMin Kwon \at SUNY Stonybrook, Korea, \email{youngmin.kwon@sunykorea.ac.kr}
+	\and Fatemeh Ghassemi \at University of Tehran, Iran, \email{fghassemi@ut.ac.ir}
 }
 \maketitle
 	
@@ -254,31 +255,55 @@ If synchronous communication is not an appropriate model, i.e., the message tran
 Hybrid process algebras \cite{RoundsS03,BERGSTRA2005215,10.1007/978-3-319-53733-7_8,DBLP:conf/case/CampbellTLPOF16} extend process algebras in a similar way that hybrid automata extend automata.
 Process algebra identifies the minimal set of constructs required to model a particular type of systems.
 For instance, the $\pi$-calculus \cite{short:MilnerR:calmp1} focuses on communicating systems and features the following constructs:
-  parallel composition ($P | Q$),
+  parallel composition ($P \,|\, Q$),
   choice ($P + Q$),
   recursion ($\mu X. P$), and
   actions $\pi.P$.
-The action in the $\pi$-calculus are sending ($a(\vec a)$), receiving ($\overline{a}\langle \vec a \rangle$), and internal $\tau$. \todo{CSP notation?}
-The $\phi$-calculus \cite{RoundsS03} extends the $\pi$-calculus by adding a new kind of action for continuous flows.
-The flows are defined in the same way as hybrid automata: an assignement, ODEs, and an invariant.
+The action in the $\pi$-calculus are
+  sending a message($a(\vec a)$),
+  receiving a message ($\overline{a}\langle \vec a \rangle$), or
+  an internal action ($\tau$). \todo{CSP notation?}
+The $\phi$-calculus \cite{RoundsS03} extends the $\pi$-calculus by adding actions for continuous flows.
+The flows are defined in the same way as hybrid automata:
+  a discrete assignment at the beginning,
+  ODEs while the system flows, and
+  an invariant that defines the boundary of the flow.
 
 The minimalism of process algebra lends itself well to deductive reasoning and induction proofs.
-The processes, by their syntax, are the actions they can take, and therefore, process algebra is used to study how processes compare: simulation, bisimulation, etc.
+By their syntax, the processes are the actions they take, and therefore, process algebra is used to study how processes compare: simulation, bisimulation, etc.
 This stands in contrast to hybrid automata where verification questions such as reachability are the main focus and the techniques is state-space exploration (model checking).
-
+%
 It is worth noting that hybrid process algebra and deductive reasoning can also be used for verification.
 Differential dynamic logic (dL) \cite{PlatzerBook,Platzer18,PlatzerT18} is a prime example.
 dL is a general logical framework to deductively reason about hybrid systems.
 It extends dynamic logic with differential operators and shows sound and (relatively) complete axiomatizations for the logic.
-Logics allow to reason about safety (whether a process stays within a region) and liveness (a process eventually reach a region).
+dL allows reasoning about safety (whether a process stays within a region) and liveness (a process eventually reach a region).
 The proof systems is based on induction and uses differential invariant for safety and differential variant for liveness.
 Keymaera \cite{QueselMLAP16} is an interactive theorem prover based on this approach and it has been used to successfully verify some complex models.
 Extensions of differential dynamic logic have been used to model loosely coupled distributed hybrid systems \cite{Platzer12}.
 However, it has not been extended with structured message-based concurrency.
 
-\todo[inline]{a concrete example}
-% DZ: restructure
-% 2. session types with time and motion
+\todo[inline]{a concrete example. wait for intro so it matches}
+
+From the process algebra, type systems to guarantee the correct execution of communication protocols have been the developed.
+There are called \emph{session types} (more details in Chapter \ref{?}). \todo{ref?}
+The original theory of binary session types (BST) \cite{DBLP:conf/esop/HondaVK98} and multiparty session types (MST) \cite{DBLP:journals/jacm/HondaYC16} assumes fully asynchronous communication models.
+Therefore, they are difficult to apply to CPS where time is a fundamental element.
+%
+MST start with a global description of the communication protocol, called choreography or global type.
+A choreography describes the legal sequences of discrete actions by the different components in the system.
+These actions are sending and receiving messages, or choice between other actions.
+A well-formed choreography can be projected on each participant, and the type checking ensures that they implement their respective role in the protocol.
+%
+MST have been extended with time \cite{DBLP:conf/concur/BocchiYY14,DBLP:conf/esop/BocchiMVY19} for the verification of realtime distributed systems.
+The timing constraints allows the specifications and verification of the causalities of interactions and the times interval in which interactions occur.
+More recently, the motion session calculus \cite{DBLP:conf/ecoop/MajumdarPYZ19} to account for synchronization through messages, time, and the physical environment.
+To describe CPS coordination, trajectories are added to the actions occuring in a choreography.
+The trajectories specify the continuous evolution of the system's state.
+The motion session calculus has been applied to the specification and verification of robotics interactions.
+
+\todo[inline]{apply to the PA example}
+
 
     \subsection{Markov Processes}
 
@@ -326,19 +351,21 @@ For example, Fig.~\ref{fig:comparment} shows a compartment model for a drug Abso
 
 \subsection{Actor Models,  Timed and Hybrid Rebeca}
 %\subsection{Actor Model}
-The Reactive Object Language, Rebeca, is an actor-based modeling language  supported by a model checking tool Afra \cite{DBLP:journals/fuin/SirjaniMSB04,DBLP:conf/birthday/SirjaniJ11}.
+The Reactive Object Language, Rebeca \cite{DBLP:journals/fuin/SirjaniMSB04,DBLP:conf/birthday/SirjaniJ11}, is an actor-based \cite{Hewitt:77:Actors,Agha90} modeling language  supported by a model checking tool Afra \cite{Afra}.
 Rebeca is used for modeling and formal verification of concurrent and distributed systems.
 The model of computation in  Rebeca is event-driven and the communication is asynchronous.
 The syntax shown in Figure \ref{fig::TRebecaSyntax} is Java-like. 
 Actors have message queues, each actor takes the message on the top of the queue, execute the method related to that message (called message server) in an atomic and non-preemptive way. While executing a method, messages can be sent to other actors (or itself), and the values of the state variables can change. Sending messages are non-blocking and there is no explicit receive statement.
 
-In Timed Rebeca three keywords are added to model logical time: \texttt{delay}, \texttt{after} and \texttt{deadline}. Time tags are attached to events and states of each actor. Using the keyword \texttt{delay}, one can model progress of time while executing a method. If a \texttt{send} statement is augmented by \texttt{after(t)},  the time tag  of the message when it is put in the queue of the receiver is \texttt{t} units more than the time tag of the message when it is sent. The time tag of the message when it is sent is the current logical time of the sender. By using \texttt{after}, one can model the network delay; periodic events can be modeled using send messages to itself augmented by  \texttt{after}.
+In Timed Rebeca \cite{DBLP:journals/scp/KhamespanahSSKI15,DBLP:conf/birthday/SirjaniK16} three keywords are added to model logical time: \texttt{delay}, \texttt{after} and \texttt{deadline}. Time tags are attached to events and states of each actor. Using the keyword \texttt{delay}, one can model progress of time while executing a method. If a \texttt{send} statement is augmented by \texttt{after(t)},  the time tag  of the message when it is put in the queue of the receiver is \texttt{t} units more than the time tag of the message when it is sent. The time tag of the message when it is sent is the current logical time of the sender. By using \texttt{after}, one can model the network delay; periodic events can be modeled using send messages to itself augmented by  \texttt{after}.
 The \texttt{deadline} keyword models the timeout, if the current time of the receiver actor at the time of triggering the event (taking the message to handle it) is more than the expressed deadline then the model checking tool will complain and raise the deadline-miss warning.
 
-
-
-
 \todo[inline]{Hybrid Rebeca}
+Hybrid Rebeca is an extension of Timed Rebeca where  physical actors are added to model the physical behavior, and the model of communication among actors can be explicitly defined. % to model the  network.
+ In Hybrid Rebeca \cite{DBLP:conf/cyphy/JahandidehGS18} we have two types of classes, software and physical. Software classes are similar to reactive classes in the Rebeca language where message servers build the body of each class. Physical classes in addition to message servers, can also contain different modes, where the continuous behaviors are specified. A physical actor (instantiated from a physical class) must always have one active mode. This active mode defines the  continuous behavior of the actor. The modes of physical classes are similar to the concept of locations in hybrid automata. 
+Semantics of Hybrid Rebeca is given in terms of Hybrid automata. For a given Hybrid Rebeca model, a monolithic  hybrid automaton is derived and a set of guidelines are provided for  reducing the verification of timed properties to reachability analysis of hybrid automaton. 
+%
+
 
 \begin{figure*}[!htbp]
  	\begin{center}
@@ -402,7 +429,7 @@ During the application design phase, different components, services, and protoco
 \begin{center}
 \begin{figure}
 \lstinputlisting[language=rebeca, multicols=2]{assets/TinyOSPV6-MACB.rebeca}
-\caption{The Rebeca model of a WSAN application (based on the code in \cite{DBLP:journals/sttt/KhamespanahSMA18})}
+\caption{The Rebeca model of a WSAN application (from \cite{DBLP:conf/birthday/Sirjani18})}
 \label{fig::wsan-model}
 \end{figure}
 \end{center}
