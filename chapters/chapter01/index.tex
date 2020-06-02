@@ -159,7 +159,7 @@ Communication for CPS need to account for synchronization through messages, time
 
 Consider a {\it smart wing} with piezo-electric sensors on its skin to estimate one of three conditions:  {\it normal}, {\it stall}, and {\it flutter.}  A CPS controlling the wing would need to actuate on it, e.g., reducing its angle of attack to prevent a stall or conversely, increasing its angle of attack to prevent flutter.  Structural health monitoring could also be accomplished whereby cracks detected early would restrict the flight envelope to prevent high-strain maneuvers, such as steep bank angles, that would impose prohibitive loads on damaged areas.
 
-Consider a {\it smart building} with temperature and humidity sensors and actuators that aims to maximize occupants' comfort while minimizing energy consumption.  \todo{Please add some desired properties here.}
+Consider a \textit{smart building} with environmental sensors (temperature, humidity, infrared, CO$_2$ sensors) and actuators (air-conditioners, window shades, ventilation ports) that aims to maximize occupants' comfort. A CPS would control not only the air-conditioners in the building but also the ventilation ports of some rooms people are gathering to improve the air-environment in the areas by, for example,  lowering the CO$_2$ content rate. The problem is how to minimize the total energy consumption while providing comfort environment (temperature, humidity, air pollution, etc.).
 
 Consider a {\it smart car} with multiple cameras, LIDAR, sound, and multimodal sensors navigating in an open environment.  A CPS controlling the car would need to accelerate, slow down, or stop the vehicle if a collision is imminent.
 
@@ -172,27 +172,84 @@ In this chapter, we will describe modeling and reasoning techniques, programming
 Many computational approaches have been developed for concurrent and real-time communication and computation, but few cover the combination of communication, and dynamic control of physical state.
 In this section, we give a short overview of models used to formalize CPS.
 
-     \subsection{Temporal logics}
-     
-    \subsection{Control theory}
+\emph{A remark about control theory.}
+It is hardly possible to discuss CPS without mentioning control theory.
+Control theory studies the algorithm which are used to process sensor inputs and produce what action to take to achieve an objective.
+At the lowest level, a controller tries to make the state of a system, also called plant, follow a reference trajectory.
+At the higher level, control can also cover planning both at the discrete and continuous level.
+In this chapter, we look at questions such as how to implement a controller, what are the appropriate abstractions, and how to verify the controller or its implementation satisfies some properties.
+In Section~\ref{sec:implementation}, we more closely at point of intersection where programming abstraction and control techniques meet.
 
-Control theory approach (plant model and feedback controller), discuss the kind of property like stability
 
-    \subsection{Hybrid and Timed Automata}
+\subsection{Specifications and Temporal Logics}
+
+Along the models for CPS, we also need a language to write their specification.
+Most CPS are \emph{reactive systems}.
+Rather than programs which start with some input, perform a computation, and produce an output, CPS runs ``forever''.
+They continuously process new sensor readings or messages over time and produce outputs to adapt the state of the system.
+Therefore, temporal logics are commonly used to formalize CPS specification.
+
+Temporal logics are special logics to express properties of sequences of events.
+For instance, it is possible to express properties such as ``event $A$ always holds'' or ``event $A$ must holds until event $B$ happens''.
+Temporal logics comes in two main families:
+    branching time, or state-based, logics like CTL \cite{DBLP:conf/lop/ClarkeE81}, and
+    linear time, or trace-based, logics like LTL \cite{DBLP:conf/focs/Pnueli77}.
+Temporal logics are deeply connected to automata theory which makes most verification questions decidable, albeit computationally expensive.
+
+Our goal is only to give a brief overview of the domain.
+We first introduce the discrete version of the logic, and then, explain how it has been adapted to deal with CPS.
+Let us take the example of LTL.
+
+\todo[inline]{LTL syntax and semantics}
+
+% https://people.eecs.berkeley.edu/~sseshia/fmee/lectures/EECS294-98_Spring2014_STL_Lecture.pdf
+
+LTL is evaluated over infinite words.
+We can consider that each new letter in the word correspond to one time unit to reason in discrete time.
+However, CPS deal with continuous time.
+Therefore, LTL has been adapted to real time.
+One such adaptation is Metric Interval Temporal Logic (MITL) \cite{DBLP:journals/jacm/AlurFH96}.
+%
+To deal with real time, words are generalized to \emph{signals}.
+A signal is a function from $\mathbb{R}_+$ (time) to letters.
+Then the temporal operators are annotated with time intervals.
+For instance, $A {\cal U}_{[1,2]} B$ holds over a signal $s$ at time $t$ if $\exists t' \in [1,2].~ B \in s(t+t')$ and $\forall t'' \in (0,t').~ A \in s(t+t'')$.
+
+MITL has a more precise view of time but the event still comes from a finite set of discrete events.
+In Signal Temporal Logic (STL) \cite{DBLP:conf/formats/MalerN04} events are predicates over trajectories.
+An event is true at a given time if the underlying predicate evaluates to true at that time.
+
+\todo[inline]{STL example}
+
+In Section \ref{sec:pctl} and \ref{sec:itlt}, we will discuss temporal logics to deal with probabilities.
+
+%distance and robustness, planning (ltlmop), GR1, etc.
+
+\subsection{Hybrid and Timed Automata}
 
 Modeling paradigms for hybrid systems such as hybrid automata and its extensions \cite{DBLP:conf/lics/Henzinger96,AlurGLS06,DBLP:journals/iandc/LynchSV03} allow expressive dynamics, but little support for compositional programming and reasoning about communication.
 Hybrid Automaton extends discrete state-based models, i.e. automata, with the continuous evolution of a dynamical systems.
 Each state of an hybrid automaton is associated with a set of ordinary differential equations (ODE) and an invariant.
 The transitions are guarded with expressions ranging over the continuous variables.
-Fig.~\ref{fig:HA-ex1} shows an hybrid automaton.
+Fig.~\ref{fig:HA-ex1-def} shows an hybrid automaton.
 
 \begin{figure}
 \centering
-\input{assets/hybrid_automata_1}
+\begin{subfigure}[b]{0.54\textwidth}
+\resizebox{0.95\linewidth}{!}{ \input{assets/hybrid_automata_1} }
+\caption{Automaton for a bang-bang controller trying to keep the temperature at $t_{\mathit{ref}}$ with an hysteresis $h$.}
+\label{fig:HA-ex1-def}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.40\textwidth}
+\includegraphics[width=0.95\textwidth]{assets/HA_simulation.pdf}
+\caption{Simulation of the automaton with $t_{\mathit{ref}}=17.5$ and $h = 5$.}
+\label{fig:HA-ex1-sim}
+\end{subfigure}
 % t is current temp
 % t_ref is target temp
 % h is hysteresis
-\caption{Hybrid automata representing a bang-bang controller for an heating system.}
+\caption{Hybrid automaton modeling an heating system}
 \label{fig:HA-ex1}
 \end{figure}
 
@@ -200,6 +257,7 @@ An run of an hybrid automaton is an sequence of discrete \emph{jumps} and contin
 When the automaton is in a state, the continuous state changes, or flows, as described by the state's ODE.
 A discrete jumps can happen when the guard of the corresponding transition evaluates to true.
 A jump does two changes to the automaton: (1) it changes the automaton's state and (2) it can changes the values of the continuous states.
+Fig.~\ref{fig:HA-ex1-sim} is a trace of the automaton from Fig.~\ref{fig:HA-ex1-def} highlighting two jumps and the flow in between.
 
 Hybrid automaton does not natively include any mechanism for communication.
 Communication needs to be encoded within the finite state structure of the automaton.
@@ -394,9 +452,7 @@ During the application design phase, different components, services, and protoco
 \end{figure}
 \end{center}
 
-\subsection{Functional Reactive Programming}
-
-    communication using streams
+% Functional Reactive Programming moved to Section 3
     
 \section{Programming and Verification}\label{sec:Programming}
 
@@ -408,18 +464,21 @@ If we consider CPS covering different dimensions: distributed systems, real-time
 
 Then talk about the domain specific languages that target CPS.
 
-Like Pilot and Lingua Franca
-%DZ: maybe discuss ROS, not really a language but based around message passing and communication
+\todo{DZ: maybe discuss ROS, not really a language but based around message passing and communication}
+
+\subsection{Pilot/Salsa}
 
 \subsection{Lingua Franca}
 Actor-based, a coordination language for cyber-physical systems
 
+\subsection{Functional Reactive Programming}
 
-    \subsection{Networked Control System}
+    communication using streams
 
-    centralized vs distributed controller
+
 
 \section{Algorithmic and Implementation Aspects}
+\label{sec:implementation}
 
     Similar to consistency question in distributed system, the freshness of physical information is important for CPS.
     The main difference between data consistency for CPS and non-CPS is that instead of a logical of operations, CPS are sensitive to time.
