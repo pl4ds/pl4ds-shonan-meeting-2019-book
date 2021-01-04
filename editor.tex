@@ -51,7 +51,10 @@ envcountchap,
 \usepackage[nottoc]{tocbibind}
 %% define commands here.
 
-\usepackage{numberpt}
+% \usepackage{numberpt}
+
+
+\include{chapters/chapter03/packages}
 
 %% redefine labels to add a unique chapter prefix, so labels dont clash between chapters.
 %% add \locallabels[prefix] at beginning of chapter
@@ -106,10 +109,10 @@ envcountchap,
 %%%% Use subimport to include chapter indexes, so that paths within that are relative to the chapter dir.
 %%%% set local label prefixes for each chapter, so that labels and refs don't clash.
 
-\chapterlabels{01}\import{chapters/chapter01/}{index}
-\chapterlabels{02}\import{chapters/chapter02/}{index}
+% \chapterlabels{01}\import{chapters/chapter01/}{index}
+% \chapterlabels{02}\import{chapters/chapter02/}{index}
 \chapterlabels{03}\import{chapters/chapter03/}{index}
-\chapterlabels{04}\import{chapters/chapter04/}{index}
+% \chapterlabels{04}\import{chapters/chapter04/}{index}
 \chapterlabels{05}\import{chapters/chapter05/}{index}
 \chapterlabels{06}\import{chapters/chapter06/}{index}
 \chapterlabels{07}\import{chapters/chapter07/}{index}

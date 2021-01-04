@@ -1,3 +1,5 @@
+%!TEX root = ../../editor.tex
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % chapter03 - Execution Models and Debugging
@@ -92,13 +94,147 @@
 	
 	\abstract{Please place your abstract here.}
 	
-	%% content
-	\section{Content}\label{sec:1}
-	
-	Please place your content here. See the sample template chapter for further reference on how you could style your content here.
-	
-	%% content
-	
+\begin{note}
+Please include at least 2 illustrations!
+\end{note}
+
+\section{Introduction}
+
+\begin{note}
+[up to 2 pages]
+What the chapter is about. Define the subject, e.g., what are CPS?
+How is relevant to distributed systems and programming languages?
+Promise of what development in PL4DS could achieve.
+\end{note}
+
+\section{State of the Art}
+
+\begin{note}
+[up to 10 pages]
+How is <subject> being used? What are motivating applications? How easy is it to program these correctly and efficiently?
+What are recent developments?
+\end{note}
+
+\subsection{Background}
+\begin{note}
+What are the current notations? Theoretical foundations?
+\end{note}
+
+\section{Research Directions}
+\begin{note}
+[at least 5 pages]
+What are current weaknesses and open problems? How can they be addressed? Relate back to applications.
+What are promising research directions? How can they address the needs of applications?
+What are the additional capabilities that could be enabled? Which novel applications will become possible?
+\end{note}
+  
+\section{Outlook and Conclusion}
+\begin{note}
+[up to 3 pages]
+Why is it now appropriate to pursue this work?
+<evangelical section>
+summarize promise
+\end{note}
+
+\section*{Notes from Shonan}
+\sm{test}
+\begin{noteco}
+  Execution Models
+
+  Topics
+  •	GPUs
+  •	Virtual Machines
+  •	Containers
+  •	PaaS, Function-as-a-service, Serverless computing
+  •	Database systems
+  •	Programming Model, language abstractions
+     o	Language feature support in runtimes
+       - Tail calls
+       - Coroutines
+       - Laziness
+       - Back-tracking
+  •	Communication model
+     o	Message passing, MPI
+     o	PGAS
+  •	Dynamic updating
+  •	Version management
+  •	Dynamic scaling, elasticity
+  •	Edge computing
+     o	asynchronous 
+     o	Partial views
+     o	Real-time constraints
+  •	(Blockchain)
+     o	Dynamically updated consensus protocol (e.g. Tezos)
+       - Agreed by consensus
+     o	Execution limited by available “gas”
+       - Limits the number of instructions that can be executed
+       - Security concerns, turing completeness
+  •	Runtime services for
+     o	Monitoring
+     o	Tracing
+     o	Replay
+     o	As fundamental enabler for
+       - (deterministic) re-execution
+       - fault tolerance
+       - fault mitigation
+       - Debugging
+     o	Enforcing idempotent design
+     o	Fault tolerance in heterogeneous language environments
+       - CORBA had exception support
+       - MPI has now support for fault tolerance
+       - Distributed Transactions
+  •	On the level of operations
+  •	Research topic in the 90ies
+  •	Heterogeneity (languages/systems) not worked out
+       - Distributed concurrency/locking support (very similar problem)
+       - Problem: these things are typically external
+       - We are used to high-level languages hiding most of these things
+       - How can we get to that state even across languages/runtimes?
+  •	Security
+     o	Enclaves, completely encrypted, not leaking any data
+     o	Limitations on system calls
+     o	Memory pages leaving enclave are encrypted
+     o	Code is authenticated/authorized/signed
+     o	Code knows that it runs on a genuine CPU, not some virtual machine
+     o	Data privacy
+     o	Classic issues with distributed systems
+     o	Safety
+     o	Multi-tenant systems
+  •	Streaming, reactivity
+     o	Enforcing synchronicity for correctness
+     o	Challenge with multiple sources, and different data rates or clocks (glitches are major issue)
+  •	Standard libraries
+  •	Application Scenarios
+     o	Microservices, distributed services
+     o	Machine learning, tensor flow
+     o	Runtime environments may need to be tailored to specific needs
+       - For scale, for performance, for fault tolerance
+
+  Open Questions, Challenges
+  •	Fault tolerance
+  •	Making Function as a Service efficient
+  •	Tension between Computing and Data resources
+     o	Moving data to function or function to the data
+     o	In cloud, edge, mist, fog computing environments
+     o	Fault tolerance, real time constraints
+  •	In distributed systems, inconsistency is the norm
+     o	How much consistency can we tolerate?
+
+  General Notes, Discussions
+  •	What do execution platforms need to provide?
+     o	One discussion about actors isolation
+     o	Actor isolation prevents shared memory
+     o	Is a nice engineering property, but has possible performance tradeoffs 
+  •	Can we automatically decide what the most efficient execution platform is?
+
+
+  Important Questions
+  •	Cost-effective/performance function-as-a-service, while preserving deployment/infrastructure benefits, security/isolation properties
+  •	Security
+  •	Fault tolerance for distributed/cloud 
+  •	Support for interoperability of components, where languages support different features
+\end{noteco}  
+  
 	\section*{Appendix}\label{appendix}
 	
 	Please place your appendix content here, if applicable.
